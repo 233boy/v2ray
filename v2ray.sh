@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="1.0.0"
+_version="1.0.1"
 
 cmd="apt-get"
 
@@ -148,7 +148,7 @@ get_transport_args() {
 	6 | 13)
 		net="kcp"
 		network="kcp"
-		header="ntp"
+		header="utp"
 		;;
 	7 | 14)
 		net="kcp"
@@ -1943,6 +1943,7 @@ get_v2ray_config_qr_link() {
 		fi
 		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
 		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
+		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
 	fi
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
@@ -3035,6 +3036,7 @@ _boom_() {
 		fi
 		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
 		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
+		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
 	fi
 	case $v2ray_transport in
 	[1-4] | 9 | 10 | 11)

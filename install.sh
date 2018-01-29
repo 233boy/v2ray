@@ -1159,7 +1159,7 @@ show_config_info() {
 	6 | 13)
 		local net="kcp"
 		local network="kcp"
-		local header="ntp"
+		local header="utp"
 		;;
 	7 | 14)
 		local net="kcp"
@@ -1209,6 +1209,7 @@ show_config_info() {
 		fi
 		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${uuid}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
 		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
+		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
 	fi
 	clear
 	echo
