@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.3"
+_version="v1.31"
 
 cmd="apt-get"
 
@@ -163,7 +163,9 @@ get_transport_args() {
 	esac
 }
 create_vmess_URL_config() {
-	get_transport_args
+
+	[[ -z $net ]] && get_transport_args
+
 	if [[ $v2ray_transport == "4" ]]; then
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
@@ -1935,8 +1937,6 @@ get_v2ray_config_info_link() {
 	rm -rf /tmp/233blog_v2ray.txt
 }
 get_v2ray_config_qr_link() {
-
-	get_transport_args
 
 	create_vmess_URL_config
 
