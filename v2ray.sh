@@ -163,6 +163,7 @@ get_transport_args() {
 	esac
 }
 create_vmess_URL_config() {
+	get_transport_args
 	if [[ $v2ray_transport == "4" ]]; then
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
