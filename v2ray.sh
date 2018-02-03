@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="1.0.1"
+_version="v1.2"
 
 cmd="apt-get"
 
@@ -161,6 +161,38 @@ get_transport_args() {
 		header="wechat-video"
 		;;
 	esac
+}
+create_vmess_URL_config() {
+	if [[ $v2ray_transport == "4" ]]; then
+		cat >/etc/v2ray/vmess_qr.json <<-EOF
+		{
+			"ps": "233blog_v2ray_${domain}",
+			"add": "${domain}",
+			"port": "443",
+			"id": "${v2ray_id}",
+			"aid": "233",
+			"net": "ws",
+			"type": "none",
+			"host": "",
+			"tls": "tls"
+		}
+		EOF
+	else
+		[[ -z $ip ]] && get_ip
+		cat >/etc/v2ray/vmess_qr.json <<-EOF
+		{
+			"ps": "233blog_v2ray_${ip}",
+			"add": "${ip}",
+			"port": "${v2ray_port}",
+			"id": "${v2ray_id}",
+			"aid": "233",
+			"net": "${net}",
+			"type": "${header}",
+			"host": "${host}",
+			"tls": ""
+		}
+		EOF
+	fi
 }
 view_v2ray_config_info() {
 
@@ -1905,36 +1937,8 @@ get_v2ray_config_qr_link() {
 
 	get_transport_args
 
-	if [[ $v2ray_transport == "4" ]]; then
-		cat >/etc/v2ray/vmess_qr.json <<-EOF
-		{
-			"ps": "233blog_v2ray_${domain}",
-			"add": "${domain}",
-			"port": "443",
-			"id": "${v2ray_id}",
-			"aid": "233",
-			"net": "ws",
-			"type": "none",
-			"host": "",
-			"tls": "tls"
-		}
-		EOF
-	else
-		get_ip
-		cat >/etc/v2ray/vmess_qr.json <<-EOF
-		{
-			"ps": "233blog_v2ray_${ip}",
-			"add": "${ip}",
-			"port": "${v2ray_port}",
-			"id": "${v2ray_id}",
-			"aid": "233",
-			"net": "${net}",
-			"type": "${header}",
-			"host": "${host}",
-			"tls": ""
-		}
-		EOF
-	fi
+	create_vmess_URL_config
+
 	if [[ $obfs ]]; then
 		if [[ $v2ray_transport == 4 ]]; then
 			ip_or_domain=$domain
@@ -2001,6 +2005,16 @@ get_v2ray_config_qr_link() {
 		rm -rf /tmp/233blog_shadowray_qr.png
 		rm -rf /etc/v2ray/shadowray_qr.txt
 	fi
+}
+get_v2ray_vmess_URL_link() {
+	create_vmess_URL_config
+	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
+	echo
+	echo "---------- V2Ray vmess URL / 仅适合部分客户端 -------------"
+	echo
+	echo $vmess
+	echo
+	rm -rf /etc/v2ray/vmess_qr.json	
 }
 other() {
 	while :; do
@@ -2233,7 +2247,7 @@ update_v2ray.sh() {
 		cp -f /etc/v2ray/233boy/v2ray/v2ray.sh /usr/local/bin/v2ray
 		chmod +x /usr/local/bin/v2ray
 		echo
-		echo -e "$green 更新完成 $none"
+		echo -e "$green 更新成功啦...当前 V2Ray 管理脚本 版本: ${cyan}$latest_version$none"
 		echo
 	fi
 
@@ -2999,35 +3013,8 @@ _boom_() {
 
 	create_v2ray_config_text >/tmp/233blog_v2ray.txt
 
-	if [[ $v2ray_transport == "4" ]]; then
-		cat >/etc/v2ray/vmess_qr.json <<-EOF
-		{
-			"ps": "233blog_v2ray_${domain}",
-			"add": "${domain}",
-			"port": "443",
-			"id": "${v2ray_id}",
-			"aid": "233",
-			"net": "ws",
-			"type": "none",
-			"host": "",
-			"tls": "tls"
-		}
-		EOF
-	else
-		cat >/etc/v2ray/vmess_qr.json <<-EOF
-		{
-			"ps": "233blog_v2ray_${ip}",
-			"add": "${ip}",
-			"port": "${v2ray_port}",
-			"id": "${v2ray_id}",
-			"aid": "233",
-			"net": "${net}",
-			"type": "${header}",
-			"host": "${host}",
-			"tls": ""
-		}
-		EOF
-	fi
+	create_vmess_URL_config
+
 	if [[ $obfs ]]; then
 		if [[ $v2ray_transport == 4 ]]; then
 			ip_or_domain=$domain
@@ -3147,7 +3134,7 @@ menu() {
 	clear
 	while :; do
 		echo
-		echo "........... V2Ray 管理脚本 by 233blog.com .........."
+		echo "........... V2Ray 管理脚本 $_version by 233blog.com .........."
 		echo
 		echo -e "## V2Ray 版本: $cyan$v2ray_ver$none  /  V2Ray 状态: $v2ray_status ##"
 		echo
@@ -3269,6 +3256,9 @@ restart)
 	;;
 log)
 	view_v2ray_log
+	;;
+url | URL)
+	get_v2ray_vmess_URL_link
 	;;
 update)
 	update_v2ray
