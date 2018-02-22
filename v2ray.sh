@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.40"
+_version="v1.41"
 
 cmd="apt-get"
 
@@ -3142,6 +3142,8 @@ menu() {
 		echo "帮助说明: https://233blog.com/post/16/"
 		echo
 		echo "反馈问题: https://github.com/233boy/v2ray/issues"
+		echo
+		echo "TG 群组: https://t.me/blog233"
 		echo
 		echo -e "$yellow 1. $none查看 V2Ray 配置"
 		echo
