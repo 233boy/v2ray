@@ -224,7 +224,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
 		echo
-		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 ShadowRay) "
+		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
 		echo
 		if [[ $is_blocked_ad ]]; then
 			echo " 备注: 广告拦截已开启.."
@@ -246,10 +246,10 @@ view_v2ray_config_info() {
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
 		if [[ $obfs ]]; then
-			echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 ShadowRay) "
+			echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
 			echo
 		else
-			echo -e " 帅帅的提示...此 V2Ray 配置不支持 ShadowRay"
+			echo -e " 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay"
 			echo
 		fi
 		if [[ $v2ray_transport -ge 9 && $is_blocked_ad ]]; then
@@ -1866,7 +1866,7 @@ create_v2ray_config_text() {
 		echo
 		echo "TLS (Enable TLS) = 打开"
 		echo
-		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 ShadowRay) "
+		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
 		echo
 		if [[ $is_blocked_ad ]]; then
 			echo " 备注: 广告拦截已开启.."
@@ -1888,10 +1888,10 @@ create_v2ray_config_text() {
 		echo "伪装类型 (header type) = ${header}"
 		echo
 		if [[ $obfs ]]; then
-			echo -e "请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 ShadowRay) "
+			echo -e "请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
 			echo
 		else
-			echo -e "帅帅的提示...此 V2Ray 配置不支持 ShadowRay"
+			echo -e "帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay"
 			echo
 		fi
 		if [[ $v2ray_transport -ge 9 && $is_blocked_ad ]]; then
@@ -1973,17 +1973,17 @@ get_v2ray_config_qr_link() {
 		echo -e "$yellow 适用于 V2RayNG / Kitsunebi = $cyan$link$none"
 		echo
 		if [[ $ios_qr && $link3 ]]; then
-			echo -e "$yellow 适用于 ShadowRay = $cyan${link3}$none"
+			echo -e "$yellow 适用于 Pepi / ShadowRay = $cyan${link3}$none"
 			echo
-			echo " 请在 ShadowRay 配置界面将 Alter Id 设置为 233 (如果你使用 ShadowRay)"
+			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 233 (如果你使用 Pepi / ShadowRay)"
 			if [[ $v2ray_transport == 4 ]]; then
 				echo
-				echo " 请在 ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 ShadowRay)"
+				echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
 			fi
 		elif [[ $ios_qr ]]; then
-			echo -e "$red 生成适用于 ShadowRay 的二维码链接 出错.... $none 请尝试使用${cyan} v2ray qr ${none}重新生成"
+			echo -e "$red 生成适用于 Pepi / ShadowRay 的二维码链接 出错.... $none 请尝试使用${cyan} v2ray qr ${none}重新生成"
 		else
-			echo -e "$red 帅帅的提示...此 V2Ray 配置不支持 ShadowRay...$none"
+			echo -e "$red 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay...$none"
 		fi
 		echo
 		echo " V2Ray 客户端使用教程: https://233blog.com/post/20/"
@@ -3052,7 +3052,7 @@ _boom_() {
 		echo
 		echo -e "$yellow V2RayN 二维码链接: $cyan$link3$none"
 		echo
-		echo -e "$yellow ShadowRay 二维码链接: $cyan$link$none"
+		echo -e "$yellow Pepi / ShadowRay 二维码链接: $cyan$link$none"
 		echo
 		echo "V2Ray 客户端使用教程: https://233blog.com/post/20/"
 		echo
