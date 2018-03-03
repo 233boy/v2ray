@@ -37,3 +37,9 @@ false
 chacha20-ietf
 ---- 屏蔽广告 -----
 false
+---- 网站伪装 -----
+false
+---- 伪装的路径 -----
+233blog
+---- 伪装的网址 -----
+https://liyafly.com
