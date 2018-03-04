@@ -24,7 +24,7 @@
                         {
                             "id": "23332333-2333-2333-2333-233boy233boy",
                             "alterId": 233,
-                            "security": "aes-128-gcm"
+                            "security": "auto"
                         }
                     ]
                 }
@@ -36,6 +36,9 @@
             "tlsSettings": {
                 "serverName": "233blog.com",
                 "allowInsecure": false
+            },
+            "wsSettings": {
+                "path": "/233blog"
             }
         },
         "mux": {

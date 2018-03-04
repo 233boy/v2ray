@@ -94,7 +94,7 @@ v2ray_config() {
 		echo "备注1: 含有 [dynamicPort] 的即启用动态端口.."
 		echo "备注2: [utp | srtp | wechat-video] 分别为 伪装成 [BT下载 | 视频通话 | 微信视频通话]"
 		echo
-		read -p "$(echo -e "(默认协议: ${magenta}TCP$none)"):" v2ray_transport_opt
+		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport_opt
 		[ -z "$v2ray_transport_opt" ] && v2ray_transport_opt=1
 		case $v2ray_transport_opt in
 		[1-9] | 1[0-5])
@@ -116,7 +116,7 @@ v2ray_port_config() {
 	if [[ $v2ray_transport_opt -ne 4 && $v2ray_transport_opt -lt 9 ]]; then
 		while :; do
 			echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
-			read -p "$(echo -e "(默认端口: ${magenta}2333$none):")" v2ray_port
+			read -p "$(echo -e "(默认端口: ${cyan}2333$none):")" v2ray_port
 			[ -z "$v2ray_port" ] && v2ray_port="2333"
 			case $v2ray_port in
 			[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
@@ -150,7 +150,7 @@ v2ray_dynamic_port_config() {
 
 	while :; do
 		echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
-		read -p "$(echo -e "(默认端口: ${magenta}2333$none):")" v2ray_port
+		read -p "$(echo -e "(默认端口: ${cyan}2333$none):")" v2ray_port
 		[ -z "$v2ray_port" ] && v2ray_port="2333"
 		case $v2ray_port in
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
@@ -174,7 +174,7 @@ v2ray_dynamic_port_start() {
 
 	while :; do
 		echo -e "请输入 "$yellow"V2Ray 动态端口开始 "$none"范围 ["$magenta"1-65535"$none"]"
-		read -p "$(echo -e "(默认开始端口: ${magenta}10000$none):")" v2ray_dynamic_port_start_input
+		read -p "$(echo -e "(默认开始端口: ${cyan}10000$none):")" v2ray_dynamic_port_start_input
 		[ -z $v2ray_dynamic_port_start_input ] && v2ray_dynamic_port_start_input=10000
 		case $v2ray_dynamic_port_start_input in
 		$v2ray_port)
@@ -207,7 +207,7 @@ v2ray_dynamic_port_end() {
 
 	while :; do
 		echo -e "请输入 "$yellow"V2Ray 动态端口结束 "$none"范围 ["$magenta"1-65535"$none"]"
-		read -p "$(echo -e "(默认结束端口: ${magenta}20000$none):")" v2ray_dynamic_port_end_input
+		read -p "$(echo -e "(默认结束端口: ${cyan}20000$none):")" v2ray_dynamic_port_end_input
 		[ -z $v2ray_dynamic_port_end_input ] && v2ray_dynamic_port_end_input=20000
 		case $v2ray_dynamic_port_end_input in
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
@@ -244,7 +244,7 @@ ws_config() {
 
 	while :; do
 		echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]，不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
-		read -p "$(echo -e "(默认端口: ${magenta}2333$none):")" v2ray_port
+		read -p "$(echo -e "(默认端口: ${cyan}2333$none):")" v2ray_port
 		[ -z "$v2ray_port" ] && v2ray_port="2333"
 		case $v2ray_port in
 		80)
@@ -355,13 +355,91 @@ ws_config() {
 		fi
 
 	done
+	if [[ $caddy ]]; then
+		ws_path_config_ask
+	fi
+}
+ws_path_config_ask() {
+	echo
+	while :; do
+		echo -e "是否开启 网站伪装 和 路径分流 [${magenta}Y/N$none]"
+		read -p "$(echo -e "(默认: [${cyan}N$none]):")" is_ws_path
+		[[ -z $is_ws_path ]] && is_ws_path="n"
+
+		case $is_ws_path in
+		Y | y)
+			ws_path_config
+			break
+			;;
+		N | n)
+			echo
+			echo
+			echo -e "$yellow 网站伪装 和 路径分流 = $cyan不想配置$none"
+			echo "----------------------------------------------------------------"
+			echo
+			break
+			;;
+		*)
+			error
+			;;
+		esac
+	done
+}
+ws_path_config() {
+	echo
+	while :; do
+		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
+		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" ws_path
+		[[ -z $ws_path ]] && ws_path="233blog"
+
+		case $ws_path in
+		*/*)
+			echo
+			echo -e " 由于这个脚本太辣鸡了..所以不能包含 $red/$none 这个符号.... "
+			echo
+			error
+			;;
+		*)
+			echo
+			echo
+			echo -e "$yellow 分流的路径 = ${cyan}/${ws_path}$none"
+			echo "----------------------------------------------------------------"
+			echo
+			break
+			;;
+		esac
+	done
+	proxy_site_config
+}
+proxy_site_config() {
+	echo
+	while :; do
+		echo -e "请输入 ${magenta}一个正确的$none ${cyan}网址$none 用来作为 ${cyan}网站的伪装$none , 例如 https://liyafly.com"
+		echo -e "举例...你当前的域名是 $green$domain$none , 伪装的网址的是 https://liyafly.com"
+		echo -e "然后打开你的域名时候...显示出来的内容就是来自 https://liyafly.com 的内容"
+		echo -e "其实就是一个反代...明白就好..."
+		echo -e "如果不能伪装成功...可以使用 v2ray config 修改伪装的网址"
+		read -p "$(echo -e "(默认: [${cyan}https://liyafly.com$none]):")" proxy_site
+		[[ -z $proxy_site ]] && proxy_site="https://liyafly.com"
+
+		case $proxy_site in
+		*)
+			echo
+			echo
+			echo -e "$yellow 伪装的网址 = ${cyan}${proxy_site}$none"
+			echo "----------------------------------------------------------------"
+			echo
+			break
+			;;
+		esac
+	done
 }
 
 blocked_hosts() {
 	echo
 	while :; do
 		echo -e "是否开启广告拦截 [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${magenta}N$none]):")" blocked_ad
+		read -p "$(echo -e "(默认 [${cyan}N$none]):")" blocked_ad
 		[[ -z $blocked_ad ]] && blocked_ad="n"
 
 		case $blocked_ad in
@@ -396,7 +474,7 @@ shadowsocks_config() {
 
 	while :; do
 		echo -e "是否配置 ${yellow}Shadowsocks${none} [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${magenta}N$none]):") " install_shadowsocks
+		read -p "$(echo -e "(默认 [${cyan}N$none]):") " install_shadowsocks
 		[[ -z "$install_shadowsocks" ]] && install_shadowsocks="n"
 		if [[ "$install_shadowsocks" == [Yy] ]]; then
 			echo
@@ -416,7 +494,7 @@ shadowsocks_config() {
 shadowsocks_port_config() {
 	while :; do
 		echo -e "请输入 "$yellow"Shadowsocks"$none" 端口 ["$magenta"1-65535"$none"]，不能和 "$yellow"V2Ray"$none" 端口相同"
-		read -p "$(echo -e "(默认端口: ${magenta}6666$none):") " ssport
+		read -p "$(echo -e "(默认端口: ${cyan}6666$none):") " ssport
 		[ -z "$ssport" ] && ssport="6666"
 		case $ssport in
 		$v2ray_port)
@@ -463,7 +541,7 @@ shadowsocks_password_config() {
 
 	while :; do
 		echo -e "请输入 "$yellow"Shadowsocks"$none" 密码"
-		read -p "$(echo -e "(默认密码: ${magenta}233blog.com$none)"): " sspass
+		read -p "$(echo -e "(默认密码: ${cyan}233blog.com$none)"): " sspass
 		[ -z "$sspass" ] && sspass="233blog.com"
 		case $sspass in
 		*/*)
@@ -496,7 +574,7 @@ shadowsocks_ciphers_config() {
 			echo -e "$yellow $i. $none${ciphers_show}"
 		done
 		echo
-		read -p "$(echo -e "(默认加密协议: ${magenta}${ciphers[6]}$none)"):" ssciphers_opt
+		read -p "$(echo -e "(默认加密协议: ${cyan}${ciphers[6]}$none)"):" ssciphers_opt
 		[ -z "$ssciphers_opt" ] && ssciphers_opt=7
 		case $ssciphers_opt in
 		[1-7])
@@ -540,6 +618,10 @@ install_info() {
 			echo
 			echo -e "$yellow 广告拦截 = $cyan$blocked_ad_info$none"
 		fi
+		if [[ $ws_path ]]; then
+			echo
+			echo -e "$yellow 路径分流 = ${cyan}/${ws_path}$none"
+		fi
 	elif [[ $v2ray_transport_opt -ge 9 ]]; then
 		echo
 		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
@@ -578,12 +660,13 @@ install_info() {
 }
 
 domain_check() {
-	if [[ $cmd == "yum" ]]; then
-		yum install bind-utils -y
-	else
-		$cmd install dnsutils -y
-	fi
-	test_domain=$(dig $domain +short)
+	# if [[ $cmd == "yum" ]]; then
+	# 	yum install bind-utils -y
+	# else
+	# 	$cmd install dnsutils -y
+	# fi
+	# test_domain=$(dig $domain +short)
+	test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
@@ -639,7 +722,22 @@ install_caddy() {
 }
 caddy_config() {
 	local email=$(shuf -i1-10000000000 -n1)
-	cat >/etc/caddy/Caddyfile <<-EOF
+	if [[ $ws_path ]]; then
+		cat >/etc/caddy/Caddyfile <<-EOF
+$domain {
+    tls ${email}@gmail.com
+    gzip
+    proxy / $proxy_site {
+        without /${ws_path}
+    }
+    proxy /${ws_path} 127.0.0.1:${v2ray_port} {
+        without /${ws_path}
+        websocket
+    }
+}
+		EOF
+	else
+		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
 	proxy / 127.0.0.1:${v2ray_port} {
@@ -647,6 +745,8 @@ $domain {
 	}
 }
 		EOF
+	fi
+
 	# systemctl restart caddy
 	do_service restart caddy
 }
@@ -1047,6 +1147,11 @@ config() {
 
 	if [[ $v2ray_transport_opt -eq 4 ]]; then
 		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$uuid/" $v2ray_client_config
+		if [[ $ws_path ]]; then
+			sed -i "41s/233blog/$ws_path/" $v2ray_client_config
+		else
+			sed -i "41s/233blog//" $v2ray_client_config
+		fi
 	else
 		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$uuid/" $v2ray_client_config
 	fi
@@ -1098,6 +1203,11 @@ backup_config() {
 	[ $v2ray_transport_opt == "4" ] && sed -i "27s/233blog.com/$domain/" $backup
 	[ $caddy ] && sed -i "29s/false/true/" $backup
 	[ $is_blocked_ad ] && sed -i "39s/false/true/" $backup
+	if [[ $ws_path ]]; then
+		sed -i "41s/false/true/; 43s/233blog/$ws_path/; $ d" $backup
+		echo "$proxy_site" >>$backup
+	fi
+
 }
 
 try_enable_bbr() {
@@ -1138,7 +1248,12 @@ do_service() {
 }
 show_config_info() {
 	local header="none"
-	local host=""
+	if [[ $ws_path ]]; then
+		local host="/$ws_path"
+	else
+		local host=""
+	fi
+
 	case $v2ray_transport_opt in
 	1 | 9)
 		local net="tcp"
@@ -1185,9 +1300,9 @@ show_config_info() {
 			"port": "443",
 			"id": "${uuid}",
 			"aid": "233",
-			"net": "ws",
+			"net": "${net}",
 			"type": "none",
-			"host": "",
+			"host": "${host}",
 			"tls": "tls"
 		}
 		EOF
@@ -1243,6 +1358,10 @@ show_config_info() {
 		echo
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
+		if [[ $ws_path ]]; then
+			echo -e "$yellow WebSocket 路径 (WS path) = ${cyan}/${ws_path}$none"
+			echo
+		fi
 		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
 		echo
 		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
@@ -1269,16 +1388,16 @@ show_config_info() {
 			echo -e " 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay"
 			echo
 		fi
-		if [[ $v2ray_transport_opt -ge 9 && $is_blocked_ad ]]; then
-			echo " 备注: 动态端口已启用...广告拦截已开启..."
-			echo
-		elif [[ $v2ray_transport_opt -ge 9 ]]; then
-			echo " 备注: 动态端口已启用..."
-			echo
-		elif [[ $is_blocked_ad ]]; then
-			echo " 备注: 广告拦截已开启.."
-			echo
-		fi
+	fi
+	if [[ $v2ray_transport_opt -ge 9 && $is_blocked_ad ]]; then
+		echo " 备注: 动态端口已启用...广告拦截已开启..."
+		echo
+	elif [[ $v2ray_transport_opt -ge 9 ]]; then
+		echo " 备注: 动态端口已启用..."
+		echo
+	elif [[ $is_blocked_ad ]]; then
+		echo " 备注: 广告拦截已开启.."
+		echo
 	fi
 	if [ $shadowsocks ]; then
 		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
@@ -1376,6 +1495,10 @@ get_qr_link() {
 				if [[ $v2ray_transport_opt == 4 ]]; then
 					echo
 					echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
+					if [[ $ws_path ]]; then
+						echo
+						echo -e "$yellow 记得要将 WebSocket 路径 (WS path) 设置为: ${cyan}/${ws_path}$none"
+					fi
 				fi
 			elif [[ $ios_qr ]]; then
 				echo -e "$red 生成适用于 Pepi / ShadowRay 的二维码链接 出错.... $none 请尝试使用${cyan} v2ray qr ${none}重新生成"
@@ -1428,6 +1551,10 @@ get_qr_link() {
 				if [[ $v2ray_transport_opt == 4 ]]; then
 					echo
 					echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
+					if [[ $ws_path ]]; then
+						echo
+						echo -e "$yellow 记得要将 WebSocket 路径 (WS path) 设置为: ${cyan}/${ws_path}$none"
+					fi
 				fi
 			elif [[ $ios_qr ]]; then
 				echo -e "$red 生成适用于 Pepi / ShadowRay 的二维码链接 出错.... $none 请尝试使用${cyan} v2ray qr ${none}重新生成"
