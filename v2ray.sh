@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.5"
+_version="v1.51"
 
 cmd="apt-get"
 
@@ -1832,8 +1832,8 @@ change_proxy_site_config() {
 
 }
 domain_check() {
-	# test_domain=$(dig $new_domain +short)
-	test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
+	test_domain=$(dig $new_domain +short)
+	# test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"

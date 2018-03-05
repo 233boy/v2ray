@@ -660,13 +660,13 @@ install_info() {
 }
 
 domain_check() {
-	# if [[ $cmd == "yum" ]]; then
-	# 	yum install bind-utils -y
-	# else
-	# 	$cmd install dnsutils -y
-	# fi
-	# test_domain=$(dig $domain +short)
-	test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
+	if [[ $cmd == "yum" ]]; then
+		yum install bind-utils -y
+	else
+		$cmd install dnsutils -y
+	fi
+	test_domain=$(dig $domain +short)
+	# test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
