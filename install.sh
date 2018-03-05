@@ -302,7 +302,7 @@ ws_config() {
 			if [[ "$record" == [Yy] ]]; then
 				echo
 				echo
-				echo -e "$yellow 域名解析 = ${cyan}已解析$none"
+				echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
 				echo "----------------------------------------------------------------"
 				echo
 				break
@@ -610,7 +610,7 @@ install_info() {
 		echo
 		echo -e "$yellow 你的域名 = $cyan$domain$none"
 		echo
-		echo -e "$yellow 域名解析 = ${cyan}已解析$none"
+		echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
 		echo
 		echo -e "$yellow 自动配置 TLS = $cyan$install_caddy_info$none"
 

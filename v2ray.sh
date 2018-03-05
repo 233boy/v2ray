@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.51"
+_version="v1.52"
 
 cmd="apt-get"
 
@@ -772,9 +772,11 @@ change_v2ray_config() {
 		echo
 		echo -e "$yellow 7. $none修改 伪装的网址 (如果可以)"
 		echo
-		echo -e "$yellow 8. $none开启 / 关闭 广告拦截"
+		echo -e "$yellow 8. $none关闭 网站伪装 和 路径分流 (如果可以)"
 		echo
-		read -p "$(echo -e "请选择 [${magenta}1-8$none]:")" _opt
+		echo -e "$yellow 9. $none开启 / 关闭 广告拦截"
+		echo
+		read -p "$(echo -e "请选择 [${magenta}1-9$none]:")" _opt
 		if [[ -z $_opt ]]; then
 			error
 		else
@@ -807,8 +809,11 @@ change_v2ray_config() {
 				change_proxy_site_config
 				break
 				;;
-
 			8)
+				disable_ws_path
+				break
+				;;
+			9)
 				blocked_hosts
 				break
 				;;
@@ -1090,7 +1095,7 @@ ws_config() {
 			if [[ "$record" == [Yy] ]]; then
 				echo
 				echo
-				echo -e "$yellow 域名解析 = ${cyan}已解析$none"
+				echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
 				echo "----------------------------------------------------------------"
 				echo
 				break
@@ -1331,8 +1336,8 @@ install_caddy() {
 }
 caddy_config() {
 	local email=$(shuf -i1-10000000000 -n1)
-	[[ -z $proxy_site ]] && proxy_site=$(sed '$!d' $backup)
 	if [[ $is_ws_path ]]; then
+		[[ -z $proxy_site ]] && proxy_site=$(sed '$!d' $backup)
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
@@ -1649,7 +1654,7 @@ change_domain() {
 				if [[ "$record" == [Yy] ]]; then
 					echo
 					echo
-					echo -e "$yellow 域名解析 = ${cyan}已解析$none"
+					echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
 					echo "----------------------------------------------------------------"
 					echo
 					pause
@@ -1843,6 +1848,62 @@ domain_check() {
 		echo "备注...如果你的域名是使用 Cloudflare 解析的话..在 Status 那里点一下那图标..让它变灰"
 		echo
 		exit 1
+	fi
+}
+disable_ws_path() {
+	if [[ $v2ray_transport == 4 && $caddy_installed ]] && [[ $is_ws_path ]]; then
+		echo
+
+		while :; do
+			echo -e "是否关闭 ${yellow}网站伪装 和 路径分流${none} [${magenta}Y/N$none]"
+			read -p "$(echo -e "(默认 [${cyan}N$none]):") " y_n
+			[[ -z "$y_n" ]] && y_n="n"
+			if [[ "$y_n" == [Yy] ]]; then
+				echo
+				echo
+				echo -e "$yellow 关闭 网站伪装 和 路径分流 = $cyan是$none"
+				echo "----------------------------------------------------------------"
+				echo
+				pause
+				sed -i "41s/true/false/" $backup
+				is_ws_path=''
+				caddy_config
+				config
+				clear
+				view_v2ray_config_info
+				download_v2ray_config_ask
+				break
+			elif [[ "$y_n" == [Nn] ]]; then
+				echo
+				echo -e " $green已取消关闭 网站伪装 和 路径分流 ....$none"
+				echo
+				break
+			else
+				error
+			fi
+
+		done
+	else
+		echo
+		echo -e "$red 抱歉...不支持修改...$none"
+		echo
+		echo -e " 当前传输协议为: ${cyan}${transport[$v2ray_transport - 1]}${none}"
+		echo
+		if [[ $caddy_installed ]]; then
+			echo -e " 自动配置 TLS = ${cyan}打开$none"
+		else
+			echo -e " 自动配置 TLS = $red关闭$none"
+		fi
+		echo
+		if [[ $is_ws_path ]]; then
+			echo -e " 路径分流 = ${cyan}打开$none"
+		else
+			echo -e " 路径分流 = $red关闭$none"
+		fi
+		echo
+		echo -e " 必须为 WebSocket + TLS 传输协议, 自动配置 TLS = ${cyan}打开$none, 路径分流 = ${cyan}打开$none, 才能修改"
+		echo
+
 	fi
 }
 blocked_hosts() {
