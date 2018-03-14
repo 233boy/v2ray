@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.52"
+_version="v1.53"
 
 cmd="apt-get"
 
@@ -1620,7 +1620,7 @@ change_domain() {
 		while :; do
 			echo
 			echo -e "请输入一个 $magenta正确的域名$none，一定一定一定要正确，不！能！出！错！"
-			read -p "(当前域名：$domain): " new_domain
+			read -p "$(echo -e "(当前域名: ${cyan}$domain$none):") " new_domain
 			[ -z "$new_domain" ] && error && continue
 			if [[ $new_domain == $domain ]]; then
 				echo
@@ -1837,13 +1837,15 @@ change_proxy_site_config() {
 
 }
 domain_check() {
-	test_domain=$(dig $new_domain +short)
-	# test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
+	# test_domain=$(dig $new_domain +short)
+	test_domain=$(ping $new_domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
 		echo
 		echo -e " 你的域名: $yellow$new_domain$none 未解析到: $cyan$ip$none"
+		echo
+		echo -e " 你的域名当前解析到: $cyan$test_domain$none"
 		echo
 		echo "备注...如果你的域名是使用 Cloudflare 解析的话..在 Status 那里点一下那图标..让它变灰"
 		echo
