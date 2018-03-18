@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.53"
+_version="v1.54"
 
 cmd="apt-get"
 
@@ -1838,7 +1838,7 @@ change_proxy_site_config() {
 }
 domain_check() {
 	# test_domain=$(dig $new_domain +short)
-	test_domain=$(ping $new_domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
+	test_domain=$(ping $new_domain -c 1 | grep -oP -m1 "([\d.]+){4}\d")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
@@ -2582,6 +2582,8 @@ update_v2ray() {
 		do_service restart v2ray
 		echo
 		echo -e " $green 更新成功啦...当前 V2Ray 版本: ${cyan}$v2ray_latest_ver$none"
+		echo
+		echo -e " $yellow 温馨提示: 为了避免出现莫名其妙的问题...所以客户端 V2Ray 版本最好也是: ${cyan}$v2ray_latest_ver$none"
 		echo
 		rm -rf /tmp/v2ray
 	else
@@ -3637,6 +3639,11 @@ un | uninstall)
 	;;
 233 | 2333 | 233boy | 233blog | 233blog.com)
 	_boom_
+	;;
+v | version)
+	echo
+	echo -e " 当前 V2Ray 版本: ${green}$v2ray_ver$none  /  当前 V2Ray 管理脚本版本: ${cyan}$_version$none"
+	echo
 	;;
 bbr)
 	other

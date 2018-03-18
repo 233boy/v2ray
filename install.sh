@@ -666,7 +666,7 @@ domain_check() {
 	# 	$cmd install dnsutils -y
 	# fi
 	# test_domain=$(dig $domain +short)
-	test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){3}\d")
+	test_domain=$(ping $domain -c 1 | grep -oP -m1 "([\d.]+){4}\d")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
@@ -755,10 +755,15 @@ $domain {
 
 install_v2ray() {
 	$cmd update -y
+	# if [[ $cmd == "apt-get" ]]; then
+	# 	$cmd install -y lrzsz git zip unzip curl wget qrencode dnsutils
+	# else
+	# 	$cmd install -y lrzsz git zip unzip curl wget qrencode bind-utils iptables-services
+	# fi
 	if [[ $cmd == "apt-get" ]]; then
-		$cmd install -y lrzsz git zip unzip curl wget qrencode dnsutils
+		$cmd install -y lrzsz git zip unzip curl wget qrencode
 	else
-		$cmd install -y lrzsz git zip unzip curl wget qrencode bind-utils iptables-services
+		$cmd install -y lrzsz git zip unzip curl wget qrencode iptables-services
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
