@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.54"
+_version="v1.55"
 
 cmd="apt-get"
 
@@ -1298,9 +1298,9 @@ install_caddy() {
 	local caddy_tmp="/tmp/install_caddy/"
 	local caddy_tmp_file="/tmp/install_caddy/caddy.tar.gz"
 	if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
-		local caddy_download_link="https://caddyserver.com/download/linux/386"
+		local caddy_download_link="https://caddyserver.com/download/linux/386?license=personal"
 	elif [[ $sys_bit == "x86_64" ]]; then
-		local caddy_download_link="https://caddyserver.com/download/linux/amd64"
+		local caddy_download_link="https://caddyserver.com/download/linux/amd64?license=personal"
 	else
 		echo -e "$red 自动安装 Caddy 失败！不支持你的系统。$none" && exit 1
 	fi
