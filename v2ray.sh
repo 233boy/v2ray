@@ -182,7 +182,7 @@ create_vmess_URL_config() {
 			"add": "${domain}",
 			"port": "443",
 			"id": "${v2ray_id}",
-			"aid": "233",
+			"aid": "255",
 			"net": "ws",
 			"type": "none",
 			"host": "${host}",
@@ -197,7 +197,7 @@ create_vmess_URL_config() {
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${v2ray_id}",
-			"aid": "233",
+			"aid": "255",
 			"net": "${net}",
 			"type": "${header}",
 			"host": "${host}",
@@ -225,7 +225,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"
 		echo
-		echo -e "$yellow 额外ID (Alter Id) = ${cyan}233${none}"
+		echo -e "$yellow 额外ID (Alter Id) = ${cyan}255${none}"
 		echo
 		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
 		echo
@@ -252,7 +252,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"
 		echo
-		echo -e "$yellow 额外ID (Alter Id) = ${cyan}233${none}"
+		echo -e "$yellow 额外ID (Alter Id) = ${cyan}255${none}"
 		echo
 		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
 		echo

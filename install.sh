@@ -1313,7 +1313,7 @@ show_config_info() {
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${uuid}",
-			"aid": "233",
+			"aid": "255",
 			"net": "${net}",
 			"type": "${header}",
 			"host": "${host}",
