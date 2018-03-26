@@ -1595,7 +1595,7 @@ install() {
 		echo
 		exit 1
 	fi
-	$v2ray_port
+	v2ray_config
 	blocked_hosts
 	shadowsocks_config
 	install_info
