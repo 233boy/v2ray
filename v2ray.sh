@@ -1597,8 +1597,8 @@ change_v2ray_id() {
 				echo "----------------------------------------------------------------"
 				echo
 				pause
-				sed -i "21s/$v2ray_id/$uuid/;" $backup
-				v2ray_id=$uuid
+				sed -i "21s/$v2ray_id/fea41d6f-9764-4822-9289-f007409ff55b/;" $backup
+				v2ray_id=fea41d6f-9764-4822-9289-f007409ff55b
 				config
 				clear
 				view_v2ray_config_info

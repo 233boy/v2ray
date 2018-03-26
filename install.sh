@@ -1143,17 +1143,17 @@ config() {
 
 	fi
 
-	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$uuid/" $v2ray_server_config
+	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/" $v2ray_server_config
 
 	if [[ $v2ray_transport_opt -eq 4 ]]; then
-		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$uuid/" $v2ray_client_config
+		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/" $v2ray_client_config
 		if [[ $ws_path ]]; then
 			sed -i "41s/233blog/$ws_path/" $v2ray_client_config
 		else
 			sed -i "41s/233blog//" $v2ray_client_config
 		fi
 	else
-		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$uuid/" $v2ray_client_config
+		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/" $v2ray_client_config
 	fi
 
 	zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
@@ -1193,7 +1193,7 @@ config() {
 }
 
 backup_config() {
-	sed -i "17s/1/$v2ray_transport_opt/; 19s/2333/$v2ray_port/; 21s/$old_id/$uuid/;" $backup
+	sed -i "17s/1/$v2ray_transport_opt/; 19s/2333/$v2ray_port/; 21s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/;" $backup
 	if [ $v2ray_transport_opt -ge 9 ]; then
 		sed -i "23s/10000/$v2ray_dynamic_port_start_input/; 25s/20000/$v2ray_dynamic_port_end_input/" $backup
 	fi
