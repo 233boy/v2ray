@@ -2147,7 +2147,7 @@ get_v2ray_config() {
 				echo
 				echo -e "$yellow 解压密码 = ${cyan}jamesmarc.com$none"
 				echo
-				echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
+				echo -e "$yellow SOCKS 监听端口 = ${cyan}80${none}"
 				echo
 				echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
 				echo
@@ -2174,7 +2174,7 @@ get_v2ray_config_link() {
 		echo
 		echo -e "$yellow 解压密码 = ${cyan}jamesmarc.com$none"
 		echo
-		echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
+		echo -e "$yellow SOCKS 监听端口 = ${cyan}80${none}"
 		echo
 		echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
 		echo
