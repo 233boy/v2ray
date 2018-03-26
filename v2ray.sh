@@ -42,7 +42,7 @@ else
 
 fi
 
-backup="/etc/v2ray/233blog_v2ray_backup.txt"
+backup="/etc/v2ray/jamesmarc_v2ray_backup.txt"
 
 if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup ]]; then
 
@@ -85,9 +85,9 @@ if [[ $ws_path_status == "true" ]]; then
 fi
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
-old_id="23332333-2333-2333-2333-233boy233boy"
+old_id="fea41d6f-9764-4822-9289-f007409ff55b"
 v2ray_server_config="/etc/v2ray/config.json"
-v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
+v2ray_client_config="/etc/v2ray/jamesmarc_v2ray_config.json"
 v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
 caddy_pid=$(pgrep "caddy")
 
@@ -178,7 +178,7 @@ create_vmess_URL_config() {
 	if [[ $v2ray_transport == "4" ]]; then
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
-			"ps": "233blog_v2ray_${domain}",
+			"ps": "jamesmarc_v2ray_${domain}",
 			"add": "${domain}",
 			"port": "443",
 			"id": "${v2ray_id}",
@@ -193,7 +193,7 @@ create_vmess_URL_config() {
 		[[ -z $ip ]] && get_ip
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
-			"ps": "233blog_v2ray_${ip}",
+			"ps": "jamesmarc_v2ray_${ip}",
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${v2ray_id}",
@@ -216,7 +216,7 @@ view_v2ray_config_info() {
 	if [[ $v2ray_transport == "4" ]]; then
 		if [[ ! $caddy_installed ]]; then
 			echo
-			echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://233blog.com/post/19/$none"
+			echo -e " $red警告！$none$yellow请自行配置 TLS...教程"
 		fi
 		echo
 		echo -e "$yellow 地址 (Address) = $cyan${domain}$none"
@@ -278,7 +278,7 @@ view_v2ray_config_info() {
 	fi
 	echo "---------- END -------------"
 	echo
-	echo "V2Ray 客户端使用教程: https://233blog.com/post/20/"
+	echo "V2Ray 客户端使用教程"
 	echo
 }
 get_shadowsocks_config() {
@@ -317,7 +317,7 @@ get_shadowsocks_config() {
 view_shadowsocks_config_info() {
 	if [[ $shadowsocks ]]; then
 		get_ip
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#jamesmarc_ss_${ip}"
 		echo
 		echo
 		echo "---------- Shadowsocks 配置信息 -------------"
@@ -344,12 +344,12 @@ get_shadowsocks_config_qr_link() {
 		echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 		echo
 		get_ip
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
-		echo "${ss}" >/tmp/233blog_shadowsocks.txt
-		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#jamesmarc_ss_${ip}"
+		echo "${ss}" >/tmp/jamesmarc_shadowsocks.txt
+		cat /tmp/jamesmarc_shadowsocks.txt | qrencode -s 50 -o /tmp/jamesmarc_shadowsocks.png
 
 		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		local link=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random}_233blog_shadowsocks.png")
+		local link=$(curl -s --upload-file /tmp/jamesmarc_shadowsocks.png "https://transfer.sh/${random}_jamesmarc_shadowsocks.png")
 		if [[ $link ]]; then
 			echo
 			echo "---------- Shadowsocks 二维码链接 -------------"
@@ -367,8 +367,8 @@ get_shadowsocks_config_qr_link() {
 			echo -e "$red 哎呀呀呀...出错咯...请重试$none"
 			echo
 		fi
-		rm -rf /tmp/233blog_shadowsocks.png
-		rm -rf /tmp/233blog_shadowsocks.txt
+		rm -rf /tmp/jamesmarc_shadowsocks.png
+		rm -rf /tmp/jamesmarc_shadowsocks.txt
 	else
 		shadowsocks_config
 	fi
@@ -526,8 +526,8 @@ shadowsocks_password_config() {
 
 	while :; do
 		echo -e "请输入 "$yellow"Shadowsocks"$none" 密码"
-		read -p "$(echo -e "(默认密码: ${cyan}233blog.com$none)"): " new_sspass
-		[ -z "$new_sspass" ] && new_sspass="233blog.com"
+		read -p "$(echo -e "(默认密码: ${cyan}jamesmarc2016$none)"): " new_sspass
+		[ -z "$new_sspass" ] && new_sspass="jamesmarc2016"
 		case $new_sspass in
 		*/*)
 			echo
@@ -1067,7 +1067,7 @@ ws_config() {
 		echo
 		echo
 		echo -e "请输入一个 $magenta正确的域名$none，一定一定一定要正确，不！能！出！错！"
-		read -p "(例如：233blog.com): " new_domain
+		read -p "(例如：jamesmarc.com): " new_domain
 		[ -z "$new_domain" ] && error && continue
 		echo
 		echo
@@ -1247,9 +1247,9 @@ ws_path_config_ask() {
 ws_path_config() {
 	echo
 	while :; do
-		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
-		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" new_ws_path
-		[[ -z $new_ws_path ]] && new_ws_path="233blog"
+		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /jamesmarc , 那么只需要输入 jamesmarc 即可"
+		read -p "$(echo -e "(默认: [${cyan}jamesmarc$none]):")" new_ws_path
+		[[ -z $new_ws_path ]] && new_ws_path="jamesmarc"
 
 		case $new_ws_path in
 		*/*)
@@ -1693,7 +1693,7 @@ change_ws_path_config() {
 	if [[ $v2ray_transport == 4 && $caddy_installed ]] && [[ $is_ws_path ]]; then
 		echo
 		while :; do
-			echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
+			echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /jamesmarc , 那么只需要输入 jamesmarc 即可"
 			read -p "$(echo -e "(当前分流的路径: [${cyan}/${ws_path}$none]):")" new_ws_path
 			[[ -z $new_ws_path ]] && error && continue
 
@@ -1921,7 +1921,7 @@ blocked_hosts() {
 		echo
 		echo "备注: 广告拦截是基于 域名 拦截的..所以也许会造成浏览网页的时候出现部分元素留白..或者其他问题"
 		echo
-		echo "反馈问题或请求拦截更多域名: https://github.com/233boy/v2ray/issues"
+		echo "反馈问题或请求拦截更多域名"
 		echo
 		echo -e "当前广告拦截状态: $_info"
 		echo
@@ -2140,18 +2140,18 @@ get_v2ray_config() {
 				echo
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
-				sz /etc/v2ray/233blog_v2ray.zip
+				sz /etc/v2ray/jamesmarc_v2ray.zip
 				echo
 				echo
 				echo -e "$green 下载完成咯...$none"
 				echo
-				echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
+				echo -e "$yellow 解压密码 = ${cyan}jamesmarc.com$none"
 				echo
 				echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 				echo
 				echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
 				echo
-				echo "V2Ray 客户端使用教程: https://233blog.com/post/20/"
+				echo "V2Ray 客户端使用教程"
 				echo
 				break
 			else
@@ -2165,20 +2165,20 @@ get_v2ray_config_link() {
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random}_233blog_v2ray.zip")
+	local link=$(curl -s --upload-file /etc/v2ray/jamesmarc_v2ray.zip "https://transfer.sh/${random}_jamesmarc_v2ray.zip")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 客户端配置文件链接 -------------"
 		echo
 		echo -e "$yellow 链接 = $cyan$link$none"
 		echo
-		echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
+		echo -e "$yellow 解压密码 = ${cyan}jamesmarc.com$none"
 		echo
 		echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 		echo
 		echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
 		echo
-		echo " V2Ray 客户端使用教程: https://233blog.com/post/20/"
+		echo " V2Ray 客户端使用教程"
 		echo
 		echo "备注...链接将在 14 天后失效"
 		echo
@@ -2200,7 +2200,7 @@ create_v2ray_config_text() {
 	if [[ $v2ray_transport == "4" ]]; then
 		if [[ ! $caddy_installed ]]; then
 			echo
-			echo " 警告！请自行配置 TLS...教程: https://233blog.com/post/19/"
+			echo " 警告！请自行配置 TLS...教程"
 		fi
 		echo
 		echo "地址 (Address) = ${domain}"
@@ -2209,7 +2209,7 @@ create_v2ray_config_text() {
 		echo
 		echo "用户ID (User ID / UUID) = ${v2ray_id}"
 		echo
-		echo "额外ID (Alter Id) = 233"
+		echo "额外ID (Alter Id) = 255"
 		echo
 		echo "传输协议 (Network) = ${network}"
 		echo
@@ -2236,7 +2236,7 @@ create_v2ray_config_text() {
 		echo
 		echo "用户ID (User ID / UUID) = ${v2ray_id}"
 		echo
-		echo "额外ID (Alter Id) = 233"
+		echo "额外ID (Alter Id) = 255"
 		echo
 		echo "传输协议 (Network) = ${network}"
 		echo
@@ -2262,23 +2262,23 @@ create_v2ray_config_text() {
 	fi
 	echo "---------- END -------------"
 	echo
-	echo "V2Ray 客户端使用教程: https://233blog.com/post/20/"
+	echo "V2Ray 客户端使用教程"
 	echo
 }
 get_v2ray_config_info_link() {
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
-	create_v2ray_config_text >/tmp/233blog_v2ray.txt
+	create_v2ray_config_text >/tmp/jamesmarc_v2ray.txt
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random}_233blog_v2ray.txt")
+	local link=$(curl -s --upload-file /tmp/jamesmarc_v2ray.txt "https://transfer.sh/${random}_jamesmarc_v2ray.txt")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 配置信息链接-------------"
 		echo
 		echo -e "$yellow 链接 = $cyan$link$none"
 		echo
-		echo -e " V2Ray 客户端使用教程: https://233blog.com/post/20/"
+		echo -e " V2Ray 客户端使用教程"
 		echo
 		echo "备注...链接将在 14 天后失效..."
 		echo
@@ -2289,7 +2289,7 @@ get_v2ray_config_info_link() {
 		echo -e "$red 哎呀呀呀...出错咯...请重试$none"
 		echo
 	fi
-	rm -rf /tmp/233blog_v2ray.txt
+	rm -rf /tmp/jamesmarc_v2ray.txt
 }
 get_v2ray_config_qr_link() {
 
@@ -2301,7 +2301,7 @@ get_v2ray_config_qr_link() {
 		else
 			ip_or_domain=$ip
 		fi
-		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
+		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=jamesmarc_v2ray_${ip_or_domain}&obfs=${obfs}"
 		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
 		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
 	fi
@@ -2312,15 +2312,15 @@ get_v2ray_config_qr_link() {
 	[1-4] | 9 | 10 | 11)
 		local ios_qr=true
 		local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/233blog_shadowray_qr.png
-		local link3=$(curl -s --upload-file /tmp/233blog_shadowray_qr.png "https://transfer.sh/${random3}_233blog_v2ray.png")
+		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
+		local link3=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png "https://transfer.sh/${random3}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
 		;;
 	esac
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 	echo $vmess >/etc/v2ray/vmess.txt
-	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
+	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random}_233blog_v2ray.png")
+	local link=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png "https://transfer.sh/${random}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 二维码链接 -------------"
@@ -2330,7 +2330,7 @@ get_v2ray_config_qr_link() {
 		if [[ $ios_qr && $link3 ]]; then
 			echo -e "$yellow 适用于 Pepi / ShadowRay = $cyan${link3}$none"
 			echo
-			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 233 (如果你使用 Pepi / ShadowRay)"
+			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 255 (如果你使用 Pepi / ShadowRay)"
 			if [[ $v2ray_transport == 4 ]]; then
 				echo
 				echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
@@ -2341,7 +2341,7 @@ get_v2ray_config_qr_link() {
 			echo -e "$red 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay...$none"
 		fi
 		echo
-		echo " V2Ray 客户端使用教程: https://233blog.com/post/20/"
+		echo " V2Ray 客户端使用教程: https://fea41d6f-9764-4822-9289-f007409ff55b.com/post/20/"
 		echo
 		echo "备注...链接将在 14 天后失效"
 		echo
@@ -2354,11 +2354,11 @@ get_v2ray_config_qr_link() {
 		echo -e "请尝试使用${cyan} v2ray qr ${none}重新生成"
 		echo
 	fi
-	rm -rf /tmp/233blog_v2ray.png
+	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
 	rm -rf /etc/v2ray/vmess_qr.json
 	rm -rf /etc/v2ray/vmess.txt
 	if [[ $ios_qr ]]; then
-		rm -rf /tmp/233blog_shadowray_qr.png
+		rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
 		rm -rf /etc/v2ray/shadowray_qr.txt
 	fi
 }
@@ -2589,7 +2589,7 @@ update_v2ray() {
 	fi
 }
 update_v2ray.sh() {
-	local latest_version=$(curl -s -L https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh | grep '_version' -m1 | cut -d\" -f2)
+	local latest_version=$(curl -s -L https://raw.githubusercontent.com/jamesmarc2016/v2ray/master/v2ray.sh | grep '_version' -m1 | cut -d\" -f2)
 	if [[ $latest_version == $_version ]]; then
 		echo
 		echo -e "$green 木有发现新版本 $none"
@@ -2598,9 +2598,9 @@ update_v2ray.sh() {
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
 		echo
-		cd /etc/v2ray/233boy/v2ray
+		cd /etc/v2ray/jamesmarc/v2ray
 		git pull
-		cp -f /etc/v2ray/233boy/v2ray/v2ray.sh /usr/local/bin/v2ray
+		cp -f /etc/v2ray/jamesmarc/v2ray/v2ray.sh /usr/local/bin/v2ray
 		chmod +x /usr/local/bin/v2ray
 		echo
 		echo -e "$green 更新成功啦...当前 V2Ray 管理脚本 版本: ${cyan}$latest_version$none"
@@ -2718,7 +2718,7 @@ uninstall_v2ray() {
 		echo
 		echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 		echo
-		echo "反馈问题: https://github.com/233boy/v2ray/issus"
+		echo "反馈问题: https://github.com/jamesmarc2016/v2ray/issus"
 		echo
 
 	elif [[ $is_uninstall_v2ray ]]; then
@@ -2762,7 +2762,7 @@ uninstall_v2ray() {
 		echo
 		echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 		echo
-		echo "反馈问题: https://github.com/233boy/v2ray/issus"
+		echo "反馈问题: https://github.com/jamesmarc2016/v2ray/issus"
 		echo
 	fi
 }
@@ -2772,79 +2772,79 @@ config() {
 			if [[ $is_blocked_ad ]]; then
 				case $v2ray_transport_opt in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/tcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/tcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			else
 				case $v2ray_transport_opt in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			fi
@@ -2852,79 +2852,79 @@ config() {
 			if [[ $is_blocked_ad ]]; then
 				case $v2ray_transport in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/tcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/tcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			else
 				case $v2ray_transport in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp_ss.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp_ss_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			fi
@@ -2935,79 +2935,79 @@ config() {
 			if [[ $is_blocked_ad ]]; then
 				case $v2ray_transport_opt in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/tcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			else
 				case $v2ray_transport_opt in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			fi
@@ -3015,79 +3015,79 @@ config() {
 			if [[ $is_blocked_ad ]]; then
 				case $v2ray_transport in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/tcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/http_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/ws_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			else
 				case $v2ray_transport in
 				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws_tls.json"
 					;;
 				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/tcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/tcp.json"
 					;;
 				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/http_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/http.json"
 					;;
 				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/ws_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/ws.json"
 					;;
 				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+					v2ray_server_config_file="/etc/v2ray/jamesmarc/v2ray/config/server/kcp_dynamic.json"
+					v2ray_client_config_file="/etc/v2ray/jamesmarc/v2ray/config/client/kcp.json"
 					;;
 				esac
 			fi
@@ -3154,25 +3154,25 @@ config() {
 
 			case $v2ray_transport_opt in
 			1)
-				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			2)
-				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			3 | 4)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			5 | 6 | 7 | 8)
-				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			9)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			10)
-				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			*)
-				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			esac
 
@@ -3207,25 +3207,25 @@ config() {
 
 			case $v2ray_transport in
 			1)
-				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			2)
-				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			3 | 4)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			5 | 6 | 7 | 8)
-				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/233blog.com/$sspass/" $v2ray_server_config
+				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
 				;;
 			9)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			10)
-				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			*)
-				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			esac
 
@@ -3344,21 +3344,21 @@ config() {
 
 	fi
 
-	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/" $v2ray_server_config
+	sed -i "8s/80/$v2ray_port/; 14s/$old_id/$v2ray_id/" $v2ray_server_config
 
 	if [[ $v2ray_transport_opt -eq 4 || $v2ray_transport -eq 4 ]]; then
-		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
+		sed -i "s/fea41d6f-9764-4822-9289-f007409ff55b.com/$domain/; 22s/80/443/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
 		if [[ $is_ws_path ]]; then
-			sed -i "41s/233blog/$ws_path/" $v2ray_client_config
+			sed -i "41s/fea41d6f-9764-4822-9289-f007409ff55b/$ws_path/" $v2ray_client_config
 		else
-			sed -i "41s/233blog//" $v2ray_client_config
+			sed -i "41s/fea41d6f-9764-4822-9289-f007409ff55b//" $v2ray_client_config
 		fi
 	else
 		[[ -z $ip ]] && get_ip
-		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
+		sed -i "s/fea41d6f-9764-4822-9289-f007409ff55b.com/$ip/; 22s/80/$v2ray_port/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
 	fi
 
-	zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
+	zip -q -r -j --password "fea41d6f-9764-4822-9289-f007409ff55b.com" /etc/v2ray/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.zip $v2ray_client_config
 
 	if [[ $new_shadowsocks ]]; then
 		open_port $new_ssport
@@ -3369,10 +3369,10 @@ config() {
 }
 _boom_() {
 	echo
-	echo -e "$green ........... V2Ray 配置链接集合 by 233blog.com  ..........$none"
+	echo -e "$green ........... V2Ray 配置链接集合 by fea41d6f-9764-4822-9289-f007409ff55b.com  ..........$none"
 	echo
 
-	create_v2ray_config_text >/tmp/233blog_v2ray.txt
+	create_v2ray_config_text >/tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt
 
 	create_vmess_URL_config
 
@@ -3382,7 +3382,7 @@ _boom_() {
 		else
 			ip_or_domain=$ip
 		fi
-		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
+		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=fea41d6f-9764-4822-9289-f007409ff55b_v2ray_${ip_or_domain}&obfs=${obfs}"
 		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
 		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
 	fi
@@ -3390,20 +3390,20 @@ _boom_() {
 	[1-4] | 9 | 10 | 11)
 		local ios_qr=true
 		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/233blog_shadowray_qr.png
-		local link=$(curl -s --upload-file /tmp/233blog_shadowray_qr.png "https://transfer.sh/${random}_233blog_v2ray.png")
+		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
+		local link=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png "https://transfer.sh/${random}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
 		;;
 	esac
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 	echo $vmess >/etc/v2ray/vmess.txt
-	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
+	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
 
 	local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link1=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random1}_233blog_v2ray.zip")
-	local link2=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random2}_233blog_v2ray.txt")
-	local link3=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random3}_233blog_v2ray.png")
+	local link1=$(curl -s --upload-file /etc/v2ray/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.zip "https://transfer.sh/${random1}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.zip")
+	local link2=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt "https://transfer.sh/${random2}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt")
+	local link3=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png "https://transfer.sh/${random3}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
 
 	if [[ $link && $link1 ]] && [[ $link2 && $link3 ]]; then
 		echo -e "$yellow 客户端配置文件链接: $cyan$link1$none"
@@ -3414,19 +3414,19 @@ _boom_() {
 		echo
 		echo -e "$yellow Pepi / ShadowRay 二维码链接: $cyan$link$none"
 		echo
-		echo "V2Ray 客户端使用教程: https://233blog.com/post/20/"
+		echo "V2Ray 客户端使用教程: https://fea41d6f-9764-4822-9289-f007409ff55b.com/post/20/"
 		echo
 	else
 		echo
 		echo -e "$red 哎呀..发生了一点意外的情况.....请重试....$none"
 		echo
 	fi
-	rm -rf /tmp/233blog_v2ray.txt
+	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt
 	rm -rf /etc/v2ray/vmess_qr.json
 	rm -rf /etc/v2ray/shadowray_qr.txt
-	rm -rf /tmp/233blog_shadowray_qr.png
+	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
 	rm -rf /etc/v2ray/vmess.txt
-	rm -rf /tmp/233blog_v2ray.png
+	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
 
 }
 
@@ -3454,7 +3454,7 @@ do_service() {
 }
 _help() {
 	echo
-	echo "........... V2Ray 管理脚本帮助信息 by 233blog.com .........."
+	echo "........... V2Ray 管理脚本帮助信息 by fea41d6f-9764-4822-9289-f007409ff55b.com .........."
 	echo -e "
 	${green}v2ray menu $none管理 V2Ray (同等于直接输入 v2ray)
 
@@ -3495,15 +3495,15 @@ menu() {
 	clear
 	while :; do
 		echo
-		echo "........... V2Ray 管理脚本 $_version by 233blog.com .........."
+		echo "........... V2Ray 管理脚本 $_version by fea41d6f-9764-4822-9289-f007409ff55b.com .........."
 		echo
 		echo -e "## V2Ray 版本: $cyan$v2ray_ver$none  /  V2Ray 状态: $v2ray_status ##"
 		echo
-		echo "帮助说明: https://233blog.com/post/16/"
+		echo "帮助说明: https://fea41d6f-9764-4822-9289-f007409ff55b.com/post/16/"
 		echo
-		echo "反馈问题: https://github.com/233boy/v2ray/issues"
+		echo "反馈问题: https://github.com/jamesmarc/v2ray/issues"
 		echo
-		echo "TG 群组: https://t.me/blog233"
+		echo "TG 群组"
 		echo
 		echo -e "$yellow 1. $none查看 V2Ray 配置"
 		echo
@@ -3633,7 +3633,7 @@ U | update.sh)
 un | uninstall)
 	uninstall_v2ray
 	;;
-233 | 2333 | 233boy | 233blog | 233blog.com)
+80 | 80 | jamesmarc | fea41d6f-9764-4822-9289-f007409ff55b | fea41d6f-9764-4822-9289-f007409ff55b.com)
 	_boom_
 	;;
 bbr)
