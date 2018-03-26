@@ -16,15 +16,15 @@
 ---- V2Ray 传输协议 -----
 1
 ---- V2Ray 端口 -----
-2333
+80
 ---- UUID -----
-23332333-2333-2333-2333-233boy233boy
+fea41d6f-9764-4822-9289-f007409ff55b
 ---- V2Ray 动态端口开始 -----
 10000
 ---- V2Ray 动态端口结束 -----
 20000
 ---- 域名 -----
-233blog.com
+jamesmarc.com
 ---- caddy -----
 false
 ---- Shadowsocks -----
@@ -32,11 +32,11 @@ false
 ---- Shadowsocks 端口 -----
 6666
 ---- Shadowsocks 密码 -----
-233blog.com
+jamesmarc2016
 ---- Shadowsocks 加密协议 -----
 chacha20-ietf
 ---- 屏蔽广告 -----
-false
+true
 ---- 网站伪装 -----
 false
 ---- 伪装的路径 -----
