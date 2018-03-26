@@ -5,7 +5,7 @@
         "loglevel": "warning"
     },
     "inbound": {
-        "port": 2333,
+        "port": 80,
         "protocol": "vmess",
         "settings": {
             "udp": true,

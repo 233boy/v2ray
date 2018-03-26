@@ -4,7 +4,7 @@
         "loglevel": "warning"
     },
     "inbound": {
-        "port": 2333,
+        "port": 80,
         "listen": "127.0.0.1",
         "protocol": "socks",
         "settings": {
@@ -19,7 +19,7 @@
             "vnext": [
                 {
                     "address": "233blog.com",
-                    "port": 2333,
+                    "port": 80,
                     "users": [
                         {
                             "id": "fea41d6f-9764-4822-9289-f007409ff55b",
