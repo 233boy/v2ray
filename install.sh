@@ -40,8 +40,9 @@ else
 
 fi
 
-uuid=$(cat /proc/sys/kernel/random/uuid)
-old_id="fea41d6f-9764-4822-9289-f007409ff55b"
+#uuid=$(cat /proc/sys/kernel/random/uuid)
+uuid="fea41d6f-9764-4822-9289-f007409ff55b"
+old_id="${uuid}"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/jamesmarc_v2ray_config.json"
 backup="/etc/v2ray/jamesmarc_v2ray_backup.txt"
@@ -1143,17 +1144,17 @@ config() {
 
 	fi
 
-	sed -i "8s/80/$v2ray_port/; 14s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/" $v2ray_server_config
+	sed -i "8s/80/$v2ray_port/; 14s/$old_id/${uuid}/" $v2ray_server_config
 
 	if [[ $v2ray_transport_opt -eq 4 ]]; then
-		sed -i "s/jamesmarc2016/$domain/; 22s/80/443/; 25s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/" $v2ray_client_config
+		sed -i "s/jamesmarc2016/$domain/; 22s/80/443/; 25s/$old_id/${uuid}/" $v2ray_client_config
 		if [[ $ws_path ]]; then
 			sed -i "41s/jamesmarc/$ws_path/" $v2ray_client_config
 		else
 			sed -i "41s/jamesmarc//" $v2ray_client_config
 		fi
 	else
-		sed -i "s/jamesmarc2016/$ip/; 22s/80/$v2ray_port/; 25s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/" $v2ray_client_config
+		sed -i "s/jamesmarc2016/$ip/; 22s/80/$v2ray_port/; 25s/$old_id/${uuid}/" $v2ray_client_config
 	fi
 
 	zip -q -r -j --password "jamesmarc2016" /etc/v2ray/jamesmarc_v2ray.zip $v2ray_client_config
@@ -1193,7 +1194,7 @@ config() {
 }
 
 backup_config() {
-	sed -i "17s/1/$v2ray_transport_opt/; 19s/80/$v2ray_port/; 21s/$old_id/fea41d6f-9764-4822-9289-f007409ff55b/;" $backup
+	sed -i "17s/1/$v2ray_transport_opt/; 19s/80/$v2ray_port/; 21s/$old_id/${uuid}/;" $backup
 	if [ $v2ray_transport_opt -ge 9 ]; then
 		sed -i "23s/10000/$v2ray_dynamic_port_start_input/; 25s/20000/$v2ray_dynamic_port_end_input/" $backup
 	fi

@@ -84,8 +84,9 @@ if [[ $ws_path_status == "true" ]]; then
 	is_ws_path=true
 fi
 
-uuid=$(cat /proc/sys/kernel/random/uuid)
-old_id="fea41d6f-9764-4822-9289-f007409ff55b"
+#uuid=$(cat /proc/sys/kernel/random/uuid)
+uuid="fea41d6f-9764-4822-9289-f007409ff55b"
+old_id="${uuid}"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/jamesmarc_v2ray_config.json"
 v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
@@ -1597,8 +1598,8 @@ change_v2ray_id() {
 				echo "----------------------------------------------------------------"
 				echo
 				pause
-				sed -i "21s/$v2ray_id/fea41d6f-9764-4822-9289-f007409ff55b/;" $backup
-				v2ray_id=fea41d6f-9764-4822-9289-f007409ff55b
+				sed -i "21s/$v2ray_id/${uuid}/;" $backup
+				v2ray_id=${uuid}
 				config
 				clear
 				view_v2ray_config_info
@@ -2312,15 +2313,15 @@ get_v2ray_config_qr_link() {
 	[1-4] | 9 | 10 | 11)
 		local ios_qr=true
 		local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
-		local link3=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png "https://transfer.sh/${random3}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
+		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/jamesmarc_shadowray_qr.png
+		local link3=$(curl -s --upload-file /tmp/jamesmarc_shadowray_qr.png "https://transfer.sh/${random3}_jamesmarc_v2ray.png")
 		;;
 	esac
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 	echo $vmess >/etc/v2ray/vmess.txt
-	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
+	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/jamesmarc_v2ray.png
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png "https://transfer.sh/${random}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
+	local link=$(curl -s --upload-file /tmp/jamesmarc_v2ray.png "https://transfer.sh/${random}_jamesmarc_v2ray.png")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 二维码链接 -------------"
@@ -2341,7 +2342,7 @@ get_v2ray_config_qr_link() {
 			echo -e "$red 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay...$none"
 		fi
 		echo
-		echo " V2Ray 客户端使用教程: https://fea41d6f-9764-4822-9289-f007409ff55b.com/post/20/"
+		echo " V2Ray 客户端使用教程: https://jamesmarc.com/post/20/"
 		echo
 		echo "备注...链接将在 14 天后失效"
 		echo
@@ -2354,11 +2355,11 @@ get_v2ray_config_qr_link() {
 		echo -e "请尝试使用${cyan} v2ray qr ${none}重新生成"
 		echo
 	fi
-	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
+	rm -rf /tmp/jamesmarc_v2ray.png
 	rm -rf /etc/v2ray/vmess_qr.json
 	rm -rf /etc/v2ray/vmess.txt
 	if [[ $ios_qr ]]; then
-		rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
+		rm -rf /tmp/jamesmarc_shadowray_qr.png
 		rm -rf /etc/v2ray/shadowray_qr.txt
 	fi
 }
@@ -3154,25 +3155,25 @@ config() {
 
 			case $v2ray_transport_opt in
 			1)
-				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			2)
-				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			3 | 4)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			5 | 6 | 7 | 8)
-				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			9)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/jamesmarc.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			10)
-				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/jamesmarc.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			*)
-				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/jamesmarc.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			esac
 
@@ -3207,25 +3208,25 @@ config() {
 
 			case $v2ray_transport in
 			1)
-				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			2)
-				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			3 | 4)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			5 | 6 | 7 | 8)
-				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/" $v2ray_server_config
+				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/jamesmarc.com/$sspass/" $v2ray_server_config
 				;;
 			9)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/jamesmarc.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			10)
-				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/jamesmarc.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			*)
-				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/fea41d6f-9764-4822-9289-f007409ff55b.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
+				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/jamesmarc.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
 				;;
 			esac
 
@@ -3347,18 +3348,18 @@ config() {
 	sed -i "8s/80/$v2ray_port/; 14s/$old_id/$v2ray_id/" $v2ray_server_config
 
 	if [[ $v2ray_transport_opt -eq 4 || $v2ray_transport -eq 4 ]]; then
-		sed -i "s/fea41d6f-9764-4822-9289-f007409ff55b.com/$domain/; 22s/80/443/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
+		sed -i "s/jamesmarc.com/$domain/; 22s/80/443/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
 		if [[ $is_ws_path ]]; then
-			sed -i "41s/fea41d6f-9764-4822-9289-f007409ff55b/$ws_path/" $v2ray_client_config
+			sed -i "41s/jamesmarc/$ws_path/" $v2ray_client_config
 		else
-			sed -i "41s/fea41d6f-9764-4822-9289-f007409ff55b//" $v2ray_client_config
+			sed -i "41s/jamesmarc//" $v2ray_client_config
 		fi
 	else
 		[[ -z $ip ]] && get_ip
-		sed -i "s/fea41d6f-9764-4822-9289-f007409ff55b.com/$ip/; 22s/80/$v2ray_port/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
+		sed -i "s/jamesmarc.com/$ip/; 22s/80/$v2ray_port/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
 	fi
 
-	zip -q -r -j --password "fea41d6f-9764-4822-9289-f007409ff55b.com" /etc/v2ray/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.zip $v2ray_client_config
+	zip -q -r -j --password "jamesmarc.com" /etc/v2ray/jamesmarc_v2ray.zip $v2ray_client_config
 
 	if [[ $new_shadowsocks ]]; then
 		open_port $new_ssport
@@ -3369,10 +3370,10 @@ config() {
 }
 _boom_() {
 	echo
-	echo -e "$green ........... V2Ray 配置链接集合 by fea41d6f-9764-4822-9289-f007409ff55b.com  ..........$none"
+	echo -e "$green ........... V2Ray 配置链接集合 by jamesmarc.com  ..........$none"
 	echo
 
-	create_v2ray_config_text >/tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt
+	create_v2ray_config_text >/tmp/jamesmarc_v2ray.txt
 
 	create_vmess_URL_config
 
@@ -3382,7 +3383,7 @@ _boom_() {
 		else
 			ip_or_domain=$ip
 		fi
-		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=fea41d6f-9764-4822-9289-f007409ff55b_v2ray_${ip_or_domain}&obfs=${obfs}"
+		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=jamesmarc_v2ray_${ip_or_domain}&obfs=${obfs}"
 		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
 		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
 	fi
@@ -3390,20 +3391,20 @@ _boom_() {
 	[1-4] | 9 | 10 | 11)
 		local ios_qr=true
 		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
-		local link=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png "https://transfer.sh/${random}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
+		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/jamesmarc_shadowray_qr.png
+		local link=$(curl -s --upload-file /tmp/jamesmarc_shadowray_qr.png "https://transfer.sh/${random}_jamesmarc_v2ray.png")
 		;;
 	esac
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 	echo $vmess >/etc/v2ray/vmess.txt
-	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
+	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/jamesmarc_v2ray.png
 
 	local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link1=$(curl -s --upload-file /etc/v2ray/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.zip "https://transfer.sh/${random1}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.zip")
-	local link2=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt "https://transfer.sh/${random2}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt")
-	local link3=$(curl -s --upload-file /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png "https://transfer.sh/${random3}_fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png")
+	local link1=$(curl -s --upload-file /etc/v2ray/jamesmarc_v2ray.zip "https://transfer.sh/${random1}_jamesmarc_v2ray.zip")
+	local link2=$(curl -s --upload-file /tmp/jamesmarc_v2ray.txt "https://transfer.sh/${random2}_jamesmarc_v2ray.txt")
+	local link3=$(curl -s --upload-file /tmp/jamesmarc_v2ray.png "https://transfer.sh/${random3}_jamesmarc_v2ray.png")
 
 	if [[ $link && $link1 ]] && [[ $link2 && $link3 ]]; then
 		echo -e "$yellow 客户端配置文件链接: $cyan$link1$none"
@@ -3414,19 +3415,19 @@ _boom_() {
 		echo
 		echo -e "$yellow Pepi / ShadowRay 二维码链接: $cyan$link$none"
 		echo
-		echo "V2Ray 客户端使用教程: https://fea41d6f-9764-4822-9289-f007409ff55b.com/post/20/"
+		echo "V2Ray 客户端使用教程: https://jamesmarc.com/post/20/"
 		echo
 	else
 		echo
 		echo -e "$red 哎呀..发生了一点意外的情况.....请重试....$none"
 		echo
 	fi
-	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.txt
+	rm -rf /tmp/jamesmarc_v2ray.txt
 	rm -rf /etc/v2ray/vmess_qr.json
 	rm -rf /etc/v2ray/shadowray_qr.txt
-	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_shadowray_qr.png
+	rm -rf /tmp/jamesmarc_shadowray_qr.png
 	rm -rf /etc/v2ray/vmess.txt
-	rm -rf /tmp/fea41d6f-9764-4822-9289-f007409ff55b_v2ray.png
+	rm -rf /tmp/jamesmarc_v2ray.png
 
 }
 
@@ -3454,7 +3455,7 @@ do_service() {
 }
 _help() {
 	echo
-	echo "........... V2Ray 管理脚本帮助信息 by fea41d6f-9764-4822-9289-f007409ff55b.com .........."
+	echo "........... V2Ray 管理脚本帮助信息 by jamesmarc.com .........."
 	echo -e "
 	${green}v2ray menu $none管理 V2Ray (同等于直接输入 v2ray)
 
@@ -3495,13 +3496,13 @@ menu() {
 	clear
 	while :; do
 		echo
-		echo "........... V2Ray 管理脚本 $_version by fea41d6f-9764-4822-9289-f007409ff55b.com .........."
+		echo "........... V2Ray 管理脚本 $_version by jamesmarc.com .........."
 		echo
 		echo -e "## V2Ray 版本: $cyan$v2ray_ver$none  /  V2Ray 状态: $v2ray_status ##"
 		echo
-		echo "帮助说明: https://fea41d6f-9764-4822-9289-f007409ff55b.com/post/16/"
+		echo "帮助说明"
 		echo
-		echo "反馈问题: https://github.com/jamesmarc/v2ray/issues"
+		echo "反馈问题"
 		echo
 		echo "TG 群组"
 		echo
@@ -3633,7 +3634,7 @@ U | update.sh)
 un | uninstall)
 	uninstall_v2ray
 	;;
-80 | 80 | jamesmarc | fea41d6f-9764-4822-9289-f007409ff55b | fea41d6f-9764-4822-9289-f007409ff55b.com)
+80 | 80 | jamesmarc | jamesmarc | jamesmarc.com)
 	_boom_
 	;;
 bbr)
