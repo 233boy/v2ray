@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.56"
+_version="v1.57"
 
 cmd="apt-get"
 
@@ -1318,18 +1318,26 @@ install_caddy() {
 		echo -e "$red 安装 Caddy 出错！" && exit 1
 	fi
 
+	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
+
 	if [[ $systemd ]]; then
 		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
-		sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
+		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
 		systemctl enable caddy
 	else
 		cp -f ${caddy_tmp}init/linux-sysvinit/caddy /etc/init.d/caddy
-		sed -i "s/www-data/root/g" /etc/init.d/caddy
+		# sed -i "s/www-data/root/g" /etc/init.d/caddy
 		chmod +x /etc/init.d/caddy
 		update-rc.d -f caddy defaults
 	fi
 
 	mkdir -p /etc/ssl/caddy
+
+	if [ -z "$(grep www-data /etc/passwd)" ]; then
+		useradd -M -s /usr/sbin/nologin www-data
+	fi
+	chown -R www-data.www-data /etc/ssl/caddy
+
 	mkdir -p /etc/caddy/
 	rm -rf $caddy_tmp
 
