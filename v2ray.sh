@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.61"
+_version="v1.62"
 
 cmd="apt-get"
 
@@ -89,12 +89,17 @@ old_id="23332333-2333-2333-2333-233boy233boy"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
 v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
-caddy_pid=$(pgrep "caddy")
+caddy_pid=$(ps ux | grep "/usr/local/bin/caddy" | grep -v grep | awk '{print $2}')
 
 if [ $v2ray_pid ]; then
 	v2ray_status="$green正在运行$none"
 else
 	v2ray_status="$red未在运行$none"
+fi
+if [[ $v2ray_transport == "4" && $caddy_installed ]] && [[ $caddy_pid ]]; then
+	caddy_run_status="$green正在运行$none"
+else
+	caddy_run_status="$red未在运行$none"
 fi
 
 transport=(
@@ -3618,7 +3623,11 @@ Q | ssqr)
 	;;
 status)
 	echo
-	echo -e " V2Ray 状态: $v2ray_status"
+	if [[ $v2ray_transport == "4" && $caddy_installed ]]; then
+		echo -e " V2Ray 状态: $v2ray_status  /  Caddy 状态: $caddy_run_status"
+	else
+		echo -e " V2Ray 状态: $v2ray_status"
+	fi
 	echo
 	;;
 start)
