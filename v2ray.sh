@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.57"
+_version="v1.58"
 
 cmd="apt-get"
 
@@ -44,7 +44,7 @@ fi
 
 backup="/etc/v2ray/233blog_v2ray_backup.txt"
 
-if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup ]]; then
+if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 
 	v2ray_transport=$(sed -n '17p' $backup)
 	v2ray_port=$(sed -n '19p' $backup)

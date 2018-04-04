@@ -724,7 +724,7 @@ install_caddy() {
 		useradd -M -s /usr/sbin/nologin www-data
 	fi
 	chown -R www-data.www-data /etc/ssl/caddy
-	
+
 	mkdir -p /etc/caddy/
 	rm -rf $caddy_tmp
 	caddy_config
@@ -775,6 +775,21 @@ install_v2ray() {
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
+	if [[ $local_install ]]; then
+		if [[ ! -d $(pwd)/config ]]; then
+			echo
+			echo -e "$red 哎呀呀...安装失败了咯...$none"
+			echo
+			echo -e " 请确保你有完整的上传 233blog.com V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
+			echo
+			exit 1
+		fi
+		mkdir -p /etc/v2ray/233boy/v2ray
+		cp -rf $(pwd)/* /etc/v2ray/233boy/v2ray
+	else
+		git clone https://github.com/233boy/v2ray /etc/v2ray/233boy/v2ray
+	fi
+
 	[ -d /tmp/v2ray ] && rm -rf /tmp/v2ray
 	mkdir -p /tmp/v2ray
 
@@ -810,12 +825,6 @@ install_v2ray() {
 
 	rm -rf /tmp/v2ray
 
-	if [[ $local_install ]]; then
-		mkdir -p /etc/v2ray/233boy/v2ray
-		cp -rf $(pwd)/* /etc/v2ray/233boy/v2ray
-	else
-		git clone https://github.com/233boy/v2ray /etc/v2ray/233boy/v2ray
-	fi
 
 	if [ $shadowsocks ]; then
 		if [[ $is_blocked_ad ]]; then
@@ -1602,7 +1611,7 @@ get_qr_link() {
 
 }
 install() {
-	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -f /lib/systemd/system/v2ray.service ]]; then
+	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		echo
 		echo " 大佬...你已经安装 V2Ray 啦...无需重新安装"
 		echo
@@ -1625,7 +1634,7 @@ install() {
 }
 uninstall() {
 
-	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup ]]; then
+	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		while :; do
 			echo
 			read -p "$(echo -e "是否卸载 ${yellow}V2Ray$none [${magenta}Y/N$none]:")" uninstall_v2ray_ask
