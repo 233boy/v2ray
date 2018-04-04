@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.60"
+_version="v1.61"
 
 cmd="apt-get"
 
@@ -3629,6 +3629,12 @@ stop)
 	;;
 restart)
 	restart_v2ray
+	;;
+reload)
+	config
+	clear
+	view_v2ray_config_info
+	download_v2ray_config_ask
 	;;
 log)
 	view_v2ray_log
