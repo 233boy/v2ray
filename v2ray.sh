@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.58"
+_version="v1.60"
 
 cmd="apt-get"
 
@@ -477,17 +477,18 @@ shadowsocks_config() {
 	done
 }
 shadowsocks_port_config() {
+	local random=$(shuf -i20001-65535 -n1)
 	while :; do
 		echo -e "请输入 "$yellow"Shadowsocks"$none" 端口 ["$magenta"1-65535"$none"]，不能和 "$yellow"V2ray"$none" 端口相同"
-		read -p "$(echo -e "(默认端口: ${cyan}6666$none):") " new_ssport
-		[ -z "$new_ssport" ] && new_ssport="6666"
+		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):") " new_ssport
+		[ -z "$new_ssport" ] && new_ssport=$random
 		case $new_ssport in
 		$v2ray_port)
 			echo
 			echo -e " 不能和$cyan V2Ray 端口 $none一毛一样...."
 			error
 			;;
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			if [[ $v2ray_transport == "4" && $new_ssport == "80" ]] || [[ $v2ray_transport == "4" && $new_ssport == "443" ]]; then
 				echo
 				echo -e "由于你选择了 "$green"WebSocket + TLS"$none" 传输协议."
@@ -596,7 +597,7 @@ change_shadowsocks_port() {
 			echo -e " 不能和$cyan V2Ray 端口 $none一毛一样...."
 			error
 			;;
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			if [[ $v2ray_transport == "4" && $new_ssport == "80" ]] || [[ $v2ray_transport == "4" && $new_ssport == "443" ]]; then
 				echo
 				echo -e "由于你选择了 "$green"WebSocket + TLS"$none" 传输协议."
@@ -844,7 +845,7 @@ change_v2ray_port() {
 				echo " 哎呀...跟当前端口一毛一样呀...修改个鸡鸡哦"
 				error
 				;;
-			[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
+			[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 				if [[ $shadowsocks ]] && [[ $v2ray_port_opt == $ssport ]]; then
 					echo
 					echo -e " ...不能跟$cyan Shadowsocks 端口 $none一毛一样..."
@@ -1385,7 +1386,7 @@ v2ray_dynamic_port_start() {
 			echo " 不能和 V2Ray 端口一毛一样...."
 			error
 			;;
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			if [[ $shadowsocks ]] && [[ $v2ray_dynamic_port_start_input == $ssport ]]; then
 				echo
 				echo " 不能和 Shadowsocks 端口一毛一样...."
@@ -1423,7 +1424,7 @@ v2ray_dynamic_port_end() {
 		read -p "$(echo -e "(默认结束端口: ${cyan}20000$none):")" v2ray_dynamic_port_end_input
 		[ -z $v2ray_dynamic_port_end_input ] && v2ray_dynamic_port_end_input=20000
 		case $v2ray_dynamic_port_end_input in
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 
 			if [[ $v2ray_dynamic_port_end_input -le $v2ray_dynamic_port_start_input ]]; then
 				echo
@@ -1514,7 +1515,7 @@ change_v2ray_dynamic_port_start() {
 			echo " 不能和 V2Ray 端口一毛一样...."
 			error
 			;;
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			if [[ $shadowsocks ]] && [[ $v2ray_dynamic_port_start_input == $ssport ]]; then
 				echo
 				echo " 不能和 Shadowsocks 端口一毛一样...."
@@ -1552,7 +1553,7 @@ change_v2ray_dynamic_port_end() {
 		read -p "$(echo -e "(当前动态结束端口: ${cyan}$v2ray_dynamicPort_end$none):")" v2ray_dynamic_port_end_input
 		[ -z $v2ray_dynamic_port_end_input ] && error && continue
 		case $v2ray_dynamic_port_end_input in
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | [1-6][0-5][0-5][0-3][0-5])
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 
 			if [[ $v2ray_dynamic_port_end_input -le $v2ray_dynamic_port_start_input ]]; then
 				echo
@@ -2496,8 +2497,8 @@ open_port() {
 		iptables-save >/etc/iptables.rules.v4
 		ip6tables-save >/etc/iptables.rules.v6
 	else
-		service iptables save
-		service ip6tables save
+		service iptables save >/dev/null 2>&1
+		service ip6tables save >/dev/null 2>&1
 	fi
 
 }
@@ -2529,8 +2530,8 @@ del_port() {
 		iptables-save >/etc/iptables.rules.v4
 		ip6tables-save >/etc/iptables.rules.v6
 	else
-		service iptables save
-		service ip6tables save
+		service iptables save >/dev/null 2>&1
+		service ip6tables save >/dev/null 2>&1
 	fi
 }
 update() {
