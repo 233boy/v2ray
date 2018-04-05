@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.62"
+_version="v1.63"
 
 cmd="apt-get"
 
@@ -89,7 +89,7 @@ old_id="23332333-2333-2333-2333-233boy233boy"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
 v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
-caddy_pid=$(ps ux | grep "/usr/local/bin/caddy" | grep -v grep | awk '{print $2}')
+caddy_pid=$(pgrep "caddy")
 
 if [ $v2ray_pid ]; then
 	v2ray_status="$green正在运行$none"
