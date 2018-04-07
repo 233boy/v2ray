@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.65"
+_version="v1.66"
 
 cmd="apt-get"
 
@@ -49,18 +49,18 @@ if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup &
 	v2ray_transport=$(sed -n '17p' $backup)
 	v2ray_port=$(sed -n '19p' $backup)
 	v2ray_id=$(sed -n '21p' $backup)
-	alterId=$(sed -n '23p' $backup)
-	v2ray_dynamicPort_start=$(sed -n '25p' $backup)
-	v2ray_dynamicPort_end=$(sed -n '27p' $backup)
-	domain=$(sed -n '29p' $backup)
-	caddy_status=$(sed -n '31p' $backup)
-	shadowsocks_status=$(sed -n '33p' $backup)
-	ssport=$(sed -n '35p' $backup)
-	sspass=$(sed -n '37p' $backup)
-	ssciphers=$(sed -n '39p' $backup)
-	blocked_ad_status=$(sed -n '41p' $backup)
-	ws_path_status=$(sed -n '43p' $backup)
-	ws_path=$(sed -n '45p' $backup)
+	v2ray_dynamicPort_start=$(sed -n '23p' $backup)
+	v2ray_dynamicPort_end=$(sed -n '25p' $backup)
+	domain=$(sed -n '27p' $backup)
+	caddy_status=$(sed -n '29p' $backup)
+	shadowsocks_status=$(sed -n '31p' $backup)
+	ssport=$(sed -n '33p' $backup)
+	sspass=$(sed -n '35p' $backup)
+	ssciphers=$(sed -n '37p' $backup)
+	blocked_ad_status=$(sed -n '39p' $backup)
+	ws_path_status=$(sed -n '41p' $backup)
+	ws_path=$(sed -n '43p' $backup)
+	alterId=$(sed -n '45p' $backup)
 
 	v2ray_ver=$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)
 
@@ -2017,7 +2017,7 @@ change_v2ray_alterId() {
 			echo "----------------------------------------------------------------"
 			echo
 			pause
-			sed -i "23s/$alterId/$new_alterId/" $backup
+			sed -i "45s/$alterId/$new_alterId/" $backup
 			alterId=$new_alterId
 			config
 			clear
