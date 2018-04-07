@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.64"
+_version="v1.65"
 
 cmd="apt-get"
 
@@ -2006,7 +2006,7 @@ blocked_hosts() {
 change_v2ray_alterId() {
 	echo
 	while :; do
-		echo -e "请输入 ${yellow}$alterId${none} 的数值 [${magenta}1-65535$none]"
+		echo -e "请输入 ${yellow}alterId${none} 的数值 [${magenta}1-65535$none]"
 		read -p "$(echo -e "(当前数值是: ${cyan}$alterId$none):") " new_alterId
 		[[ -z $new_alterId ]] && error && continue
 		case $new_alterId in
