@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.63"
+_version="v1.64"
 
 cmd="apt-get"
 
@@ -49,17 +49,18 @@ if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup &
 	v2ray_transport=$(sed -n '17p' $backup)
 	v2ray_port=$(sed -n '19p' $backup)
 	v2ray_id=$(sed -n '21p' $backup)
-	v2ray_dynamicPort_start=$(sed -n '23p' $backup)
-	v2ray_dynamicPort_end=$(sed -n '25p' $backup)
-	domain=$(sed -n '27p' $backup)
-	caddy_status=$(sed -n '29p' $backup)
-	shadowsocks_status=$(sed -n '31p' $backup)
-	ssport=$(sed -n '33p' $backup)
-	sspass=$(sed -n '35p' $backup)
-	ssciphers=$(sed -n '37p' $backup)
-	blocked_ad_status=$(sed -n '39p' $backup)
-	ws_path_status=$(sed -n '41p' $backup)
-	ws_path=$(sed -n '43p' $backup)
+	alterId=$(sed -n '23p' $backup)
+	v2ray_dynamicPort_start=$(sed -n '25p' $backup)
+	v2ray_dynamicPort_end=$(sed -n '27p' $backup)
+	domain=$(sed -n '29p' $backup)
+	caddy_status=$(sed -n '31p' $backup)
+	shadowsocks_status=$(sed -n '33p' $backup)
+	ssport=$(sed -n '35p' $backup)
+	sspass=$(sed -n '37p' $backup)
+	ssciphers=$(sed -n '39p' $backup)
+	blocked_ad_status=$(sed -n '41p' $backup)
+	ws_path_status=$(sed -n '43p' $backup)
+	ws_path=$(sed -n '45p' $backup)
 
 	v2ray_ver=$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)
 
@@ -187,7 +188,7 @@ create_vmess_URL_config() {
 			"add": "${domain}",
 			"port": "443",
 			"id": "${v2ray_id}",
-			"aid": "233",
+			"aid": "${alterId}",
 			"net": "ws",
 			"type": "none",
 			"host": "${host}",
@@ -202,7 +203,7 @@ create_vmess_URL_config() {
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${v2ray_id}",
-			"aid": "233",
+			"aid": "${alterId}",
 			"net": "${net}",
 			"type": "${header}",
 			"host": "${host}",
@@ -230,7 +231,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"
 		echo
-		echo -e "$yellow 额外ID (Alter Id) = ${cyan}233${none}"
+		echo -e "$yellow 额外ID (Alter Id) = ${cyan}${alterId}${none}"
 		echo
 		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
 		echo
@@ -257,7 +258,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"
 		echo
-		echo -e "$yellow 额外ID (Alter Id) = ${cyan}233${none}"
+		echo -e "$yellow 额外ID (Alter Id) = ${cyan}${alterId}${none}"
 		echo
 		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
 		echo
@@ -821,6 +822,10 @@ change_v2ray_config() {
 				;;
 			9)
 				blocked_hosts
+				break
+				;;
+			[Dd] | [Aa][Ii] | 233 | 233[Bb][Ll][Oo][Gg] | 233[Bb][Ll][Oo][Gg].[Cc][Oo][Mm] | 233[Bb][Oo][Yy] | [Aa][Ll][Tt][Ee][Rr][Ii][Dd])
+				change_v2ray_alterId
 				break
 				;;
 			*)
@@ -1998,6 +2003,34 @@ blocked_hosts() {
 	done
 
 }
+change_v2ray_alterId() {
+	echo
+	while :; do
+		echo -e "请输入 ${yellow}$alterId${none} 的数值 [${magenta}1-65535$none]"
+		read -p "$(echo -e "(当前数值是: ${cyan}$alterId$none):") " new_alterId
+		[[ -z $new_alterId ]] && error && continue
+		case $new_alterId in
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
+			echo
+			echo
+			echo -e "$yellow alterId = $cyan$new_alterId$none"
+			echo "----------------------------------------------------------------"
+			echo
+			pause
+			sed -i "23s/$alterId/$new_alterId/" $backup
+			alterId=$new_alterId
+			config
+			clear
+			view_v2ray_config_info
+			download_v2ray_config_ask
+			break
+			;;
+		*)
+			error
+			;;
+		esac
+	done
+}
 v2ray_service() {
 	while :; do
 		echo
@@ -2225,7 +2258,7 @@ create_v2ray_config_text() {
 		echo
 		echo "用户ID (User ID / UUID) = ${v2ray_id}"
 		echo
-		echo "额外ID (Alter Id) = 233"
+		echo "额外ID (Alter Id) = ${alterId}"
 		echo
 		echo "传输协议 (Network) = ${network}"
 		echo
@@ -2252,7 +2285,7 @@ create_v2ray_config_text() {
 		echo
 		echo "用户ID (User ID / UUID) = ${v2ray_id}"
 		echo
-		echo "额外ID (Alter Id) = 233"
+		echo "额外ID (Alter Id) = ${alterId}"
 		echo
 		echo "传输协议 (Network) = ${network}"
 		echo
@@ -2346,7 +2379,7 @@ get_v2ray_config_qr_link() {
 		if [[ $ios_qr && $link3 ]]; then
 			echo -e "$yellow 适用于 Pepi / ShadowRay = $cyan${link3}$none"
 			echo
-			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 233 (如果你使用 Pepi / ShadowRay)"
+			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 ${alterId} (如果你使用 Pepi / ShadowRay)"
 			if [[ $v2ray_transport == 4 ]]; then
 				echo
 				echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
@@ -3362,10 +3395,10 @@ config() {
 
 	fi
 
-	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/" $v2ray_server_config
+	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/; 16s/233/$alterId/" $v2ray_server_config
 
 	if [[ $v2ray_transport_opt -eq 4 || $v2ray_transport -eq 4 ]]; then
-		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
+		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
 		if [[ $is_ws_path ]]; then
 			sed -i "41s/233blog/$ws_path/" $v2ray_client_config
 		else
@@ -3373,7 +3406,7 @@ config() {
 		fi
 	else
 		[[ -z $ip ]] && get_ip
-		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
+		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
 	fi
 
 	zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
