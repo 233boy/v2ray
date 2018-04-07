@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.66"
+_version="v1.67"
 
 cmd="apt-get"
 
@@ -2769,7 +2769,7 @@ uninstall_v2ray() {
 		echo
 		echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 		echo
-		echo "反馈问题: https://github.com/233boy/v2ray/issus"
+		echo "反馈问题: https://github.com/233boy/v2ray/issues"
 		echo
 
 	elif [[ $is_uninstall_v2ray ]]; then
@@ -2813,7 +2813,7 @@ uninstall_v2ray() {
 		echo
 		echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 		echo
-		echo "反馈问题: https://github.com/233boy/v2ray/issus"
+		echo "反馈问题: https://github.com/233boy/v2ray/issues"
 		echo
 	fi
 }
