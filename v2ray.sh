@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.67"
+_version="v1.68"
 
 cmd="apt-get"
 
@@ -1306,6 +1306,13 @@ proxy_site_config() {
 }
 
 install_caddy() {
+	if [[ $cmd == "yum" ]]; then
+		[[ $(pgrep "httpd") ]] && systemctl stop httpd
+		[[ $(command -v httpd) ]] && yum remove httpd -y
+	else
+		[[ $(pgrep "apache2") ]] && service apache2 stop
+		[[ $(command -v apache2) ]] && apt-get remove apache2* -y
+	fi
 	local caddy_tmp="/tmp/install_caddy/"
 	local caddy_tmp_file="/tmp/install_caddy/caddy.tar.gz"
 	if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
@@ -3416,6 +3423,15 @@ config() {
 		sed -i "31s/false/true/; 33s/$ssport/$new_ssport/; 35s/$sspass/$new_sspass/; 37s/$ssciphers/$new_ssciphers/" $backup
 	fi
 
+	if [[ $v2ray_port == "80" ]]; then
+		if [[ $cmd == "yum" ]]; then
+			[[ $(pgrep "httpd") ]] && systemctl stop httpd >/dev/null 2>&1
+			[[ $(command -v httpd) ]] && yum remove httpd -y >/dev/null 2>&1
+		else
+			[[ $(pgrep "apache2") ]] && service apache2 stop >/dev/null 2>&1
+			[[ $(command -v apache2) ]] && apt-get remove apache2* -y >/dev/null 2>&1
+		fi
+	fi
 	do_service restart v2ray
 }
 _boom_() {

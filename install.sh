@@ -1627,6 +1627,15 @@ install() {
 	try_enable_bbr
 	[ $caddy ] && domain_check
 	install_v2ray
+	if [[ $caddy || $v2ray_port == "80" ]]; then
+		if [[ $cmd == "yum" ]]; then
+			[[ $(pgrep "httpd") ]] && systemctl stop httpd
+			[[ $(command -v httpd) ]] && yum remove httpd -y
+		else
+			[[ $(pgrep "apache2") ]] && service apache2 stop
+			[[ $(command -v apache2) ]] && apt-get remove apache2* -y
+		fi
+	fi
 	[ $caddy ] && install_caddy
 	get_ip
 	config
