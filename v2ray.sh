@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.68"
+_version="v1.69"
 
 cmd="apt-get"
 
@@ -1368,6 +1368,7 @@ caddy_config() {
 $domain {
     tls ${email}@gmail.com
     gzip
+	timeouts none
     proxy / $proxy_site {
         without /${ws_path}
     }
@@ -1381,6 +1382,7 @@ $domain {
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
+	timeouts none
 	proxy / 127.0.0.1:${v2ray_port} {
 		websocket
 	}
@@ -2013,11 +2015,11 @@ blocked_hosts() {
 change_v2ray_alterId() {
 	echo
 	while :; do
-		echo -e "请输入 ${yellow}alterId${none} 的数值 [${magenta}1-65535$none]"
+		echo -e "请输入 ${yellow}alterId${none} 的数值 [${magenta}0-65535$none]"
 		read -p "$(echo -e "(当前数值是: ${cyan}$alterId$none):") " new_alterId
 		[[ -z $new_alterId ]] && error && continue
 		case $new_alterId in
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
+		0 | [1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			echo
 			echo
 			echo -e "$yellow alterId = $cyan$new_alterId$none"
@@ -3690,6 +3692,7 @@ restart)
 	;;
 reload)
 	config
+	[[ $v2ray_transport == "4" && $caddy_installed ]] && caddy_config
 	clear
 	view_v2ray_config_info
 	download_v2ray_config_ask
