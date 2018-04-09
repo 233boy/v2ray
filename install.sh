@@ -739,6 +739,7 @@ caddy_config() {
 $domain {
     tls ${email}@gmail.com
     gzip
+	timeouts none
     proxy / $proxy_site {
         without /${ws_path}
     }
@@ -752,6 +753,7 @@ $domain {
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
+	timeouts none
 	proxy / 127.0.0.1:${v2ray_port} {
 		websocket
 	}
