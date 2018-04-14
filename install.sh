@@ -44,7 +44,7 @@ uuid=$(cat /proc/sys/kernel/random/uuid)
 old_id="23332333-2333-2333-2333-233boy233boy"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
-backup="/etc/v2ray/233blog_v2ray_backup.txt"
+backup="/etc/v2ray/233blog_v2ray_backup.conf"
 
 transport=(
 	TCP
@@ -394,9 +394,9 @@ ws_path_config() {
 		[[ -z $ws_path ]] && ws_path="233blog"
 
 		case $ws_path in
-		*/*)
+		*[/$]*)
 			echo
-			echo -e " 由于这个脚本太辣鸡了..所以不能包含 $red/$none 这个符号.... "
+			echo -e " 由于这个脚本太辣鸡了..所以分流的路径不能包含$red / $none或$red $ $none这两个符号.... "
 			echo
 			error
 			;;
@@ -424,6 +424,12 @@ proxy_site_config() {
 		[[ -z $proxy_site ]] && proxy_site="https://liyafly.com"
 
 		case $proxy_site in
+		*[#$]*)
+			echo
+			echo -e " 由于这个脚本太辣鸡了..所以伪装的网址不能包含$red # $none或$red $ $none这两个符号.... "
+			echo
+			error
+			;;
 		*)
 			echo
 			echo
@@ -546,9 +552,9 @@ shadowsocks_password_config() {
 		read -p "$(echo -e "(默认密码: ${cyan}233blog.com$none)"): " sspass
 		[ -z "$sspass" ] && sspass="233blog.com"
 		case $sspass in
-		*/*)
+		*[/$]*)
 			echo
-			echo -e " 由于这个脚本太辣鸡了..所以密码不能包含 $red/$none 这个符号.... "
+			echo -e " 由于这个脚本太辣鸡了..所以密码不能包含$red / $none或$red $ $none这两个符号.... "
 			echo
 			error
 			;;
@@ -1041,9 +1047,14 @@ del_port() {
 		# fi
 	else
 		# if [[ $cmd == "apt-get" ]]; then
-		local port_start=$(sed -n '23p' $backup)
-		local port_end=$(sed -n '25p' $backup)
-		local ports="${port_start}:${port_end}"
+		if [[ $v2ray_transport ]]; then
+			local ports="${v2ray_dynamicPort_start}:${v2ray_dynamicPort_end}"
+		else
+			local port_start=$(sed -n '23p' $backup)
+			local port_end=$(sed -n '25p' $backup)
+			local ports="${port_start}:${port_end}"
+		fi
+
 		iptables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
 		iptables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
 		ip6tables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
@@ -1070,7 +1081,7 @@ del_port() {
 config() {
 	cp -f $v2ray_server_config_file $v2ray_server_config
 	cp -f $v2ray_client_config_file $v2ray_client_config
-	cp -f /etc/v2ray/233boy/v2ray/config/backup.txt $backup
+	cp -f /etc/v2ray/233boy/v2ray/config/backup.conf $backup
 	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh /usr/local/bin/v2ray
 	chmod +x /usr/local/bin/v2ray
 
@@ -1220,19 +1231,19 @@ config() {
 }
 
 backup_config() {
-	sed -i "17s/1/$v2ray_transport_opt/; 19s/2333/$v2ray_port/; 21s/$old_id/$uuid/;" $backup
+	sed -i "18s/=1/=$v2ray_transport_opt/; 21s/=2333/=$v2ray_port/; 24s/=$old_id/=$uuid/" $backup
 	if [ $v2ray_transport_opt -ge 9 ]; then
-		sed -i "23s/10000/$v2ray_dynamic_port_start_input/; 25s/20000/$v2ray_dynamic_port_end_input/" $backup
+		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
 	fi
 	if [ $shadowsocks ]; then
-		sed -i "31s/false/true/; 33s/6666/$ssport/; 35s/233blog.com/$sspass/; 37s/chacha20-ietf/$ssciphers/" $backup
+		sed -i "42s/=/=true/; 45s/=6666/=$ssport/; 48s/=233blog.com/=$sspass/; 51s/=chacha20-ietf/=$ssciphers/" $backup
 	fi
-	[ $v2ray_transport_opt == "4" ] && sed -i "27s/233blog.com/$domain/" $backup
-	[ $caddy ] && sed -i "29s/false/true/" $backup
-	[ $is_blocked_ad ] && sed -i "39s/false/true/" $backup
+	[ $v2ray_transport_opt == "4" ] && sed -i "36s/=233blog.com/=$domain/" $backup
+	[ $caddy ] && sed -i "39s/=/=true/" $backup
+	[ $is_blocked_ad ] && sed -i "54s/=/=true/" $backup
 	if [[ $ws_path ]]; then
-		sed -i "41s/false/true/; 43s/233blog/$ws_path/; $ d" $backup
-		echo "$proxy_site" >>$backup
+		sed -i "57s/=/=true/; 60s/=233blog/=$ws_path/" $backup
+		sed -i "63s#=https://liyafly.com#=$proxy_site#" $backup
 	fi
 
 }
@@ -1621,6 +1632,13 @@ install() {
 		echo -e " $yellow输入 ${cyan}v2ray${none} $yellow即可管理 V2Ray${none}"
 		echo
 		exit 1
+	elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
+		echo
+		echo " 大佬... 如果你需要继续安装.. 请先卸载旧版本"
+		echo
+		echo -e " $yellow输入 ${cyan}v2ray uninstall${none} $yellow即可卸载${none}"
+		echo
+		exit 1
 	fi
 	v2ray_config
 	blocked_hosts
@@ -1647,6 +1665,168 @@ install() {
 uninstall() {
 
 	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
+		. $backup
+		while :; do
+			echo
+			read -p "$(echo -e "是否卸载 ${yellow}V2Ray$none [${magenta}Y/N$none]:")" uninstall_v2ray_ask
+			if [[ -z $uninstall_v2ray_ask ]]; then
+				error
+			else
+				case $uninstall_v2ray_ask in
+				Y | y)
+					is_uninstall_v2ray=true
+					echo
+					echo -e "$yellow 卸载 V2Ray = ${cyan}是${none}"
+					echo
+					break
+					;;
+				N | n)
+					echo
+					echo -e "$red 卸载已取消...$none"
+					echo
+					break
+					;;
+				*)
+					error
+					;;
+				esac
+			fi
+		done
+
+		if [[ $caddy_status ]] && [[ -f /usr/local/bin/caddy && -f /etc/caddy/Caddyfile ]]; then
+			while :; do
+				echo
+				read -p "$(echo -e "是否卸载 ${yellow}Caddy$none [${magenta}Y/N$none]:")" uninstall_caddy_ask
+				if [[ -z $uninstall_caddy_ask ]]; then
+					error
+				else
+					case $uninstall_caddy_ask in
+					Y | y)
+						is_uninstall_caddy=true
+						echo
+						echo -e "$yellow 卸载 Caddy = ${cyan}是${none}"
+						echo
+						break
+						;;
+					N | n)
+						echo
+						echo -e "$yellow 卸载 Caddy = ${cyan}否${none}"
+						echo
+						break
+						;;
+					*)
+						error
+						;;
+					esac
+				fi
+			done
+		fi
+
+		if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
+			pause
+			echo
+
+			if [[ $shadowsocks_status ]]; then
+				del_port $ssport
+			fi
+
+			if [[ $v2ray_transport == "4" ]]; then
+				del_port "80"
+				del_port "443"
+				del_port $v2ray_port
+			elif [[ $v2ray_transport -ge 9 ]]; then
+				del_port $v2ray_port
+				del_port "multiport"
+			else
+				del_port $v2ray_port
+			fi
+
+			[ $cmd == "apt-get" ] && rm -rf /etc/network/if-pre-up.d/iptables
+
+			v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
+			# [ $v2ray_pid ] && systemctl stop v2ray
+			[ $v2ray_pid ] && do_service stop v2ray
+
+			rm -rf /usr/bin/v2ray
+			rm -rf /usr/local/bin/v2ray
+			rm -rf /etc/v2ray
+			rm -rf /var/log/v2ray
+
+			caddy_pid=$(pgrep "caddy")
+			# [ $caddy_pid ] && systemctl stop caddy
+			[ $caddy_pid ] && do_service stop caddy
+			rm -rf /usr/local/bin/caddy
+			rm -rf /etc/caddy
+			rm -rf /etc/ssl/caddy
+
+			if [[ $systemd ]]; then
+				systemctl disable v2ray >/dev/null 2>&1
+				rm -rf /lib/systemd/system/v2ray.service
+				systemctl disable caddy >/dev/null 2>&1
+				rm -rf /lib/systemd/system/caddy.service
+			else
+				update-rc.d -f caddy remove >/dev/null 2>&1
+				update-rc.d -f v2ray remove >/dev/null 2>&1
+				rm -rf /etc/init.d/caddy
+				rm -rf /etc/init.d/v2ray
+			fi
+
+			# clear
+			echo
+			echo -e "$green V2Ray 卸载完成啦 ....$none"
+			echo
+			echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
+			echo
+			echo "反馈问题: https://github.com/233boy/v2ray/issus"
+			echo
+
+		elif [[ $is_uninstall_v2ray ]]; then
+			pause
+			echo
+
+			if [[ $shadowsocks_status ]]; then
+				del_port $ssport
+			fi
+
+			if [[ $v2ray_transport == "4" ]]; then
+				del_port "80"
+				del_port "443"
+				del_port $v2ray_port
+			elif [[ $v2ray_transport -ge 9 ]]; then
+				del_port $v2ray_port
+				del_port "multiport"
+			else
+				del_port $v2ray_port
+			fi
+
+			[ $cmd == "apt-get" ] && rm -rf /etc/network/if-pre-up.d/iptables
+
+			v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
+			# [ $v2ray_pid ] && systemctl stop v2ray
+			[ $v2ray_pid ] && do_service stop v2ray
+			rm -rf /usr/bin/v2ray
+			rm -rf /usr/local/bin/v2ray
+			rm -rf /etc/v2ray
+			rm -rf /var/log/v2ray
+			if [[ $systemd ]]; then
+				systemctl disable v2ray >/dev/null 2>&1
+				rm -rf /lib/systemd/system/v2ray.service
+			else
+				update-rc.d -f v2ray remove >/dev/null 2>&1
+				rm -rf /etc/init.d/v2ray
+			fi
+			# clear
+			echo
+			echo -e "$green V2Ray 卸载完成啦 ....$none"
+			echo
+			echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
+			echo
+			echo "反馈问题: https://github.com/233boy/v2ray/issus"
+			echo
+
+		fi
+	elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
+		backup="/etc/v2ray/233blog_v2ray_backup.txt"
 		while :; do
 			echo
 			read -p "$(echo -e "是否卸载 ${yellow}V2Ray$none [${magenta}Y/N$none]:")" uninstall_v2ray_ask
@@ -1823,7 +2003,7 @@ uninstall() {
 		echo -e "
 		$red 大胸弟...你貌似毛有安装 V2Ray ....卸载个鸡鸡哦...$none
 
-		备注...仅支持卸载使用我(233blog.com)提供的 V2Ray 一键安装脚本
+		备注...仅支持卸载使用我 (233blog.com) 提供的 V2Ray 一键安装脚本
 		" && exit 1
 	fi
 
@@ -1866,7 +2046,7 @@ while :; do
 	echo " 2. 卸载"
 	echo
 	if [[ $local_install ]]; then
-		echo " 温馨提示.. 本地安装已启用 .."
+		echo -e "$yellow 温馨提示.. 本地安装已启用 ..$none"
 		echo
 	fi
 	read -p "$(echo -e "请选择 [${magenta}1-2$none]:")" choose
