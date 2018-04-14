@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.0"
+_version="v2.01"
 
 cmd="apt-get"
 
@@ -54,7 +54,7 @@ elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2
 	cp -f /etc/v2ray/233boy/v2ray/v2ray.old.sh /usr/local/bin/v2ray
 	chmod +x /usr/local/bin/v2ray
 	echo
-	echo -e " 哇哦.. 出现了一点小意外.. 当前环境不能使用$cyan v2.0 $nonet版本以上的管理脚本.. 已自动回退到旧版本"
+	echo -e " 哇哦.. 出现了一点小意外.. 当前环境不能使用$cyan v2.0 $none版本以上的管理脚本.. 已自动回退到旧版本"
 	echo
 	echo -e " 请使用命令$yellow v2ray reload $none重新加载配置...以避免发生莫名其妙的问题"
 	echo
