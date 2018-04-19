@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.01"
+_version="v1.70"
 
 cmd="apt-get"
 
@@ -42,41 +42,45 @@ else
 
 fi
 
-backup="/etc/v2ray/233blog_v2ray_backup.conf"
+backup="/etc/v2ray/233blog_v2ray_backup.txt"
 
 if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 
-	. $backup
+	v2ray_transport=$(sed -n '17p' $backup)
+	v2ray_port=$(sed -n '19p' $backup)
+	v2ray_id=$(sed -n '21p' $backup)
+	v2ray_dynamicPort_start=$(sed -n '23p' $backup)
+	v2ray_dynamicPort_end=$(sed -n '25p' $backup)
+	domain=$(sed -n '27p' $backup)
+	caddy_status=$(sed -n '29p' $backup)
+	shadowsocks_status=$(sed -n '31p' $backup)
+	ssport=$(sed -n '33p' $backup)
+	sspass=$(sed -n '35p' $backup)
+	ssciphers=$(sed -n '37p' $backup)
+	blocked_ad_status=$(sed -n '39p' $backup)
+	ws_path_status=$(sed -n '41p' $backup)
+	ws_path=$(sed -n '43p' $backup)
+
 	v2ray_ver=$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)
 
-elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
-
-	cp -f /etc/v2ray/233boy/v2ray/v2ray.old.sh /usr/local/bin/v2ray
-	chmod +x /usr/local/bin/v2ray
-	echo
-	echo -e " 哇哦.. 出现了一点小意外.. 当前环境不能使用$cyan v2.0 $none版本以上的管理脚本.. 已自动回退到旧版本"
-	echo
-	echo -e " 请使用命令$yellow v2ray reload $none重新加载配置...以避免发生莫名其妙的问题"
-	echo
-	exit 1
 else
 	echo -e " 哎呀哎呀…… ${red}出错咯...请重新安装V2Ray${none} ${yellow}~(^_^) ${none}" && exit 1
 fi
 
-if [[ $caddy_status ]]; then
+if [[ $caddy_status == "true" ]]; then
 	caddy_installed=true
 fi
-if [[ $shadowsocks_status ]]; then
+if [[ $shadowsocks_status == "true" ]]; then
 	shadowsocks=true
 fi
-if [[ $blocked_ad_status ]]; then
+if [[ $blocked_ad_status == "true" ]]; then
 	is_blocked_ad=true
 fi
 if [[ $v2ray_transport -ge 9 ]]; then
 	dynamicPort=true
 	port_range="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
 fi
-if [[ $ws_path_status ]]; then
+if [[ $ws_path_status == "true" ]]; then
 	is_ws_path=true
 fi
 
@@ -183,7 +187,7 @@ create_vmess_URL_config() {
 			"add": "${domain}",
 			"port": "443",
 			"id": "${v2ray_id}",
-			"aid": "${alterId}",
+			"aid": "233",
 			"net": "ws",
 			"type": "none",
 			"host": "${host}",
@@ -198,7 +202,7 @@ create_vmess_URL_config() {
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${v2ray_id}",
-			"aid": "${alterId}",
+			"aid": "233",
 			"net": "${net}",
 			"type": "${header}",
 			"host": "${host}",
@@ -226,7 +230,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"
 		echo
-		echo -e "$yellow 额外ID (Alter Id) = ${cyan}${alterId}${none}"
+		echo -e "$yellow 额外ID (Alter Id) = ${cyan}233${none}"
 		echo
 		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
 		echo
@@ -253,7 +257,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"
 		echo
-		echo -e "$yellow 额外ID (Alter Id) = ${cyan}${alterId}${none}"
+		echo -e "$yellow 额外ID (Alter Id) = ${cyan}233${none}"
 		echo
 		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
 		echo
@@ -622,8 +626,7 @@ change_shadowsocks_port() {
 				echo "----------------------------------------------------------------"
 				echo
 				pause
-				# sed -i "45s/=$ssport/=$new_ssport/" $backup
-				backup_config ssport
+				sed -i "33s/$ssport/$new_ssport/" $backup
 				del_port $ssport
 				open_port $new_ssport
 				ssport=$new_ssport
@@ -666,8 +669,7 @@ change_shadowsocks_password() {
 			echo "----------------------------------------------------------------"
 			echo
 			pause
-			# sed -i "48s/=$sspass/=$new_sspass/" $backup
-			backup_config sspass
+			sed -i "35s/$sspass/$new_sspass/" $backup
 			sspass=$new_sspass
 			config
 			clear
@@ -707,8 +709,7 @@ change_shadowsocks_ciphers() {
 			echo "----------------------------------------------------------------"
 			echo
 			pause
-			# sed -i "51s/=$ssciphers/=$new_ssciphers/" $backup
-			backup_config ssciphers
+			sed -i "37s/$ssciphers/$new_ssciphers/" $backup
 			ssciphers=$new_ssciphers
 			config
 			clear
@@ -738,8 +739,7 @@ disable_shadowsocks() {
 			echo "----------------------------------------------------------------"
 			echo
 			pause
-			# sed -i "31s/true/false/" $backup
-			backup_config -ss
+			sed -i "31s/true/false/" $backup
 			del_port $ssport
 			shadowsocks=''
 			config
@@ -823,10 +823,6 @@ change_v2ray_config() {
 				blocked_hosts
 				break
 				;;
-			[Dd] | [Aa][Ii] | 233 | 233[Bb][Ll][Oo][Gg] | 233[Bb][Ll][Oo][Gg].[Cc][Oo][Mm] | 233[Bb][Oo][Yy] | [Aa][Ll][Tt][Ee][Rr][Ii][Dd])
-				change_v2ray_alterId
-				break
-				;;
 			*)
 				error
 				;;
@@ -877,8 +873,7 @@ change_v2ray_port() {
 					echo "----------------------------------------------------------------"
 					echo
 					pause
-					# sed -i "19s/$v2ray_port/$v2ray_port_opt/" $backup
-					backup_config v2ray_port
+					sed -i "19s/$v2ray_port/$v2ray_port_opt/" $backup
 					del_port $v2ray_port
 					open_port $v2ray_port_opt
 					v2ray_port=$v2ray_port_opt
@@ -1024,15 +1019,13 @@ change_v2ray_transport() {
 				fi
 			fi
 			if [[ $is_ws_path ]]; then
-				# sed -i "41s/true/false/" $backup
-				backup_config -ws_path
+				sed -i "41s/true/false/" $backup
 			fi
 		elif [[ $v2ray_transport -ge 9 ]]; then
 			del_port "multiport"
 		fi
 		open_port "multiport"
-		# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 23s/$v2ray_dynamicPort_start/$v2ray_dynamic_port_start_input/; 25s/$v2ray_dynamicPort_end/$v2ray_dynamic_port_end_input/" $backup
-		backup_config v2ray_transport v2ray_dynamicPort_start v2ray_dynamicPort_end
+		sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 23s/$v2ray_dynamicPort_start/$v2ray_dynamic_port_start_input/; 25s/$v2ray_dynamicPort_end/$v2ray_dynamic_port_end_input/" $backup
 		port_range="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
 		config
 		clear
@@ -1040,8 +1033,7 @@ change_v2ray_transport() {
 		view_v2ray_config_info
 		download_v2ray_config_ask
 	else
-		# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/" $backup
-		backup_config v2ray_transport
+		sed -i "17s/$v2ray_transport/$v2ray_transport_opt/" $backup
 		if [[ $v2ray_transport == 4 ]]; then
 			del_port "80"
 			del_port "443"
@@ -1061,8 +1053,7 @@ change_v2ray_transport() {
 				fi
 			fi
 			if [[ $is_ws_path ]]; then
-				# sed -i "41s/true/false/" $backup
-				backup_config -ws_path
+				sed -i "41s/true/false/" $backup
 			fi
 		elif [[ $v2ray_transport -ge 9 ]]; then
 			del_port "multiport"
@@ -1125,14 +1116,11 @@ ws_config() {
 		ws_path_config_ask
 		pause
 		domain_check
-		# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/" $backup
-		backup_config v2ray_transport domain
+		sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/" $backup
 		if [[ $new_ws_path ]]; then
-			# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-			# echo "$proxy_site" >>$backup
-			backup_config +ws_path
+			sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
+			echo "$proxy_site" >>$backup
 			ws_path=$new_ws_path
-			proxy_site=$new_proxy_site
 			is_ws_path=true
 		fi
 
@@ -1183,14 +1171,11 @@ ws_config() {
 					ws_path_config_ask
 					pause
 					domain_check
-					# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/; 29s/false/true/" $backup
-					backup_config v2ray_transport domain caddy
+					sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/; 29s/false/true/" $backup
 					if [[ $new_ws_path ]]; then
-						# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-						# echo "$proxy_site" >>$backup
-						backup_config +ws_path
+						sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
+						echo "$proxy_site" >>$backup
 						ws_path=$new_ws_path
-						proxy_site=$new_proxy_site
 						is_ws_path=true
 					fi
 					if [[ $v2ray_transport -ge 9 ]]; then
@@ -1216,8 +1201,7 @@ ws_config() {
 					echo
 					pause
 					domain_check
-					# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/" $backup
-					backup_config v2ray_transport domain
+					sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/" $backup
 					if [[ $v2ray_transport -ge 9 ]]; then
 						del_port "multiport"
 					fi
@@ -1300,20 +1284,14 @@ proxy_site_config() {
 		echo -e "然后打开你的域名时候...显示出来的内容就是来自 https://liyafly.com 的内容"
 		echo -e "其实就是一个反代...明白就好..."
 		echo -e "如果不能伪装成功...可以使用 v2ray config 修改伪装的网址"
-		read -p "$(echo -e "(默认: [${cyan}https://liyafly.com$none]):")" new_proxy_site
-		[[ -z $new_proxy_site ]] && new_proxy_site="https://liyafly.com"
+		read -p "$(echo -e "(默认: [${cyan}https://liyafly.com$none]):")" proxy_site
+		[[ -z $proxy_site ]] && proxy_site="https://liyafly.com"
 
-		case $new_proxy_site in
-		*[#$]*)
-			echo
-			echo -e " 由于这个脚本太辣鸡了..所以伪装的网址不能包含$red # $none或$red $ $none这两个符号.... "
-			echo
-			error
-			;;
+		case $proxy_site in
 		*)
 			echo
 			echo
-			echo -e "$yellow 伪装的网址 = ${cyan}${new_proxy_site}$none"
+			echo -e "$yellow 伪装的网址 = ${cyan}${proxy_site}$none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -1380,7 +1358,7 @@ install_caddy() {
 caddy_config() {
 	local email=$(shuf -i1-10000000000 -n1)
 	if [[ $is_ws_path ]]; then
-		# [[ -z $proxy_site ]] && proxy_site=$(sed '$!d' $backup)
+		[[ -z $proxy_site ]] && proxy_site=$(sed '$!d' $backup)
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
@@ -1502,8 +1480,7 @@ change_v2ray_dynamicport() {
 		pause
 		del_port "multiport"
 		open_port "multiport"
-		# sed -i "23s/$v2ray_dynamicPort_start/$v2ray_dynamic_port_start_input/; 25s/$v2ray_dynamicPort_end/$v2ray_dynamic_port_end_input/" $backup
-		backup_config v2ray_dynamicPort_start v2ray_dynamicPort_end
+		sed -i "23s/$v2ray_dynamicPort_start/$v2ray_dynamic_port_start_input/; 25s/$v2ray_dynamicPort_end/$v2ray_dynamic_port_end_input/" $backup
 		port_range="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
 		config
 		# clear
@@ -1643,8 +1620,7 @@ change_v2ray_id() {
 				echo "----------------------------------------------------------------"
 				echo
 				pause
-				# sed -i "21s/$v2ray_id/$uuid/;" $backup
-				backup_config uuid
+				sed -i "21s/$v2ray_id/$uuid/;" $backup
 				v2ray_id=$uuid
 				config
 				clear
@@ -1706,8 +1682,7 @@ change_domain() {
 					echo
 					pause
 					domain_check
-					# sed -i "27s/$domain/$new_domain/" $backup
-					backup_config domain
+					sed -i "27s/$domain/$new_domain/" $backup
 					domain=$new_domain
 					caddy_config
 					config
@@ -1769,8 +1744,7 @@ change_ws_path_config() {
 			esac
 		done
 		pause
-		# sed -i "43s/$ws_path/$new_ws_path/" $backup
-		backup_config ws_path
+		sed -i "43s/$ws_path/$new_ws_path/" $backup
 		ws_path=$new_ws_path
 		caddy_config
 		config
@@ -1780,11 +1754,9 @@ change_ws_path_config() {
 	elif [[ $v2ray_transport == 4 && $caddy_installed ]]; then
 		ws_path_config_ask
 		if [[ $new_ws_path ]]; then
-			# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-			# echo "$proxy_site" >>$backup
-			backup_config +ws_path
+			sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
+			echo "$proxy_site" >>$backup
 			ws_path=$new_ws_path
-			proxy_site=$new_proxy_site
 			is_ws_path=true
 			caddy_config
 			config
@@ -1825,20 +1797,14 @@ change_proxy_site_config() {
 			echo -e "然后打开你的域名时候...显示出来的内容就是来自 https://liyafly.com 的内容"
 			echo -e "其实就是一个反代...明白就好..."
 			echo -e "如果不能伪装成功...可以使用 v2ray config 修改伪装的网址"
-			read -p "$(echo -e "(当前伪装的网址: [${cyan}${proxy_site}$none]):")" new_proxy_site
-			[[ -z $new_proxy_site ]] && error && continue
+			read -p "$(echo -e "(当前伪装的网址: [${cyan}$(sed '$!d' $backup)$none]):")" proxy_site
+			[[ -z $proxy_site ]] && error && continue
 
-			case $new_proxy_site in
-			*[#$]*)
-				echo
-				echo -e " 由于这个脚本太辣鸡了..所以伪装的网址不能包含$red # $none或$red $ $none这两个符号.... "
-				echo
-				error
-				;;
+			case $proxy_site in
 			*)
 				echo
 				echo
-				echo -e "$yellow 伪装的网址 = ${cyan}${new_proxy_site}$none"
+				echo -e "$yellow 伪装的网址 = ${cyan}${proxy_site}$none"
 				echo "----------------------------------------------------------------"
 				echo
 				break
@@ -1846,10 +1812,8 @@ change_proxy_site_config() {
 			esac
 		done
 		pause
-		# sed -i "$ d" $backup
-		# echo "$proxy_site" >>$backup
-		backup_config proxy_site
-		proxy_site=$new_proxy_site
+		sed -i "$ d" $backup
+		echo "$proxy_site" >>$backup
 		caddy_config
 		echo
 		echo
@@ -1861,11 +1825,9 @@ change_proxy_site_config() {
 	elif [[ $v2ray_transport == 4 && $caddy_installed ]]; then
 		ws_path_config_ask
 		if [[ $new_ws_path ]]; then
-			# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-			# echo "$proxy_site" >>$backup
-			backup_config +ws_path
+			sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
+			echo "$proxy_site" >>$backup
 			ws_path=$new_ws_path
-			proxy_site=$new_proxy_site
 			is_ws_path=true
 			caddy_config
 			config
@@ -1928,8 +1890,7 @@ disable_ws_path() {
 				echo "----------------------------------------------------------------"
 				echo
 				pause
-				# sed -i "41s/true/false/" $backup
-				backup_config -ws_path
+				sed -i "41s/true/false/" $backup
 				is_ws_path=''
 				caddy_config
 				config
@@ -2006,8 +1967,7 @@ blocked_hosts() {
 					echo "----------------------------------------------------------------"
 					echo
 					pause
-					# sed -i "39s/false/true/" $backup
-					backup_config +ad
+					sed -i "39s/false/true/" $backup
 					is_blocked_ad=true
 					config
 					echo
@@ -2025,8 +1985,7 @@ blocked_hosts() {
 					echo "----------------------------------------------------------------"
 					echo
 					pause
-					# sed -i "39s/true/false/" $backup
-					backup_config -ad
+					sed -i "39s/true/false/" $backup
 					is_blocked_ad=''
 					config
 					echo
@@ -2047,41 +2006,6 @@ blocked_hosts() {
 		fi
 	done
 
-}
-change_v2ray_alterId() {
-	echo
-	while :; do
-		echo -e "请输入 ${yellow}alterId${none} 的数值 [${magenta}0-65535$none]"
-		read -p "$(echo -e "(当前数值是: ${cyan}$alterId$none):") " new_alterId
-		[[ -z $new_alterId ]] && error && continue
-		case $new_alterId in
-		$alterId)
-			echo
-			echo -e " 大佬...跟 当前 alterId 一毛一样啊...修改个鸡鸡哦 "
-			echo
-			error
-			;;
-		[0-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			echo
-			echo
-			echo -e "$yellow alterId = $cyan$new_alterId$none"
-			echo "----------------------------------------------------------------"
-			echo
-			pause
-			# sed -i "45s/$alterId/$new_alterId/" $backup
-			backup_config alterId
-			alterId=$new_alterId
-			config
-			clear
-			view_v2ray_config_info
-			download_v2ray_config_ask
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-	done
 }
 v2ray_service() {
 	while :; do
@@ -2310,7 +2234,7 @@ create_v2ray_config_text() {
 		echo
 		echo "用户ID (User ID / UUID) = ${v2ray_id}"
 		echo
-		echo "额外ID (Alter Id) = ${alterId}"
+		echo "额外ID (Alter Id) = 233"
 		echo
 		echo "传输协议 (Network) = ${network}"
 		echo
@@ -2337,7 +2261,7 @@ create_v2ray_config_text() {
 		echo
 		echo "用户ID (User ID / UUID) = ${v2ray_id}"
 		echo
-		echo "额外ID (Alter Id) = ${alterId}"
+		echo "额外ID (Alter Id) = 233"
 		echo
 		echo "传输协议 (Network) = ${network}"
 		echo
@@ -2431,7 +2355,7 @@ get_v2ray_config_qr_link() {
 		if [[ $ios_qr && $link3 ]]; then
 			echo -e "$yellow 适用于 Pepi / ShadowRay = $cyan${link3}$none"
 			echo
-			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 ${alterId} (如果你使用 Pepi / ShadowRay)"
+			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 233 (如果你使用 Pepi / ShadowRay)"
 			if [[ $v2ray_transport == 4 ]]; then
 				echo
 				echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
@@ -2692,7 +2616,7 @@ update_v2ray() {
 	fi
 }
 update_v2ray.sh() {
-	local latest_version=$(curl -s -L https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh | grep '_version' -m1 | cut -d\" -f2)
+	local latest_version=$(curl -s -L https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.old.sh | grep '_version' -m1 | cut -d\" -f2)
 	if [[ $latest_version == $_version ]]; then
 		echo
 		echo -e "$green 木有发现新版本 $none"
@@ -3447,10 +3371,10 @@ config() {
 
 	fi
 
-	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/; 16s/233/$alterId/" $v2ray_server_config
+	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/" $v2ray_server_config
 
 	if [[ $v2ray_transport_opt -eq 4 || $v2ray_transport -eq 4 ]]; then
-		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
+		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
 		if [[ $is_ws_path ]]; then
 			sed -i "41s/233blog/$ws_path/" $v2ray_client_config
 		else
@@ -3458,15 +3382,14 @@ config() {
 		fi
 	else
 		[[ -z $ip ]] && get_ip
-		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
+		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$v2ray_id/" $v2ray_client_config
 	fi
 
 	zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
 
 	if [[ $new_shadowsocks ]]; then
 		open_port $new_ssport
-		# sed -i "31s/false/true/; 33s/$ssport/$new_ssport/; 35s/$sspass/$new_sspass/; 37s/$ssciphers/$new_ssciphers/" $backup
-		backup_config +ss
+		sed -i "31s/false/true/; 33s/$ssport/$new_ssport/; 35s/$sspass/$new_sspass/; 37s/$ssciphers/$new_ssciphers/" $backup
 	fi
 
 	if [[ $v2ray_port == "80" ]]; then
@@ -3478,71 +3401,8 @@ config() {
 			[[ $(command -v apache2) ]] && apt-get remove apache2* -y >/dev/null 2>&1
 		fi
 	fi
-	do_service restart v2ray
-}
-backup_config() {
-	for keys in $*; do
-		case $keys in
-		v2ray_transport)
-			sed -i "18s/=$v2ray_transport/=$v2ray_transport_opt/" $backup
-			;;
-		v2ray_port)
-			sed -i "21s/=$v2ray_port/=$v2ray_port_opt/" $backup
-			;;
-		uuid)
-			sed -i "24s/=$v2ray_id/=$uuid/" $backup
-			;;
-		alterId)
-			sed -i "27s/=$alterId/=$new_alterId/" $backup
-			;;
-		v2ray_dynamicPort_start)
-			sed -i "30s/=$v2ray_dynamicPort_start/=$v2ray_dynamic_port_start_input/" $backup
-			;;
-		v2ray_dynamicPort_end)
-			sed -i "33s/=$v2ray_dynamicPort_end/=$v2ray_dynamic_port_end_input/" $backup
-			;;
-		domain)
-			sed -i "36s/=$domain/=$new_domain/" $backup
-			;;
-		caddy)
-			sed -i "39s/=/=true/" $backup
-			;;
-		+ss)
-			sed -i "42s/=/=true/; 45s/=$ssport/=$new_ssport/; 48s/=$sspass/=$new_sspass/; 51s/=$ssciphers/=$new_ssciphers/" $backup
-			;;
-		-ss)
-			sed -i "42s/=true/=/" $backup
-			;;
-		ssport)
-			sed -i "45s/=$ssport/=$new_ssport/" $backup
-			;;
-		sspass)
-			sed -i "48s/=$sspass/=$new_sspass/" $backup
-			;;
-		ssciphers)
-			sed -i "51s/=$ssciphers/=$new_ssciphers/" $backup
-			;;
-		+ad)
-			sed -i "54s/=/=true/" $backup
-			;;
-		-ad)
-			sed -i "54s/=true/=/" $backup
-			;;
-		+ws_path)
-			sed -i "57s/=/=true/; 60s/=$ws_path/=$new_ws_path/; 63s#=$proxy_site#=$new_proxy_site#" $backup
-			;;
-		-ws_path)
-			sed -i "57s/=true/=/" $backup
-			;;
-		ws_path)
-			sed -i "60s/=$ws_path/=$new_ws_path/" $backup
-			;;
-		proxy_site)
-			sed -i "63s#=$proxy_site#=$new_proxy_site#" $backup
-			;;
-		esac
-	done
 
+	do_service restart v2ray
 }
 _boom_() {
 	echo
