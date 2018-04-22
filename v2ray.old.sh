@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.71"
+_version="v1.72"
 
 cmd="apt-get"
 
@@ -2627,7 +2627,7 @@ update_v2ray.sh() {
 		echo
 		cd /etc/v2ray/233boy/v2ray
 		git pull
-		cp -f /etc/v2ray/233boy/v2ray/v2ray.sh /usr/local/bin/v2ray
+		cp -f /etc/v2ray/233boy/v2ray/v2ray.old.sh /usr/local/bin/v2ray
 		chmod +x /usr/local/bin/v2ray
 		echo
 		echo -e "$green 更新成功啦...当前 V2Ray 管理脚本 版本: ${cyan}$latest_version$none"
