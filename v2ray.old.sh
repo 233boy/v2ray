@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v1.70"
+_version="v1.73"
 
 cmd="apt-get"
 
@@ -46,20 +46,7 @@ backup="/etc/v2ray/233blog_v2ray_backup.txt"
 
 if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 
-	v2ray_transport=$(sed -n '17p' $backup)
-	v2ray_port=$(sed -n '19p' $backup)
-	v2ray_id=$(sed -n '21p' $backup)
-	v2ray_dynamicPort_start=$(sed -n '23p' $backup)
-	v2ray_dynamicPort_end=$(sed -n '25p' $backup)
-	domain=$(sed -n '27p' $backup)
-	caddy_status=$(sed -n '29p' $backup)
-	shadowsocks_status=$(sed -n '31p' $backup)
-	ssport=$(sed -n '33p' $backup)
-	sspass=$(sed -n '35p' $backup)
-	ssciphers=$(sed -n '37p' $backup)
-	blocked_ad_status=$(sed -n '39p' $backup)
-	ws_path_status=$(sed -n '41p' $backup)
-	ws_path=$(sed -n '43p' $backup)
+	. /etc/v2ray/233boy/v2ray/tools/v1xx_to_v2xx.sh
 
 	v2ray_ver=$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)
 
@@ -1861,7 +1848,7 @@ change_proxy_site_config() {
 }
 domain_check() {
 	# test_domain=$(dig $new_domain +short)
-	test_domain=$(ping $new_domain -c 1 | grep -oP -m1 "(\d+\.){3}\d+")
+	test_domain=$(ping $new_domain -c 1 | grep -oE -m1 "([0-9]{1,3}\.){3}[0-9]{1,3}")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
@@ -2627,7 +2614,7 @@ update_v2ray.sh() {
 		echo
 		cd /etc/v2ray/233boy/v2ray
 		git pull
-		cp -f /etc/v2ray/233boy/v2ray/v2ray.sh /usr/local/bin/v2ray
+		cp -f /etc/v2ray/233boy/v2ray/v2ray.old.sh /usr/local/bin/v2ray
 		chmod +x /usr/local/bin/v2ray
 		echo
 		echo -e "$green 更新成功啦...当前 V2Ray 管理脚本 版本: ${cyan}$latest_version$none"
