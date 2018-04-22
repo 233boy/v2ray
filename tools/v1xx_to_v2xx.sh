@@ -1,4 +1,5 @@
 #!/bin/bash
+backup="/etc/v2ray/233blog_v2ray_backup.txt"
 v2ray_transport=$(sed -n '17p' $backup)
 v2ray_port=$(sed -n '19p' $backup)
 v2ray_id=$(sed -n '21p' $backup)
