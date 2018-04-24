@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.12"
+_version="v2.13"
 
 cmd="apt-get"
 
@@ -2235,13 +2235,14 @@ get_v2ray_config() {
 				echo
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
-				sz /etc/v2ray/233blog_v2ray.zip
+				# sz /etc/v2ray/233blog_v2ray.zip
+				sz $v2ray_client_config
 				echo
 				echo
 				echo -e "$green 下载完成咯...$none"
 				echo
-				echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
-				echo
+				# echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
+				# echo
 				echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 				echo
 				echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
