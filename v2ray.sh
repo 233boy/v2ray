@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.01"
+_version="v2.13"
 
 cmd="apt-get"
 
@@ -51,14 +51,8 @@ if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup &
 
 elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
 
-	cp -f /etc/v2ray/233boy/v2ray/v2ray.old.sh /usr/local/bin/v2ray
-	chmod +x /usr/local/bin/v2ray
-	echo
-	echo -e " 哇哦.. 出现了一点小意外.. 当前环境不能使用$cyan v2.0 $none版本以上的管理脚本.. 已自动回退到旧版本"
-	echo
-	echo -e " 请使用命令$yellow v2ray reload $none重新加载配置...以避免发生莫名其妙的问题"
-	echo
-	exit 1
+	. /etc/v2ray/233boy/v2ray/tools/v1xx_to_v2xx.sh
+
 else
 	echo -e " 哎呀哎呀…… ${red}出错咯...请重新安装V2Ray${none} ${yellow}~(^_^) ${none}" && exit 1
 fi
@@ -1899,7 +1893,7 @@ change_proxy_site_config() {
 }
 domain_check() {
 	# test_domain=$(dig $new_domain +short)
-	test_domain=$(ping $new_domain -c 1 | grep -oP -m1 "(\d+\.){3}\d+")
+	test_domain=$(ping $new_domain -c 1 | grep -oE -m1 "([0-9]{1,3}\.){3}[0-9]{1,3}")
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
@@ -2241,13 +2235,14 @@ get_v2ray_config() {
 				echo
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
-				sz /etc/v2ray/233blog_v2ray.zip
+				# sz /etc/v2ray/233blog_v2ray.zip
+				sz $v2ray_client_config
 				echo
 				echo
 				echo -e "$green 下载完成咯...$none"
 				echo
-				echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
-				echo
+				# echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
+				# echo
 				echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 				echo
 				echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
@@ -2266,15 +2261,16 @@ get_v2ray_config_link() {
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random}_233blog_v2ray.zip")
+	# local link=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random}_233blog_v2ray.zip")
+	local link=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random}_233blog_v2ray.json")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 客户端配置文件链接 -------------"
 		echo
 		echo -e "$yellow 链接 = $cyan$link$none"
 		echo
-		echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
-		echo
+		# echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
+		# echo
 		echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 		echo
 		echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
@@ -3461,7 +3457,7 @@ config() {
 		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
 	fi
 
-	zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
+	# zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
 
 	if [[ $new_shadowsocks ]]; then
 		open_port $new_ssport
@@ -3578,7 +3574,8 @@ _boom_() {
 	local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local link1=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random1}_233blog_v2ray.zip")
+	# local link1=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random1}_233blog_v2ray.zip")
+	local link1=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random1}_233blog_v2ray.json")
 	local link2=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random2}_233blog_v2ray.txt")
 	local link3=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random3}_233blog_v2ray.png")
 
@@ -3805,6 +3802,9 @@ reload)
 	clear
 	view_v2ray_config_info
 	download_v2ray_config_ask
+	;;
+reconfig)
+	. /etc/v2ray/233boy/v2ray/tools/reconfig.sh
 	;;
 log)
 	view_v2ray_log
