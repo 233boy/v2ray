@@ -33,11 +33,10 @@
         "streamSettings": {
             "network": "h2",
             "security": "tls",
-            "tlsSettings": {
-                "serverName": "233blog.com",
-                "allowInsecure": false
-            },
             "httpSettings": {
+                "host": [
+                    "233blog.com"
+                ],
                 "path": "/233blog"
             }
         },
