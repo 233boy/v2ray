@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.18"
+_version="v2.19"
 
 cmd="apt-get"
 
@@ -3605,6 +3605,10 @@ U | update.sh)
 	;;
 un | uninstall)
 	uninstall_v2ray
+	;;
+reinstall)
+	uninstall_v2ray
+	[[ $is_uninstall_v2ray ]] && bash <(curl -s -L https://233blog.com/v2ray.sh)
 	;;
 233 | 2333 | 233boy | 233blog | 233blog.com)
 	_boom_
