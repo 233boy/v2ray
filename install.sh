@@ -1336,9 +1336,9 @@ do_service() {
 show_config_info() {
 	local header="none"
 	if [[ $path ]]; then
-		local host=$domain
+		local _path="/$path"
 	else
-		local host=""
+		local _path="/"
 	fi
 
 	case $v2ray_transport_opt in
@@ -1394,8 +1394,8 @@ show_config_info() {
 			"aid": "233",
 			"net": "${net}",
 			"type": "none",
-			"host": "${host}",
-			"path": "/$path",
+			"host": "${domain}",
+			"path": "$_path",
 			"tls": "tls"
 		}
 		EOF
@@ -1453,12 +1453,10 @@ show_config_info() {
 		echo
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
-		echo -e "$yellow 伪装域名 (host) = ${cyan}${host}$none"
+		echo -e "$yellow 伪装域名 (host) = ${cyan}${domain}$none"
 		echo
-		if [[ $path ]]; then
-			echo -e "$yellow 路径 (path) = ${cyan}/${path}$none"
-			echo
-		fi
+		echo -e "$yellow 路径 (path) = ${cyan}${_path}$none"
+		echo
 		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
 		echo
 		# echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "

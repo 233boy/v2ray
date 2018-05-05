@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.14"
+_version="v2.15"
 
 cmd="apt-get"
 
@@ -127,9 +127,9 @@ ciphers=(
 get_transport_args() {
 	header="none"
 	if [[ $is_path ]]; then
-		host=$domain
+		_path="/$path"
 	else
-		host=""
+		_path="/"
 	fi
 	case $v2ray_transport in
 	1 | 9)
@@ -189,8 +189,8 @@ create_vmess_URL_config() {
 			"aid": "${alterId}",
 			"net": "${net}",
 			"type": "none",
-			"host": "${host}",
-			"path": "/$path",
+			"host": "${domain}",
+			"path": "$_path",
 			"tls": "tls"
 		}
 		EOF
@@ -240,10 +240,8 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 伪装域名 (host) = ${cyan}${host}$none"
 		echo
-		if [[ $is_path ]]; then
-			echo -e "$yellow 路径 (path) = ${cyan}/${path}$none"
-			echo
-		fi
+		echo -e "$yellow 路径 (path) = ${cyan}${_path}$none"
+		echo
 		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
 		echo
 		# echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
@@ -2387,12 +2385,10 @@ create_v2ray_config_text() {
 		echo
 		echo "伪装类型 (header type) = ${header}"
 		echo
-		echo "伪装域名 (host) = ${host}"
+		echo "伪装域名 (host) = ${domain}"
 		echo
-		if [[ $is_path ]]; then
-			echo -e "$yellow 路径 (path) = ${cyan}/${path}$none"
-			echo
-		fi
+		echo "路径 (path) = ${_path}"
+		echo
 		echo "TLS (Enable TLS) = 打开"
 		echo
 		# echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
