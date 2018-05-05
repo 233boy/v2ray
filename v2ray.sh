@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.15"
+_version="v2.16"
 
 cmd="apt-get"
 
@@ -2296,6 +2296,7 @@ download_v2ray_config() {
 	done
 }
 get_v2ray_config() {
+	config
 	echo
 	echo " 如果你当前使用的 SSH 客户端不是 Xshell 的话...下载 V2Ray 客户端配置文件将会出现卡死情况"
 	echo
@@ -2309,7 +2310,9 @@ get_v2ray_config() {
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
 				# sz /etc/v2ray/233blog_v2ray.zip
-				sz $v2ray_client_config
+				local tmpfile="/tmp/233blog_v2ray_config_$(date +"%F-%T").json"
+				cp -f $v2ray_client_config $tmpfile
+				sz $tmpfile
 				echo
 				echo
 				echo -e "$green 下载完成咯...$none"
@@ -2328,6 +2331,8 @@ get_v2ray_config() {
 			fi
 		fi
 	done
+	[[ -f $tmpfile ]] && rm -rf $tmpfile
+
 }
 get_v2ray_config_link() {
 	echo
