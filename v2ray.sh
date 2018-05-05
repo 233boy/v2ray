@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.16"
+_version="v2.17"
 
 cmd="apt-get"
 
@@ -2310,7 +2310,7 @@ get_v2ray_config() {
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
 				# sz /etc/v2ray/233blog_v2ray.zip
-				local tmpfile="/tmp/233blog_v2ray_config_$(date +"%F-%T").json"
+				local tmpfile="/tmp/233blog_v2ray_config_$RANDOM.json"
 				cp -f $v2ray_client_config $tmpfile
 				sz $tmpfile
 				echo
