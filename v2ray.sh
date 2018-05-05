@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.17"
+_version="v2.18"
 
 cmd="apt-get"
 
@@ -2731,7 +2731,7 @@ update_v2ray() {
 	mkdir -p /tmp/v2ray
 
 	v2ray_tmp_file="/tmp/v2ray/v2ray.zip"
-	v2ray_latest_ver="$(curl -s https://api.github.com/repos/v2ray/v2ray-core/releases/latest | grep 'tag_name' | cut -d\" -f4)"
+	v2ray_latest_ver="$(curl -s "https://api.github.com/repos/v2ray/v2ray-core/releases/latest?r=$RANDOM" | grep 'tag_name' | cut -d\" -f4)"
 	if [[ $v2ray_ver != $v2ray_latest_ver ]]; then
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
@@ -2766,7 +2766,7 @@ update_v2ray() {
 	fi
 }
 update_v2ray.sh() {
-	local latest_version=$(curl -s -L https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh | grep '_version' -m1 | cut -d\" -f2)
+	local latest_version=$(curl -s -L "https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh?r=$RANDOM" | grep '_version' -m1 | cut -d\" -f2)
 	if [[ $latest_version == $_version ]]; then
 		echo
 		echo -e "$green 木有发现新版本 $none"
