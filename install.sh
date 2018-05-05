@@ -1281,7 +1281,7 @@ config() {
 
 backup_config() {
 	sed -i "18s/=1/=$v2ray_transport_opt/; 21s/=2333/=$v2ray_port/; 24s/=$old_id/=$uuid/" $backup
-	if [ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]; then
+	if [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]]; then
 		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
 	fi
 	if [ $shadowsocks ]; then

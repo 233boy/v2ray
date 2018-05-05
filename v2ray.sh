@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.15"
+_version="v2.20"
 
 cmd="apt-get"
 
@@ -2296,6 +2296,7 @@ download_v2ray_config() {
 	done
 }
 get_v2ray_config() {
+	config
 	echo
 	echo " 如果你当前使用的 SSH 客户端不是 Xshell 的话...下载 V2Ray 客户端配置文件将会出现卡死情况"
 	echo
@@ -2309,7 +2310,9 @@ get_v2ray_config() {
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
 				# sz /etc/v2ray/233blog_v2ray.zip
-				sz $v2ray_client_config
+				local tmpfile="/tmp/233blog_v2ray_config_$RANDOM.json"
+				cp -f $v2ray_client_config $tmpfile
+				sz $tmpfile
 				echo
 				echo
 				echo -e "$green 下载完成咯...$none"
@@ -2328,6 +2331,8 @@ get_v2ray_config() {
 			fi
 		fi
 	done
+	[[ -f $tmpfile ]] && rm -rf $tmpfile
+
 }
 get_v2ray_config_link() {
 	echo
@@ -2726,7 +2731,7 @@ update_v2ray() {
 	mkdir -p /tmp/v2ray
 
 	v2ray_tmp_file="/tmp/v2ray/v2ray.zip"
-	v2ray_latest_ver="$(curl -s https://api.github.com/repos/v2ray/v2ray-core/releases/latest | grep 'tag_name' | cut -d\" -f4)"
+	v2ray_latest_ver="$(curl -s "https://api.github.com/repos/v2ray/v2ray-core/releases/latest?r=$RANDOM" | grep 'tag_name' | cut -d\" -f4)"
 	if [[ $v2ray_ver != $v2ray_latest_ver ]]; then
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
@@ -2761,7 +2766,7 @@ update_v2ray() {
 	fi
 }
 update_v2ray.sh() {
-	local latest_version=$(curl -s -L https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh | grep '_version' -m1 | cut -d\" -f2)
+	local latest_version=$(curl -s -L "https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh?r=$RANDOM" | grep '_version' -m1 | cut -d\" -f2)
 	if [[ $latest_version == $_version ]]; then
 		echo
 		echo -e "$green 木有发现新版本 $none"
@@ -3600,6 +3605,13 @@ U | update.sh)
 	;;
 un | uninstall)
 	uninstall_v2ray
+	;;
+reinstall)
+	uninstall_v2ray
+	if [[ $is_uninstall_v2ray ]]; then
+		cd; cd - >/dev/null 2>&1
+		bash <(curl -s -L https://233blog.com/v2ray.sh)
+	fi
 	;;
 233 | 2333 | 233boy | 233blog | 233blog.com)
 	_boom_
