@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.20"
+_version="v2.21"
 
 cmd="apt-get"
 
@@ -69,7 +69,7 @@ fi
 if [[ $blocked_ad_status ]]; then
 	is_blocked_ad=true
 fi
-if [[ $v2ray_transport -ge 9 ]]; then
+if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 	dynamicPort=true
 	port_range="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
 fi
@@ -3141,13 +3141,13 @@ config() {
 			sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		9)
-			sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/; 42s/10000-20000/$multi_port/" $v2ray_server_config
+			sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
 			;;
 		10)
-			sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$multi_port/" $v2ray_server_config
+			sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
 			;;
 		1[1-5])
-			sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$multi_port/" $v2ray_server_config
+			sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
 			;;
 		16)
 			sed -i "46s/6666/$ssport/; 48s/chacha20-ietf/$ssciphers/; 49s/233blog.com/$sspass/" $v2ray_server_config
@@ -3184,13 +3184,13 @@ config() {
 	else
 		case $v2ray_transport in
 		9)
-			sed -i "31s/10000-20000/$multi_port/" $v2ray_server_config
+			sed -i "31s/10000-20000/$port_range/" $v2ray_server_config
 			;;
 		10)
-			sed -i "67s/10000-20000/$multi_port/" $v2ray_server_config
+			sed -i "67s/10000-20000/$port_range/" $v2ray_server_config
 			;;
 		1[1-5])
-			sed -i "34s/10000-20000/$multi_port/" $v2ray_server_config
+			sed -i "34s/10000-20000/$port_range/" $v2ray_server_config
 			;;
 		esac
 
