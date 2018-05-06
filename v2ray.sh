@@ -3446,6 +3446,8 @@ _help() {
 	${green}v2ray update.sh $none更新 V2Ray 管理脚本
 
 	${green}v2ray uninstall $none卸载 V2Ray
+	
+	${green}v2ray reinstall $none重装 V2Ray
 "
 }
 menu() {
@@ -3480,7 +3482,7 @@ menu() {
 		echo
 		echo -e "$yellow 7. $none更新 V2Ray / 更新 V2Ray 管理脚本"
 		echo
-		echo -e "$yellow 8. $none卸载 V2Ray"
+		echo -e "$yellow 8. $none卸载 V2Ray /重装V2ray"
 		echo
 		echo -e "$yellow 9. $none其他"
 		echo
