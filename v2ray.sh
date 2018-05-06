@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.21"
+_version="v2.22"
 
 cmd="apt-get"
 
@@ -238,7 +238,7 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
-		echo -e "$yellow 伪装域名 (host) = ${cyan}${host}$none"
+		echo -e "$yellow 伪装域名 (host) = ${cyan}${domain}$none"
 		echo
 		echo -e "$yellow 路径 (path) = ${cyan}${_path}$none"
 		echo
