@@ -34,7 +34,7 @@
             "network": "ws",
             "security": "tls",
             "tlsSettings": {
-                "serverName": "233blog.com",
+                "serverName": "233blog.com"
             },
             "wsSettings": {
                 "path": "/233blog"
