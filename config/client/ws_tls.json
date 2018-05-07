@@ -37,7 +37,10 @@
                 "serverName": "233blog.com"
             },
             "wsSettings": {
-                "path": "/233blog"
+                "path": "/233blog",
+                "headers": {
+                    "Host": "233blog.com"
+                }
             }
         },
         "mux": {
