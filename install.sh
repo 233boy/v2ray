@@ -1130,7 +1130,7 @@ config() {
 			sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		2)
-			sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/233blog.com/$sspass/" $v2ray_server_config
+			sed -i "64s/6666/$ssport/; 66s/chacha20-ietf/$ssciphers/; 67s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		3 | 4)
 			sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/" $v2ray_server_config
