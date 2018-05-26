@@ -1,4 +1,6 @@
 #!/bin/bash
+[[ $ws_path_status ]] && path_status=$ws_path_status
+[[ $ws_path ]] && path=$ws_path
 cat >$backup <<-EOF
 # -----------------------------------
 # 警告...请不要修改或删除这个文件...谢谢
@@ -56,12 +58,18 @@ ssciphers=$ssciphers
 blocked_ad_status=$blocked_ad_status
 
 #---- 网站伪装 -----
-path_status=$ws_path_status
+path_status=$path_status
 
 #---- 伪装的路径 -----
-path=$ws_path
+path=$path
 
 #---- 伪装的网址 -----
 proxy_site=$proxy_site
+
+#---- Socks5 用户名 -----
+username=233blog
+
+#---- Socks5 密码 -----
+userpass=233blog.com
 		EOF
 . $backup
