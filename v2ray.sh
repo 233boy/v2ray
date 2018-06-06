@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.12"
+_version="v2.30"
 
 cmd="apt-get"
 
@@ -48,6 +48,9 @@ if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup &
 
 	. $backup
 	v2ray_ver=$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)
+	if [[ ! $username ]]; then
+		. /etc/v2ray/233boy/v2ray/tools/support_socks.sh
+	fi
 
 elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
 
@@ -66,12 +69,12 @@ fi
 if [[ $blocked_ad_status ]]; then
 	is_blocked_ad=true
 fi
-if [[ $v2ray_transport -ge 9 ]]; then
+if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 	dynamicPort=true
 	port_range="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
 fi
-if [[ $ws_path_status ]]; then
-	is_ws_path=true
+if [[ $path_status ]]; then
+	is_path=true
 fi
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
@@ -108,6 +111,8 @@ transport=(
 	mKCP_utp_dynamicPort
 	mKCP_srtp_dynamicPort
 	mKCP_wechat-video_dynamicPort
+	HTTP/2
+	Socks5
 )
 
 ciphers=(
@@ -122,47 +127,40 @@ ciphers=(
 
 get_transport_args() {
 	header="none"
-	if [[ $is_ws_path ]]; then
-		host="/$ws_path"
+	if [[ $is_path ]]; then
+		_path="/$path"
 	else
-		host=""
+		_path="/"
 	fi
 	case $v2ray_transport in
 	1 | 9)
 		net="tcp"
-		network="tcp"
-		obfs="none"
 		;;
 	2 | 10)
 		net="tcp"
-		network="tcp"
 		header="http"
 		host="www.baidu.com"
-		obfs="http"
 		;;
 	3 | 4 | 11)
 		net="ws"
-		network="ws (WebSocket)"
-		obfs="websocket"
 		;;
 	5 | 12)
 		net="kcp"
-		network="kcp"
 		;;
 	6 | 13)
 		net="kcp"
-		network="kcp"
 		header="utp"
 		;;
 	7 | 14)
 		net="kcp"
-		network="kcp"
 		header="srtp"
 		;;
 	8 | 15)
 		net="kcp"
-		network="kcp"
 		header="wechat-video"
+		;;
+	16)
+		net="h2"
 		;;
 	esac
 }
@@ -170,17 +168,19 @@ create_vmess_URL_config() {
 
 	[[ -z $net ]] && get_transport_args
 
-	if [[ $v2ray_transport == "4" ]]; then
+	if [[ $v2ray_transport == "4" || $v2ray_transport == 16 ]]; then
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
+			"v": "2",
 			"ps": "233blog_v2ray_${domain}",
 			"add": "${domain}",
 			"port": "443",
 			"id": "${v2ray_id}",
 			"aid": "${alterId}",
-			"net": "ws",
+			"net": "${net}",
 			"type": "none",
-			"host": "${host}",
+			"host": "${domain}",
+			"path": "$_path",
 			"tls": "tls"
 		}
 		EOF
@@ -188,6 +188,7 @@ create_vmess_URL_config() {
 		[[ -z $ip ]] && get_ip
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
+			"v": "2",
 			"ps": "233blog_v2ray_${ip}",
 			"add": "${ip}",
 			"port": "${v2ray_port}",
@@ -196,6 +197,7 @@ create_vmess_URL_config() {
 			"net": "${net}",
 			"type": "${header}",
 			"host": "${host}",
+			"path": "",
 			"tls": ""
 		}
 		EOF
@@ -203,12 +205,12 @@ create_vmess_URL_config() {
 }
 view_v2ray_config_info() {
 
-	get_transport_args
-
+	[[ $v2ray_transport != 17 ]] && get_transport_args
+	[[ -z $ip ]] && get_ip
 	echo
 	echo
 	echo "---------- V2Ray 配置信息 -------------"
-	if [[ $v2ray_transport == "4" ]]; then
+	if [[ $v2ray_transport == "4" || $v2ray_transport == 16 ]]; then
 		if [[ ! $caddy_installed ]]; then
 			echo
 			echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://233blog.com/post/19/$none"
@@ -222,24 +224,35 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 额外ID (Alter Id) = ${cyan}${alterId}${none}"
 		echo
-		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
+		echo -e "$yellow 传输协议 (Network) = ${cyan}${net}$none"
 		echo
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
-		if [[ $is_ws_path ]]; then
-			echo -e "$yellow WebSocket 路径 (WS path) = ${cyan}/${ws_path}$none"
-			echo
-		fi
-		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
+		echo -e "$yellow 伪装域名 (host) = ${cyan}${domain}$none"
 		echo
-		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
+		echo -e "$yellow 路径 (path) = ${cyan}${_path}$none"
+		echo
+		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
 		echo
 		if [[ $is_blocked_ad ]]; then
 			echo " 备注: 广告拦截已开启.."
 			echo
 		fi
+	elif [[ $v2ray_transport == 17 ]]; then
+		echo
+		echo -e "$yellow 主机 (Hostname) = $cyan${ip}$none"
+		echo
+		echo -e "$yellow 端口 (Port) = $cyan$v2ray_port$none"
+		echo
+		echo -e "$yellow 用户名 (Username) = $cyan${username}$none"
+		echo
+		echo -e "$yellow 密码 (Password) = $cyan${userpass}$none"
+		echo
+		echo -e "$yellow Telegram 代理配置链接 = ${cyan}tg://socks?server=${ip}&port=${v2ray_port}&user=${username}&pass=${userpass}$none"
+		echo
+		echo " 这是 Socks5 协议相关的配置啦.... 不用在乎一些 V2Ray 客户端 怎么没有这些东东配置的"
+		echo
 	else
-		[[ -z $ip ]] && get_ip
 		echo
 		echo -e "$yellow 地址 (Address) = $cyan${ip}$none"
 		echo
@@ -249,22 +262,15 @@ view_v2ray_config_info() {
 		echo
 		echo -e "$yellow 额外ID (Alter Id) = ${cyan}${alterId}${none}"
 		echo
-		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
+		echo -e "$yellow 传输协议 (Network) = ${cyan}${net}$none"
 		echo
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
-		if [[ $obfs ]]; then
-			echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
-			echo
-		else
-			echo -e " 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay"
-			echo
-		fi
 	fi
-	if [[ $v2ray_transport -ge 9 && $is_blocked_ad ]]; then
+	if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]] && [[ $is_blocked_ad ]]; then
 		echo " 备注: 动态端口已启用...广告拦截已开启..."
 		echo
-	elif [[ $v2ray_transport -ge 9 ]]; then
+	elif [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 		echo " 备注: 动态端口已启用..."
 		echo
 	elif [[ $is_blocked_ad ]]; then
@@ -446,17 +452,18 @@ shadowsocks_config() {
 		[[ -z "$install_shadowsocks" ]] && install_shadowsocks="n"
 		if [[ "$install_shadowsocks" == [Yy] ]]; then
 			echo
-			new_shadowsocks=true
+			shadowsocks=true
 			shadowsocks_port_config
 			shadowsocks_password_config
 			shadowsocks_ciphers_config
 			pause
-			config
-			clear
-			shadowsocks=true
+			open_port $new_ssport
+			backup_config +ss
 			ssport=$new_ssport
 			sspass=$new_sspass
 			ssciphers=$new_ssciphers
+			config
+			clear
 			view_shadowsocks_config_info
 			get_shadowsocks_config_qr_ask
 			break
@@ -484,9 +491,12 @@ shadowsocks_port_config() {
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			if [[ $v2ray_transport == "4" && $new_ssport == "80" ]] || [[ $v2ray_transport == "4" && $new_ssport == "443" ]]; then
+			if [[ $v2ray_transport == "4" || $v2ray_transport == "16" ]]; then
+				local tls=ture
+			fi
+			if [[ $tls && $new_ssport == "80" ]] || [[ $tls && $new_ssport == "443" ]]; then
 				echo
-				echo -e "由于你选择了 "$green"WebSocket + TLS"$none" 传输协议."
+				echo -e "由于你当前已使用了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
 				echo
 				echo -e "所以不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
 				error
@@ -593,9 +603,12 @@ change_shadowsocks_port() {
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			if [[ $v2ray_transport == "4" && $new_ssport == "80" ]] || [[ $v2ray_transport == "4" && $new_ssport == "443" ]]; then
+			if [[ $v2ray_transport == "4" || $v2ray_transport == "16" ]]; then
+				local tls=ture
+			fi
+			if [[ $tls && $new_ssport == "80" ]] || [[ $tls && $new_ssport == "443" ]]; then
 				echo
-				echo -e "由于你选择了 "$green"WebSocket + TLS"$none" 传输协议."
+				echo -e "由于你当前已使用了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
 				echo
 				echo -e "所以不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
 				error
@@ -756,27 +769,31 @@ disable_shadowsocks() {
 	done
 }
 change_v2ray_config() {
+	local _menu=(
+		"修改 V2Ray 端口"
+		"修改 V2Ray 传输协议"
+		"修改 V2Ray 动态端口 (如果可以)"
+		"修改 用户ID ( UUID )"
+		"修改 TLS 域名 (如果可以)"
+		"修改 分流的路径 (如果可以)"
+		"修改 伪装的网址 (如果可以)"
+		"关闭 网站伪装 和 路径分流 (如果可以)"
+		"开启 / 关闭 广告拦截"
+		"修改 Socks5 用户名 (如果可以)"
+		"修改 Socks5 密码 (如果可以)"
+	)
 	while :; do
+		for ((i = 1; i <= ${#_menu[*]}; i++)); do
+			if [[ "$i" -le 9 ]]; then
+				echo
+				echo -e "$yellow  $i. $none${_menu[$i - 1]}"
+			else
+				echo
+				echo -e "$yellow $i. $none${_menu[$i - 1]}"
+			fi
+		done
 		echo
-		echo -e "$yellow 1. $none修改 V2Ray 端口"
-		echo
-		echo -e "$yellow 2. $none修改 V2Ray 传输协议"
-		echo
-		echo -e "$yellow 3. $none修改 V2Ray 动态端口 (如果可以)"
-		echo
-		echo -e "$yellow 4. $none修改 用户ID ( UUID )"
-		echo
-		echo -e "$yellow 5. $none修改 TLS 域名 (如果可以)"
-		echo
-		echo -e "$yellow 6. $none修改 分流的路径 (如果可以)"
-		echo
-		echo -e "$yellow 7. $none修改 伪装的网址 (如果可以)"
-		echo
-		echo -e "$yellow 8. $none关闭 网站伪装 和 路径分流 (如果可以)"
-		echo
-		echo -e "$yellow 9. $none开启 / 关闭 广告拦截"
-		echo
-		read -p "$(echo -e "请选择 [${magenta}1-9$none]:")" _opt
+		read -p "$(echo -e "请选择 [${magenta}1-${#_menu[*]}$none]:")" _opt
 		if [[ -z $_opt ]]; then
 			error
 		else
@@ -802,7 +819,7 @@ change_v2ray_config() {
 				break
 				;;
 			6)
-				change_ws_path_config
+				change_path_config
 				break
 				;;
 			7)
@@ -810,11 +827,24 @@ change_v2ray_config() {
 				break
 				;;
 			8)
-				disable_ws_path
+				disable_path
 				break
 				;;
 			9)
 				blocked_hosts
+				break
+				;;
+			10)
+				change_socks_user_config
+				break
+				;;
+			11)
+				change_socks_pass_config
+				break
+				;;
+			[aA][Ii][aA][Ii] | [Dd][Dd])
+				socks_check
+				custom_uuid
 				break
 				;;
 			[Dd] | [Aa][Ii] | 233 | 233[Bb][Ll][Oo][Gg] | 233[Bb][Ll][Oo][Gg].[Cc][Oo][Mm] | 233[Bb][Oo][Yy] | [Aa][Ll][Tt][Ee][Rr][Ii][Dd])
@@ -832,6 +862,13 @@ change_v2ray_port() {
 	if [[ $v2ray_transport == 4 ]]; then
 		echo
 		echo -e " 由于你目前使用的是$yellow WebSocket + TLS $none传输协议...所以修不修改 V2Ray 端口没有什么不一样的"
+		echo
+		echo " 如果你想要使用其他端口...可以先修改 V2Ray 的传输协议..之后再修改 V2Ray 端口"
+		echo
+		change_v2ray_transport_ask
+	elif [[ $v2ray_transport == 16 ]]; then
+		echo
+		echo -e " 由于你目前使用的是$yellow HTTP/2 $none传输协议...所以修不修改 V2Ray 端口没有什么不一样的"
 		echo
 		echo " 如果你想要使用其他端口...可以先修改 V2Ray 的传输协议..之后再修改 V2Ray 端口"
 		echo
@@ -954,16 +991,16 @@ change_v2ray_transport() {
 				echo " 哎呀...跟当前传输协议一毛一样呀...修改个鸡鸡哦"
 				error
 				;;
-			4)
+			4 | 16)
 				if [[ $v2ray_port == "80" || $v2ray_port == "443" ]]; then
 					echo
-					echo -e " 抱歉...如果你想要使用${cyan} WebSocket + TLS $none传输协议.. ${red}V2Ray 端口不能为 80 或者 443 ...$none"
+					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$v2ray_transport_opt - 1]} $none传输协议.. ${red}V2Ray 端口不能为 80 或者 443 ...$none"
 					echo
 					echo -e " 当前 V2Ray 端口: ${cyan}$v2ray_port$none"
 					error
 				elif [[ $shadowsocks ]] && [[ $ssport == "80" || $ssport == "443" ]]; then
 					echo
-					echo -e " 抱歉...如果你想要使用${cyan} WebSocket + TLS $none传输协议.. ${red}Shadowsocks 端口不能为 80 或者 443 ...$none"
+					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$v2ray_transport_opt - 1]} $none传输协议.. ${red}Shadowsocks 端口不能为 80 或者 443 ...$none"
 					echo
 					echo -e " 当前 Shadowsocks 端口: ${cyan}$ssport$none"
 					error
@@ -976,7 +1013,7 @@ change_v2ray_transport() {
 					break
 				fi
 				;;
-			[1-9] | 1[0-5])
+			[1-9] | 1[0-7])
 				echo
 				echo
 				echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport_opt - 1]}$none"
@@ -993,84 +1030,120 @@ change_v2ray_transport() {
 	done
 	pause
 
-	if [[ $v2ray_transport_opt == 4 ]]; then
-		ws_config
-	elif [[ $v2ray_transport_opt -ge 9 ]]; then
+	if [[ $v2ray_transport_opt == 4 || $v2ray_transport_opt == 16 ]]; then
+		tls_config
+	elif [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]]; then
 		v2ray_dynamic_port_start
 		v2ray_dynamic_port_end
 		pause
-		if [[ $v2ray_transport == 4 ]]; then
-			del_port "80"
-			del_port "443"
-			if [[ $caddy_installed && $caddy_pid ]]; then
-				# systemctl stop caddy
-				do_service stop caddy
-				if [[ $systemd ]]; then
-					systemctl disable caddy >/dev/null 2>&1
-				else
-					update-rc.d -f caddy remove >/dev/null 2>&1
-				fi
-			elif [[ $caddy_installed ]]; then
-				if [[ $systemd ]]; then
-					systemctl disable caddy >/dev/null 2>&1
-				else
-					update-rc.d -f caddy remove >/dev/null 2>&1
-				fi
-			fi
-			if [[ $is_ws_path ]]; then
-				# sed -i "41s/true/false/" $backup
-				backup_config -ws_path
-			fi
-		elif [[ $v2ray_transport -ge 9 ]]; then
-			del_port "multiport"
-		fi
+		old_transport
 		open_port "multiport"
-		# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 23s/$v2ray_dynamicPort_start/$v2ray_dynamic_port_start_input/; 25s/$v2ray_dynamicPort_end/$v2ray_dynamic_port_end_input/" $backup
 		backup_config v2ray_transport v2ray_dynamicPort_start v2ray_dynamicPort_end
 		port_range="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
+		v2ray_transport=$v2ray_transport_opt
 		config
 		clear
+		view_v2ray_config_info
+		download_v2ray_config_ask
+	elif [[ $v2ray_transport_opt == 17 ]]; then
+		socks_user_config
+		socks_pass_config
+		pause
+		old_transport
+		backup_config v2ray_transport username userpass
 		v2ray_transport=$v2ray_transport_opt
+		username=$new_username
+		userpass=$new_userpass
+		config
+		clear
 		view_v2ray_config_info
 		download_v2ray_config_ask
 	else
-		# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/" $backup
+		old_transport
 		backup_config v2ray_transport
-		if [[ $v2ray_transport == 4 ]]; then
-			del_port "80"
-			del_port "443"
-			if [[ $caddy_installed && $caddy_pid ]]; then
-				# systemctl stop caddy
-				do_service stop caddy
-				if [[ $systemd ]]; then
-					systemctl disable caddy >/dev/null 2>&1
-				else
-					update-rc.d -f caddy remove >/dev/null 2>&1
-				fi
-			elif [[ $caddy_installed ]]; then
-				if [[ $systemd ]]; then
-					systemctl disable caddy >/dev/null 2>&1
-				else
-					update-rc.d -f caddy remove >/dev/null 2>&1
-				fi
-			fi
-			if [[ $is_ws_path ]]; then
-				# sed -i "41s/true/false/" $backup
-				backup_config -ws_path
-			fi
-		elif [[ $v2ray_transport -ge 9 ]]; then
-			del_port "multiport"
-		fi
+		v2ray_transport=$v2ray_transport_opt
 		config
 		clear
-		v2ray_transport=$v2ray_transport_opt
 		view_v2ray_config_info
 		download_v2ray_config_ask
 	fi
 
 }
+old_transport() {
+	if [[ $v2ray_transport == 4 || $v2ray_transport == 16 ]]; then
+		del_port "80"
+		del_port "443"
+		if [[ $caddy_installed && $caddy_pid ]]; then
+			do_service stop caddy
+			if [[ $systemd ]]; then
+				systemctl disable caddy >/dev/null 2>&1
+			else
+				update-rc.d -f caddy remove >/dev/null 2>&1
+			fi
+		elif [[ $caddy_installed ]]; then
+			if [[ $systemd ]]; then
+				systemctl disable caddy >/dev/null 2>&1
+			else
+				update-rc.d -f caddy remove >/dev/null 2>&1
+			fi
+		fi
+		if [[ $is_path ]]; then
+			backup_config -path
+		fi
+	elif [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
+		del_port "multiport"
+	fi
+}
 
-ws_config() {
+socks_user_config() {
+	echo
+	while :; do
+		read -p "$(echo -e "请输入$yellow用户名$none...(默认用户名: ${cyan}233blog$none)"): " new_username
+		[ -z "$new_username" ] && new_username="233blog"
+		case $new_username in
+		*[/$]* | *\&*)
+			echo
+			echo -e " 由于这个脚本太辣鸡了..所以用户名不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo
+			error
+			;;
+		*)
+			echo
+			echo
+			echo -e "$yellow 用户名 = $cyan$new_username$none"
+			echo "----------------------------------------------------------------"
+			echo
+			break
+			;;
+		esac
+	done
+
+}
+socks_pass_config() {
+	echo
+	while :; do
+		read -p "$(echo -e "请输入$yellow密码$none...(默认密码: ${cyan}233blog.com$none)"): " new_userpass
+		[ -z "$new_userpass" ] && new_userpass="233blog.com"
+		case $new_userpass in
+		*[/$]* | *\&*)
+			echo
+			echo -e " 由于这个脚本太辣鸡了..所以密码不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo
+			error
+			;;
+		*)
+			echo
+			echo
+			echo -e "$yellow 密码 = $cyan$new_userpass$none"
+			echo "----------------------------------------------------------------"
+			echo
+			break
+			;;
+		esac
+	done
+}
+
+tls_config() {
 	while :; do
 		echo
 		echo
@@ -1116,21 +1189,18 @@ ws_config() {
 	done
 
 	if [[ $caddy_installed ]]; then
-		ws_path_config_ask
+		path_config_ask
 		pause
 		domain_check
-		# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/" $backup
 		backup_config v2ray_transport domain
-		if [[ $new_ws_path ]]; then
-			# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-			# echo "$proxy_site" >>$backup
-			backup_config +ws_path
-			ws_path=$new_ws_path
+		if [[ $new_path ]]; then
+			backup_config +path
+			path=$new_path
 			proxy_site=$new_proxy_site
-			is_ws_path=true
+			is_path=true
 		fi
 
-		if [[ $v2ray_transport -ge 9 ]]; then
+		if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 			del_port "multiport"
 		fi
 		domain=$new_domain
@@ -1142,14 +1212,46 @@ ws_config() {
 		else
 			update-rc.d -f caddy defaults >/dev/null 2>&1
 		fi
+		v2ray_transport=$v2ray_transport_opt
 		caddy_config
 		config
-		v2ray_transport=$v2ray_transport_opt
 		clear
 		view_v2ray_config_info
 		download_v2ray_config_ask
 	else
-		echo -e "
+		if [[ $v2ray_transport_opt == 16 ]]; then
+			path_config_ask
+			pause
+			domain_check
+			backup_config v2ray_transport domain caddy
+			if [[ $new_path ]]; then
+				backup_config +path
+				path=$new_path
+				proxy_site=$new_proxy_site
+				is_path=true
+			fi
+			if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
+				del_port "multiport"
+			fi
+			domain=$new_domain
+			install_caddy
+			open_port "80"
+			open_port "443"
+			v2ray_transport=$v2ray_transport_opt
+			caddy_config
+			config
+			caddy_installed=true
+			clear
+			view_v2ray_config_info
+			download_v2ray_config_ask
+		else
+			auto_tls_config
+		fi
+	fi
+
+}
+auto_tls_config() {
+	echo -e "
 
 		安装 Caddy 来实现 自动配置 TLS
 		
@@ -1159,91 +1261,85 @@ ws_config() {
 
 		那么就不需要 打开自动配置 TLS
 		"
-		echo "----------------------------------------------------------------"
-		echo
+	echo "----------------------------------------------------------------"
+	echo
 
-		while :; do
+	while :; do
 
-			read -p "$(echo -e "(是否自动配置 TLS: [${magenta}Y/N$none]):") " auto_install_caddy
-			if [[ -z "$auto_install_caddy" ]]; then
-				error
-			else
-				if [[ "$auto_install_caddy" == [Yy] ]]; then
-					echo
-					echo
-					echo -e "$yellow 自动配置 TLS = $cyan打开$none"
-					echo "----------------------------------------------------------------"
-					echo
-					ws_path_config_ask
-					pause
-					domain_check
-					# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/; 29s/false/true/" $backup
-					backup_config v2ray_transport domain caddy
-					if [[ $new_ws_path ]]; then
-						# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-						# echo "$proxy_site" >>$backup
-						backup_config +ws_path
-						ws_path=$new_ws_path
-						proxy_site=$new_proxy_site
-						is_ws_path=true
-					fi
-					if [[ $v2ray_transport -ge 9 ]]; then
-						del_port "multiport"
-					fi
-					domain=$new_domain
-					install_caddy
-					open_port "80"
-					open_port "443"
-					caddy_config
-					config
-					v2ray_transport=$v2ray_transport_opt
-					caddy_installed=true
-					clear
-					view_v2ray_config_info
-					download_v2ray_config_ask
-					break
-				elif [[ "$auto_install_caddy" == [Nn] ]]; then
-					echo
-					echo
-					echo -e "$yellow 自动配置 TLS = $cyan关闭$none"
-					echo "----------------------------------------------------------------"
-					echo
-					pause
-					domain_check
-					# sed -i "17s/$v2ray_transport/$v2ray_transport_opt/; 27s/$domain/$new_domain/" $backup
-					backup_config v2ray_transport domain
-					if [[ $v2ray_transport -ge 9 ]]; then
-						del_port "multiport"
-					fi
-					domain=$new_domain
-					open_port "80"
-					open_port "443"
-					config
-					v2ray_transport=$v2ray_transport_opt
-					clear
-					view_v2ray_config_info
-					download_v2ray_config_ask
-					break
-				else
-					error
+		read -p "$(echo -e "(是否自动配置 TLS: [${magenta}Y/N$none]):") " auto_install_caddy
+		if [[ -z "$auto_install_caddy" ]]; then
+			error
+		else
+			if [[ "$auto_install_caddy" == [Yy] ]]; then
+				echo
+				echo
+				echo -e "$yellow 自动配置 TLS = $cyan打开$none"
+				echo "----------------------------------------------------------------"
+				echo
+				path_config_ask
+				pause
+				domain_check
+				backup_config v2ray_transport domain caddy
+				if [[ $new_path ]]; then
+					backup_config +path
+					path=$new_path
+					proxy_site=$new_proxy_site
+					is_path=true
 				fi
+				if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
+					del_port "multiport"
+				fi
+				domain=$new_domain
+				install_caddy
+				open_port "80"
+				open_port "443"
+				v2ray_transport=$v2ray_transport_opt
+				caddy_config
+				config
+				caddy_installed=true
+				clear
+				view_v2ray_config_info
+				download_v2ray_config_ask
+				break
+			elif [[ "$auto_install_caddy" == [Nn] ]]; then
+				echo
+				echo
+				echo -e "$yellow 自动配置 TLS = $cyan关闭$none"
+				echo "----------------------------------------------------------------"
+				echo
+				pause
+				domain_check
+				backup_config v2ray_transport domain
+				if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
+					del_port "multiport"
+				fi
+				domain=$new_domain
+				open_port "80"
+				open_port "443"
+				v2ray_transport=$v2ray_transport_opt
+				config
+				clear
+				view_v2ray_config_info
+				download_v2ray_config_ask
+				break
+			else
+				error
 			fi
+		fi
 
-		done
-	fi
-
+	done
 }
 
-ws_path_config_ask() {
+path_config_ask() {
 	echo
 	while :; do
 		echo -e "是否开启 网站伪装 和 路径分流 [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认: [${cyan}N$none]):")" ws_path_ask
-		[[ -z $ws_path_ask ]] && ws_path_ask="n"
+		read -p "$(echo -e "(默认: [${cyan}N$none]):")" path_ask
+		[[ -z $path_ask ]] && path_ask="n"
 
-		case $ws_path_ask in
+		case $path_ask in
 		Y | y)
-			ws_path_config
+			path_config
 			break
 			;;
 		N | n)
@@ -1260,14 +1356,14 @@ ws_path_config_ask() {
 		esac
 	done
 }
-ws_path_config() {
+path_config() {
 	echo
 	while :; do
 		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
-		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" new_ws_path
-		[[ -z $new_ws_path ]] && new_ws_path="233blog"
+		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" new_path
+		[[ -z $new_path ]] && new_path="233blog"
 
-		case $new_ws_path in
+		case $new_path in
 		*[/$]*)
 			echo
 			echo -e " 由于这个脚本太辣鸡了..所以分流的路径不能包含$red / $none或$red $ $none这两个符号.... "
@@ -1277,7 +1373,7 @@ ws_path_config() {
 		*)
 			echo
 			echo
-			echo -e "$yellow 分流的路径 = ${cyan}/${new_ws_path}$none"
+			echo -e "$yellow 分流的路径 = ${cyan}/${new_path}$none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -1373,24 +1469,25 @@ install_caddy() {
 }
 caddy_config() {
 	local email=$(shuf -i1-10000000000 -n1)
-	if [[ $is_ws_path ]]; then
-		# [[ -z $proxy_site ]] && proxy_site=$(sed '$!d' $backup)
-		cat >/etc/caddy/Caddyfile <<-EOF
+	case $v2ray_transport in
+	4)
+		if [[ $is_path ]]; then
+			cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
     gzip
 	timeouts none
     proxy / $proxy_site {
-        without /${ws_path}
+        without /${path}
     }
-    proxy /${ws_path} 127.0.0.1:${v2ray_port} {
-        without /${ws_path}
+    proxy /${path} 127.0.0.1:${v2ray_port} {
+        without /${path}
         websocket
     }
 }
 		EOF
-	else
-		cat >/etc/caddy/Caddyfile <<-EOF
+		else
+			cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
 	timeouts none
@@ -1399,7 +1496,41 @@ $domain {
 	}
 }
 		EOF
-	fi
+		fi
+		;;
+	16)
+		if [[ $is_path ]]; then
+			cat >/etc/caddy/Caddyfile <<-EOF
+$domain {
+    tls ${email}@gmail.com
+    gzip
+	timeouts none
+    proxy / $proxy_site {
+        without /${path}
+    }
+    proxy /${path} https://127.0.0.1:${v2ray_port} {
+        header_upstream Host {host}
+		header_upstream X-Forwarded-Proto {scheme}
+		insecure_skip_verify
+    }
+}
+		EOF
+		else
+			cat >/etc/caddy/Caddyfile <<-EOF
+$domain {
+    tls ${email}@gmail.com
+	timeouts none
+	proxy / https://127.0.0.1:${v2ray_port} {
+        header_upstream Host {host}
+		header_upstream X-Forwarded-Proto {scheme}
+		insecure_skip_verify
+	}
+}
+		EOF
+		fi
+		;;
+
+	esac
 	# systemctl restart caddy
 	do_service restart caddy
 }
@@ -1490,13 +1621,12 @@ v2ray_dynamic_port_end() {
 
 }
 change_v2ray_dynamicport() {
-	if [[ $v2ray_transport -ge 9 ]]; then
+	if [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 		change_v2ray_dynamic_port_start
 		change_v2ray_dynamic_port_end
 		pause
 		del_port "multiport"
 		open_port "multiport"
-		# sed -i "23s/$v2ray_dynamicPort_start/$v2ray_dynamic_port_start_input/; 25s/$v2ray_dynamicPort_end/$v2ray_dynamic_port_end_input/" $backup
 		backup_config v2ray_dynamicPort_start v2ray_dynamicPort_end
 		port_range="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
 		config
@@ -1657,7 +1787,7 @@ change_v2ray_id() {
 	done
 }
 change_domain() {
-	if [[ $v2ray_transport == 4 && $caddy_installed ]]; then
+	if [[ $v2ray_transport == 4 || $v2ray_transport == 16 ]] && [[ $caddy_installed ]]; then
 		while :; do
 			echo
 			echo -e "请输入一个 $magenta正确的域名$none，一定一定一定要正确，不！能！出！错！"
@@ -1719,7 +1849,7 @@ change_domain() {
 		echo
 		echo -e "$red 抱歉...不支持修改...$none"
 		echo
-		echo -e " 备注..修改 TLS 域名仅支持传输协议为 ${yellow}WebSocket + TLS$none 并且$yellow 自动配置 TLS = 打开$none"
+		echo -e " 备注..修改 TLS 域名仅支持传输协议为 ${yellow}WebSocket + TLS$none 或 ${yellow}HTTP/2$none 并且$yellow 自动配置 TLS = 打开$none"
 		echo
 		echo -e " 当前传输协议为: ${cyan}${transport[$v2ray_transport - 1]}${none}"
 		echo
@@ -1731,16 +1861,16 @@ change_domain() {
 		echo
 	fi
 }
-change_ws_path_config() {
-	if [[ $v2ray_transport == 4 && $caddy_installed ]] && [[ $is_ws_path ]]; then
+change_path_config() {
+	if [[ $v2ray_transport == 4 || $v2ray_transport == 16 ]] && [[ $caddy_installed && $is_path ]]; then
 		echo
 		while :; do
 			echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
-			read -p "$(echo -e "(当前分流的路径: [${cyan}/${ws_path}$none]):")" new_ws_path
-			[[ -z $new_ws_path ]] && error && continue
+			read -p "$(echo -e "(当前分流的路径: [${cyan}/${path}$none]):")" new_path
+			[[ -z $new_path ]] && error && continue
 
-			case $new_ws_path in
-			$ws_path)
+			case $new_path in
+			$path)
 				echo
 				echo -e " 大佬...跟 当前分流的路径 一毛一样啊...修改个鸡鸡哦 "
 				echo
@@ -1755,7 +1885,7 @@ change_ws_path_config() {
 			*)
 				echo
 				echo
-				echo -e "$yellow 分流的路径 = ${cyan}/${new_ws_path}$none"
+				echo -e "$yellow 分流的路径 = ${cyan}/${new_path}$none"
 				echo "----------------------------------------------------------------"
 				echo
 				break
@@ -1763,23 +1893,20 @@ change_ws_path_config() {
 			esac
 		done
 		pause
-		# sed -i "43s/$ws_path/$new_ws_path/" $backup
-		backup_config ws_path
-		ws_path=$new_ws_path
+		backup_config path
+		path=$new_path
 		caddy_config
 		config
 		clear
 		view_v2ray_config_info
 		download_v2ray_config_ask
-	elif [[ $v2ray_transport == 4 && $caddy_installed ]]; then
-		ws_path_config_ask
-		if [[ $new_ws_path ]]; then
-			# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-			# echo "$proxy_site" >>$backup
-			backup_config +ws_path
-			ws_path=$new_ws_path
+	elif [[ $v2ray_transport == 4 || $v2ray_transport == 16 ]] && [[ $caddy_installed ]]; then
+		path_config_ask
+		if [[ $new_path ]]; then
+			backup_config +path
+			path=$new_path
 			proxy_site=$new_proxy_site
-			is_ws_path=true
+			is_path=true
 			caddy_config
 			config
 			clear
@@ -1796,7 +1923,7 @@ change_ws_path_config() {
 		echo
 		echo -e "$red 抱歉...不支持修改...$none"
 		echo
-		echo -e " 备注..修改 分流的路径 仅支持传输协议为 ${yellow}WebSocket + TLS$none 并且$yellow 自动配置 TLS = 打开$none"
+		echo -e " 备注..修改 分流的路径 仅支持传输协议为 ${yellow}WebSocket + TLS$none 或 ${yellow}HTTP/2$none 并且$yellow 自动配置 TLS = 打开$none"
 		echo
 		echo -e " 当前传输协议为: ${cyan}${transport[$v2ray_transport - 1]}${none}"
 		echo
@@ -1811,7 +1938,7 @@ change_ws_path_config() {
 
 }
 change_proxy_site_config() {
-	if [[ $v2ray_transport == 4 && $caddy_installed ]] && [[ $is_ws_path ]]; then
+	if [[ $v2ray_transport == 4 || $v2ray_transport == 16 ]] && [[ $caddy_installed && $is_path ]]; then
 		echo
 		while :; do
 			echo -e "请输入 ${magenta}一个正确的$none ${cyan}网址$none 用来作为 ${cyan}网站的伪装$none , 例如 https://liyafly.com"
@@ -1840,8 +1967,6 @@ change_proxy_site_config() {
 			esac
 		done
 		pause
-		# sed -i "$ d" $backup
-		# echo "$proxy_site" >>$backup
 		backup_config proxy_site
 		proxy_site=$new_proxy_site
 		caddy_config
@@ -1852,15 +1977,13 @@ change_proxy_site_config() {
 		echo -e " 赶紧打开你的域名 ${cyan}https://${domain}$none 检查一下看看"
 		echo
 		echo
-	elif [[ $v2ray_transport == 4 && $caddy_installed ]]; then
-		ws_path_config_ask
-		if [[ $new_ws_path ]]; then
-			# sed -i "41s/false/true/; 43s/$ws_path/$new_ws_path/; $ d" $backup
-			# echo "$proxy_site" >>$backup
-			backup_config +ws_path
-			ws_path=$new_ws_path
+	elif [[ $v2ray_transport == 4 || $v2ray_transport == 16 ]] && [[ $caddy_installed ]]; then
+		path_config_ask
+		if [[ $new_path ]]; then
+			backup_config +path
+			path=$new_path
 			proxy_site=$new_proxy_site
-			is_ws_path=true
+			is_path=true
 			caddy_config
 			config
 			clear
@@ -1877,7 +2000,7 @@ change_proxy_site_config() {
 		echo
 		echo -e "$red 抱歉...不支持修改...$none"
 		echo
-		echo -e " 备注..修改 伪装的网址 仅支持传输协议为 ${yellow}WebSocket + TLS$none 并且$yellow 自动配置 TLS = 打开$none"
+		echo -e " 备注..修改 伪装的网址 仅支持传输协议为 ${yellow}WebSocket + TLS$none 或 ${yellow}HTTP/2$none 并且$yellow 自动配置 TLS = 打开$none"
 		echo
 		echo -e " 当前传输协议为: ${cyan}${transport[$v2ray_transport - 1]}${none}"
 		echo
@@ -1907,8 +2030,8 @@ domain_check() {
 		exit 1
 	fi
 }
-disable_ws_path() {
-	if [[ $v2ray_transport == 4 && $caddy_installed ]] && [[ $is_ws_path ]]; then
+disable_path() {
+	if [[ $v2ray_transport == 4 || $v2ray_transport == 16 ]] && [[ $caddy_installed && $is_path ]]; then
 		echo
 
 		while :; do
@@ -1922,9 +2045,8 @@ disable_ws_path() {
 				echo "----------------------------------------------------------------"
 				echo
 				pause
-				# sed -i "41s/true/false/" $backup
-				backup_config -ws_path
-				is_ws_path=''
+				backup_config -path
+				is_path=''
 				caddy_config
 				config
 				clear
@@ -1953,13 +2075,13 @@ disable_ws_path() {
 			echo -e " 自动配置 TLS = $red关闭$none"
 		fi
 		echo
-		if [[ $is_ws_path ]]; then
+		if [[ $is_path ]]; then
 			echo -e " 路径分流 = ${cyan}打开$none"
 		else
 			echo -e " 路径分流 = $red关闭$none"
 		fi
 		echo
-		echo -e " 必须为 WebSocket + TLS 传输协议, 自动配置 TLS = ${cyan}打开$none, 路径分流 = ${cyan}打开$none, 才能修改"
+		echo -e " 必须为 WebSocket + TLS 或 HTTP/2 传输协议, 自动配置 TLS = ${cyan}打开$none, 路径分流 = ${cyan}打开$none, 才能修改"
 		echo
 
 	fi
@@ -2062,7 +2184,6 @@ change_v2ray_alterId() {
 			echo "----------------------------------------------------------------"
 			echo
 			pause
-			# sed -i "45s/$alterId/$new_alterId/" $backup
 			backup_config alterId
 			alterId=$new_alterId
 			config
@@ -2073,6 +2194,148 @@ change_v2ray_alterId() {
 			;;
 		*)
 			error
+			;;
+		esac
+	done
+}
+change_socks_user_config() {
+	if [[ $v2ray_transport == 17 ]]; then
+		echo
+		while :; do
+			read -p "$(echo -e "请输入$yellow用户名$none...(当前用户名: ${cyan}$username$none)"): " new_username
+			[ -z "$new_username" ] && error && continue
+			case $new_username in
+			$username)
+				echo
+				echo -e " 大佬...跟 当前用户名 一毛一样啊...修改个鸡鸡哦 "
+				echo
+				error
+				;;
+			*[/$]* | *\&*)
+				echo
+				echo -e " 由于这个脚本太辣鸡了..所以用户名不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+				echo
+				error
+				;;
+			*)
+				echo
+				echo
+				echo -e "$yellow 用户名 = $cyan$new_username$none"
+				echo "----------------------------------------------------------------"
+				echo
+				pause
+				backup_config username
+				username=$new_username
+				config
+				clear
+				view_v2ray_config_info
+				download_v2ray_config_ask
+				break
+				;;
+			esac
+		done
+	else
+		echo
+		echo -e "$red 哎呀....不支持修改呢...$none"
+		echo
+		echo -e " 必须使用..${cyan} Socks5 $none传输协议才能修改哦"
+		echo
+		echo -e " 当前传输协议为: ${cyan}${transport[$v2ray_transport - 1]}${none}"
+		echo
+	fi
+}
+change_socks_pass_config() {
+	if [[ $v2ray_transport == 17 ]]; then
+		echo
+		while :; do
+			read -p "$(echo -e "请输入$yellow密码$none...(当前密码: ${cyan}$userpass$none)"): " new_userpass
+			[ -z "$new_userpass" ] && error && continue
+			case $new_userpass in
+			$userpass)
+				echo
+				echo -e " 大佬...跟 当前密码 一毛一样啊...修改个鸡鸡哦 "
+				echo
+				error
+				;;
+			*[/$]* | *\&*)
+				echo
+				echo -e " 由于这个脚本太辣鸡了..所以密码不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+				echo
+				error
+				;;
+			*)
+				echo
+				echo
+				echo -e "$yellow 密码 = $cyan$new_userpass$none"
+				echo "----------------------------------------------------------------"
+				echo
+				pause
+				backup_config userpass
+				userpass=$new_userpass
+				config
+				clear
+				view_v2ray_config_info
+				download_v2ray_config_ask
+				break
+				;;
+			esac
+		done
+	else
+		echo
+		echo -e "$red 哎呀....不支持修改呢...$none"
+		echo
+		echo -e " 必须使用..${cyan} Socks5 $none传输协议才能修改哦"
+		echo
+		echo -e " 当前传输协议为: ${cyan}${transport[$v2ray_transport - 1]}${none}"
+		echo
+	fi
+}
+socks_check() {
+	if [[ $v2ray_transport == 17 ]]; then
+		echo
+		echo -e " 哎呀...由于你当前使用 Socks5 传输协议...是无法执行此功能的哦.."
+		echo
+		echo -e " 如果你想要查看 Socks5 配置信息的话...请使用$cyan v2ray info $none"
+		echo
+		exit 1
+	fi
+}
+custom_uuid() {
+	echo
+	while :; do
+		echo -e "请输入$yello自定义的 UUID$none...(${cyan}UUID 格式一定要对!!!$none)"
+		read -p "$(echo -e "(当前 UUID: ${cyan}${v2ray_id}$none)"): " myuuid
+		[ -z "$myuuid" ] && error && continue
+		case $myuuid in
+		$v2ray_id)
+			echo
+			echo -e " 大佬...跟 当前 UUID 一毛一样啊...修改个鸡鸡哦 "
+			echo
+			error
+			;;
+		*[/$]* | *\&*)
+			echo
+			echo -e " 由于这个脚本太辣鸡了..所以 UUID 不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo
+			error
+			;;
+		*)
+			echo
+			echo
+			echo -e "$yellow UUID = $cyan$myuuid$none"
+			echo
+			echo -e " 如果 UUID 格式不正确.. V2Ray 会跪...使用$cyan v2ray reuuid$none 复活"
+			echo "----------------------------------------------------------------"
+			echo
+			pause
+			uuid=$myuuid
+			backup_config uuid
+			v2ray_id=$uuid
+			config
+			clear
+			view_v2ray_config_info
+			download_v2ray_config_ask
+			break
 			;;
 		esac
 	done
@@ -2223,6 +2486,7 @@ download_v2ray_config() {
 	done
 }
 get_v2ray_config() {
+	config
 	echo
 	echo " 如果你当前使用的 SSH 客户端不是 Xshell 的话...下载 V2Ray 客户端配置文件将会出现卡死情况"
 	echo
@@ -2235,13 +2499,16 @@ get_v2ray_config() {
 				echo
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
-				sz /etc/v2ray/233blog_v2ray.zip
+				# sz /etc/v2ray/233blog_v2ray.zip
+				local tmpfile="/tmp/233blog_v2ray_config_$RANDOM.json"
+				cp -f $v2ray_client_config $tmpfile
+				sz $tmpfile
 				echo
 				echo
 				echo -e "$green 下载完成咯...$none"
 				echo
-				echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
-				echo
+				# echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
+				# echo
 				echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 				echo
 				echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
@@ -2254,13 +2521,14 @@ get_v2ray_config() {
 			fi
 		fi
 	done
+	[[ -f $tmpfile ]] && rm -rf $tmpfile
+
 }
 get_v2ray_config_link() {
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	# local link=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random}_233blog_v2ray.zip")
 	local link=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random}_233blog_v2ray.json")
 	if [[ $link ]]; then
 		echo
@@ -2268,8 +2536,6 @@ get_v2ray_config_link() {
 		echo
 		echo -e "$yellow 链接 = $cyan$link$none"
 		echo
-		# echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
-		# echo
 		echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 		echo
 		echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
@@ -2293,7 +2559,7 @@ create_v2ray_config_text() {
 	echo
 	echo
 	echo "---------- V2Ray 配置信息 -------------"
-	if [[ $v2ray_transport == "4" ]]; then
+	if [[ $v2ray_transport == "4" || $v2ray_transport == 16 ]]; then
 		if [[ ! $caddy_installed ]]; then
 			echo
 			echo " 警告！请自行配置 TLS...教程: https://233blog.com/post/19/"
@@ -2307,17 +2573,15 @@ create_v2ray_config_text() {
 		echo
 		echo "额外ID (Alter Id) = ${alterId}"
 		echo
-		echo "传输协议 (Network) = ${network}"
+		echo "传输协议 (Network) = ${net}"
 		echo
 		echo "伪装类型 (header type) = ${header}"
 		echo
-		if [[ $is_ws_path ]]; then
-			echo -e "$yellow WebSocket 路径 (WS path) = ${cyan}/${ws_path}$none"
-			echo
-		fi
-		echo "TLS (Enable TLS) = 打开"
+		echo "伪装域名 (host) = ${domain}"
 		echo
-		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
+		echo "路径 (path) = ${_path}"
+		echo
+		echo "TLS (Enable TLS) = 打开"
 		echo
 		if [[ $is_blocked_ad ]]; then
 			echo " 备注: 广告拦截已开启.."
@@ -2334,22 +2598,15 @@ create_v2ray_config_text() {
 		echo
 		echo "额外ID (Alter Id) = ${alterId}"
 		echo
-		echo "传输协议 (Network) = ${network}"
+		echo "传输协议 (Network) = ${net}"
 		echo
 		echo "伪装类型 (header type) = ${header}"
 		echo
-		if [[ $obfs ]]; then
-			echo -e "请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
-			echo
-		else
-			echo -e "帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay"
-			echo
-		fi
 	fi
-	if [[ $v2ray_transport -ge 9 && $is_blocked_ad ]]; then
+	if [[ $v2ray_transport -ge 9 || $v2ray_transport -le 15 ]] && [[ $is_blocked_ad ]]; then
 		echo "备注: 动态端口已启用...广告拦截已开启..."
 		echo
-	elif [[ $v2ray_transport -ge 9 ]]; then
+	elif [[ $v2ray_transport -ge 9 || $v2ray_transport -le 15 ]]; then
 		echo "备注: 动态端口已启用..."
 		echo
 	elif [[ $is_blocked_ad ]]; then
@@ -2362,6 +2619,7 @@ create_v2ray_config_text() {
 	echo
 }
 get_v2ray_config_info_link() {
+	socks_check
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
@@ -2389,29 +2647,12 @@ get_v2ray_config_info_link() {
 }
 get_v2ray_config_qr_link() {
 
+	socks_check
 	create_vmess_URL_config
 
-	if [[ $obfs ]]; then
-		if [[ $v2ray_transport == 4 ]]; then
-			ip_or_domain=$domain
-		else
-			ip_or_domain=$ip
-		fi
-		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
-		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
-		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
-	fi
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
-	case $v2ray_transport in
-	[1-4] | 9 | 10 | 11)
-		local ios_qr=true
-		local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/233blog_shadowray_qr.png
-		local link3=$(curl -s --upload-file /tmp/233blog_shadowray_qr.png "https://transfer.sh/${random3}_233blog_v2ray.png")
-		;;
-	esac
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 	echo $vmess >/etc/v2ray/vmess.txt
 	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
@@ -2421,21 +2662,8 @@ get_v2ray_config_qr_link() {
 		echo
 		echo "---------- V2Ray 二维码链接 -------------"
 		echo
-		echo -e "$yellow 适用于 V2RayNG / Kitsunebi = $cyan$link$none"
+		echo -e "$yellow 适用于 V2RayNG v0.4.1+ / Kitsunebi = $cyan$link$none"
 		echo
-		if [[ $ios_qr && $link3 ]]; then
-			echo -e "$yellow 适用于 Pepi / ShadowRay = $cyan${link3}$none"
-			echo
-			echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 ${alterId} (如果你使用 Pepi / ShadowRay)"
-			if [[ $v2ray_transport == 4 ]]; then
-				echo
-				echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
-			fi
-		elif [[ $ios_qr ]]; then
-			echo -e "$red 生成适用于 Pepi / ShadowRay 的二维码链接 出错.... $none 请尝试使用${cyan} v2ray qr ${none}重新生成"
-		else
-			echo -e "$red 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay...$none"
-		fi
 		echo
 		echo " V2Ray 客户端使用教程: https://233blog.com/post/20/"
 		echo
@@ -2453,16 +2681,13 @@ get_v2ray_config_qr_link() {
 	rm -rf /tmp/233blog_v2ray.png
 	rm -rf /etc/v2ray/vmess_qr.json
 	rm -rf /etc/v2ray/vmess.txt
-	if [[ $ios_qr ]]; then
-		rm -rf /tmp/233blog_shadowray_qr.png
-		rm -rf /etc/v2ray/shadowray_qr.txt
-	fi
 }
 get_v2ray_vmess_URL_link() {
+	socks_check
 	create_vmess_URL_config
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 	echo
-	echo "---------- V2Ray vmess URL / 仅适合部分客户端 -------------"
+	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
 	echo
 	echo $vmess
 	echo
@@ -2652,7 +2877,7 @@ update_v2ray() {
 	mkdir -p /tmp/v2ray
 
 	v2ray_tmp_file="/tmp/v2ray/v2ray.zip"
-	v2ray_latest_ver="$(curl -s https://api.github.com/repos/v2ray/v2ray-core/releases/latest | grep 'tag_name' | cut -d\" -f4)"
+	v2ray_latest_ver="$(curl -s "https://api.github.com/repos/v2ray/v2ray-core/releases/latest?r=$RANDOM" | grep 'tag_name' | cut -d\" -f4)"
 	if [[ $v2ray_ver != $v2ray_latest_ver ]]; then
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
@@ -2687,7 +2912,7 @@ update_v2ray() {
 	fi
 }
 update_v2ray.sh() {
-	local latest_version=$(curl -s -L https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh | grep '_version' -m1 | cut -d\" -f2)
+	local latest_version=$(curl -s -L "https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh?r=$RANDOM" | grep '_version' -m1 | cut -d\" -f2)
 	if [[ $latest_version == $_version ]]; then
 		echo
 		echo -e "$green 木有发现新版本 $none"
@@ -2771,11 +2996,11 @@ uninstall_v2ray() {
 			del_port $ssport
 		fi
 
-		if [[ $v2ray_transport == "4" ]]; then
+		if [[ $v2ray_transport == "4" || $v2ray_transport == 16 ]]; then
 			del_port "80"
 			del_port "443"
 			del_port $v2ray_port
-		elif [[ $v2ray_transport -ge 9 ]]; then
+		elif [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 			del_port $v2ray_port
 			del_port "multiport"
 		else
@@ -2827,11 +3052,11 @@ uninstall_v2ray() {
 			del_port $ssport
 		fi
 
-		if [[ $v2ray_transport == "4" ]]; then
+		if [[ $v2ray_transport == "4" || $v2ray_transport == 16 ]]; then
 			del_port "80"
 			del_port "443"
 			del_port $v2ray_port
-		elif [[ $v2ray_transport -ge 9 ]]; then
+		elif [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 			del_port $v2ray_port
 			del_port "multiport"
 		else
@@ -2865,330 +3090,197 @@ uninstall_v2ray() {
 	fi
 }
 config() {
-	if [[ $shadowsocks || $new_shadowsocks ]]; then
-		if [[ $v2ray_transport_opt ]]; then
-			if [[ $is_blocked_ad ]]; then
-				case $v2ray_transport_opt in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			else
-				case $v2ray_transport_opt in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			fi
+	if [[ $shadowsocks ]]; then
+		if [[ $is_blocked_ad ]]; then
+			case $v2ray_transport in
+			1)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			2)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			3)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			4)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+				;;
+			5 | 6 | 7 | 8)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			9)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			10)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			11)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			12 | 13 | 14 | 15)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/h2_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/socks_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
+				;;
+			esac
 		else
-			if [[ $is_blocked_ad ]]; then
-				case $v2ray_transport in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			else
-				case $v2ray_transport in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			fi
+			case $v2ray_transport in
+			1)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			2)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			3)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			4)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+				;;
+			5 | 6 | 7 | 8)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			9)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			10)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			11)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			12 | 13 | 14 | 15)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/h2_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/socks_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
+				;;
+			esac
 		fi
-
 	else
-		if [[ $v2ray_transport_opt ]]; then
-			if [[ $is_blocked_ad ]]; then
-				case $v2ray_transport_opt in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			else
-				case $v2ray_transport_opt in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			fi
+		if [[ $is_blocked_ad ]]; then
+			case $v2ray_transport in
+			1)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			2)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			3)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			4)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+				;;
+			5 | 6 | 7 | 8)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			9)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			10)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			11)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			12 | 13 | 14 | 15)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/h2.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/socks.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
+				;;
+			esac
 		else
-			if [[ $is_blocked_ad ]]; then
-				case $v2ray_transport in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			else
-				case $v2ray_transport in
-				1)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				2)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				3)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				4)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
-					;;
-				5 | 6 | 7 | 8)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				9)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
-					;;
-				10)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
-					;;
-				11)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
-					;;
-				12 | 13 | 14 | 15)
-					v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_dynamic.json"
-					v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
-					;;
-				esac
-			fi
+			case $v2ray_transport in
+			1)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			2)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			3)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			4)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws_tls.json"
+				;;
+			5 | 6 | 7 | 8)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			9)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/tcp_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
+				;;
+			10)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/http_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
+				;;
+			11)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/ws_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
+				;;
+			12 | 13 | 14 | 15)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_dynamic.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/h2.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/socks.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
+				;;
+			esac
 		fi
 
 	fi
@@ -3196,28 +3288,34 @@ config() {
 	cp -f $v2ray_server_config_file $v2ray_server_config
 	cp -f $v2ray_client_config_file $v2ray_client_config
 
-	if [[ $new_shadowsocks ]]; then
+	if [[ $shadowsocks ]]; then
 		case $v2ray_transport in
 		1)
-			sed -i "28s/$ssport/$new_ssport/; 30s/$ssciphers/$new_ssciphers/; 31s/$sspass/$new_sspass/" $v2ray_server_config
+			sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		2)
-			sed -i "50s/$ssport/$new_ssport/; 52s/$ssciphers/$new_ssciphers/; 53s/$sspass/$new_sspass/" $v2ray_server_config
+			sed -i "64s/6666/$ssport/; 66s/chacha20-ietf/$ssciphers/; 67s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		3 | 4)
-			sed -i "31s/$ssport/$new_ssport/; 33s/$ssciphers/$new_ssciphers/; 34s/$sspass/$new_sspass/" $v2ray_server_config
+			sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		5 | 6 | 7 | 8)
-			sed -i "43s/$ssport/$new_ssport/; 45s/$ssciphers/$new_ssciphers/; 46s/$sspass/$new_sspass/" $v2ray_server_config
+			sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		9)
-			sed -i "31s/$ssport/$new_ssport/; 33s/$ssciphers/$new_ssciphers/; 34s/$sspass/$new_sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
+			sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
 			;;
 		10)
-			sed -i "67s/$ssport/$new_ssport/; 69s/$ssciphers/$new_ssciphers/; 70s/$sspass/$new_sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
+			sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
 			;;
-		*)
-			sed -i "34s/$ssport/$new_ssport/; 36s/$ssciphers/$new_ssciphers/; 37s/$sspass/$new_sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
+		1[1-5])
+			sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
+			;;
+		16)
+			sed -i "46s/6666/$ssport/; 48s/chacha20-ietf/$ssciphers/; 49s/233blog.com/$sspass/" $v2ray_server_config
+			;;
+		17)
+			sed -i "30s/6666/$ssport/; 32s/chacha20-ietf/$ssciphers/; 33s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		esac
 
@@ -3247,222 +3345,78 @@ config() {
 			sed -i "44s/none/wechat-video/" $v2ray_client_config
 			;;
 		esac
-	elif [[ $shadowsocks ]]; then
-		if [[ $v2ray_transport_opt ]]; then
-
-			case $v2ray_transport_opt in
-			1)
-				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			2)
-				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			3 | 4)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			5 | 6 | 7 | 8)
-				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			9)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			10)
-				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			*)
-				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			esac
-
-			case $v2ray_transport_opt in
-			6)
-				sed -i "31s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			7)
-				sed -i "31s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			8)
-				sed -i "31s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			13)
-				sed -i "74s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			14)
-				sed -i "74s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			15)
-				sed -i "74s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			esac
-
-		else
-
-			case $v2ray_transport in
-			1)
-				sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			2)
-				sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			3 | 4)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			5 | 6 | 7 | 8)
-				sed -i "43s/6666/$ssport/; 45s/chacha20-ietf/$ssciphers/; 46s/233blog.com/$sspass/" $v2ray_server_config
-				;;
-			9)
-				sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/; 42s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			10)
-				sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			*)
-				sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			esac
-
-			case $v2ray_transport in
-			6)
-				sed -i "31s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			7)
-				sed -i "31s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			8)
-				sed -i "31s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			13)
-				sed -i "74s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			14)
-				sed -i "74s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			15)
-				sed -i "74s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			esac
-
-		fi
 
 	else
-		if [[ $v2ray_transport_opt ]]; then
-			case $v2ray_transport_opt in
-			9)
-				sed -i "31s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			10)
-				sed -i "67s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			11 | 12 | 13 | 14 | 15)
-				sed -i "34s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			esac
+		case $v2ray_transport in
+		9)
+			sed -i "31s/10000-20000/$port_range/" $v2ray_server_config
+			;;
+		10)
+			sed -i "67s/10000-20000/$port_range/" $v2ray_server_config
+			;;
+		1[1-5])
+			sed -i "34s/10000-20000/$port_range/" $v2ray_server_config
+			;;
+		esac
 
-			case $v2ray_transport_opt in
-			6)
-				sed -i "31s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			7)
-				sed -i "31s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			8)
-				sed -i "31s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			13)
-				sed -i "63s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			14)
-				sed -i "63s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			15)
-				sed -i "63s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			esac
-
-		else
-
-			case $v2ray_transport in
-			9)
-				sed -i "31s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			10)
-				sed -i "67s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			11 | 12 | 13 | 14 | 15)
-				sed -i "34s/10000-20000/$port_range/" $v2ray_server_config
-				;;
-			esac
-
-			case $v2ray_transport in
-			6)
-				sed -i "31s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			7)
-				sed -i "31s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			8)
-				sed -i "31s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			13)
-				sed -i "63s/none/utp/" $v2ray_server_config
-				sed -i "44s/none/utp/" $v2ray_client_config
-				;;
-			14)
-				sed -i "63s/none/srtp/" $v2ray_server_config
-				sed -i "44s/none/srtp/" $v2ray_client_config
-				;;
-			15)
-				sed -i "63s/none/wechat-video/" $v2ray_server_config
-				sed -i "44s/none/wechat-video/" $v2ray_client_config
-				;;
-			esac
-
-		fi
+		case $v2ray_transport in
+		6)
+			sed -i "31s/none/utp/" $v2ray_server_config
+			sed -i "44s/none/utp/" $v2ray_client_config
+			;;
+		7)
+			sed -i "31s/none/srtp/" $v2ray_server_config
+			sed -i "44s/none/srtp/" $v2ray_client_config
+			;;
+		8)
+			sed -i "31s/none/wechat-video/" $v2ray_server_config
+			sed -i "44s/none/wechat-video/" $v2ray_client_config
+			;;
+		13)
+			sed -i "63s/none/utp/" $v2ray_server_config
+			sed -i "44s/none/utp/" $v2ray_client_config
+			;;
+		14)
+			sed -i "63s/none/srtp/" $v2ray_server_config
+			sed -i "44s/none/srtp/" $v2ray_client_config
+			;;
+		15)
+			sed -i "63s/none/wechat-video/" $v2ray_server_config
+			sed -i "44s/none/wechat-video/" $v2ray_client_config
+			;;
+		esac
 
 	fi
 
-	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/; 16s/233/$alterId/" $v2ray_server_config
-
-	if [[ $v2ray_transport_opt -eq 4 || $v2ray_transport -eq 4 ]]; then
-		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
-		if [[ $is_ws_path ]]; then
-			sed -i "41s/233blog/$ws_path/" $v2ray_client_config
-		else
-			sed -i "41s/233blog//" $v2ray_client_config
-		fi
+	if [[ $v2ray_transport == 17 ]]; then
+		sed -i "8s/2333/$v2ray_port/; 14s/233blog/$username/; 15s/233blog.com/$userpass/" $v2ray_server_config
 	else
-		[[ -z $ip ]] && get_ip
+		sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/; 16s/233/$alterId/" $v2ray_server_config
+	fi
+	if [[ $v2ray_transport -eq 16 ]]; then
+		sed -i "24s/233blog.com/$domain/" $v2ray_server_config
+		if [[ $is_path ]]; then
+			sed -i "26s/233blog/$path/" $v2ray_server_config
+		else
+			sed -i "26s/233blog//" $v2ray_server_config
+		fi
+	fi
+
+	[[ -z $ip ]] && get_ip
+	if [[ $v2ray_transport -eq 4 || $v2ray_transport -eq 16 ]]; then
+		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
+		if [[ $is_path ]]; then
+			sed -i "40s/233blog/$path/" $v2ray_client_config
+		else
+			sed -i "40s/233blog//" $v2ray_client_config
+		fi
+	elif [[ $v2ray_transport == 17 ]]; then
+		sed -i "21s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/233blog/$username/; 26s/233blog.com/$userpass/" $v2ray_client_config
+	else
 		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$v2ray_id/; 26s/233/$alterId/" $v2ray_client_config
 	fi
 
 	# zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
-
-	if [[ $new_shadowsocks ]]; then
-		open_port $new_ssport
-		# sed -i "31s/false/true/; 33s/$ssport/$new_ssport/; 35s/$sspass/$new_sspass/; 37s/$ssciphers/$new_ssciphers/" $backup
-		backup_config +ss
-	fi
 
 	if [[ $v2ray_port == "80" ]]; then
 		if [[ $cmd == "yum" ]]; then
@@ -3523,17 +3477,23 @@ backup_config() {
 		-ad)
 			sed -i "54s/=true/=/" $backup
 			;;
-		+ws_path)
-			sed -i "57s/=/=true/; 60s/=$ws_path/=$new_ws_path/; 63s#=$proxy_site#=$new_proxy_site#" $backup
+		+path)
+			sed -i "57s/=/=true/; 60s/=$path/=$new_path/; 63s#=$proxy_site#=$new_proxy_site#" $backup
 			;;
-		-ws_path)
+		-path)
 			sed -i "57s/=true/=/" $backup
 			;;
-		ws_path)
-			sed -i "60s/=$ws_path/=$new_ws_path/" $backup
+		path)
+			sed -i "60s/=$path/=$new_path/" $backup
 			;;
 		proxy_site)
 			sed -i "63s#=$proxy_site#=$new_proxy_site#" $backup
+			;;
+		username)
+			sed -i "66s/=$username/=$new_username/" $backup
+			;;
+		userpass)
+			sed -i "69s/=$userpass/=$new_userpass/" $backup
 			;;
 		esac
 	done
@@ -3548,24 +3508,6 @@ _boom_() {
 
 	create_vmess_URL_config
 
-	if [[ $obfs ]]; then
-		if [[ $v2ray_transport == 4 ]]; then
-			ip_or_domain=$domain
-		else
-			ip_or_domain=$ip
-		fi
-		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${v2ray_id}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
-		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
-		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
-	fi
-	case $v2ray_transport in
-	[1-4] | 9 | 10 | 11)
-		local ios_qr=true
-		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/233blog_shadowray_qr.png
-		local link=$(curl -s --upload-file /tmp/233blog_shadowray_qr.png "https://transfer.sh/${random}_233blog_v2ray.png")
-		;;
-	esac
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 	echo $vmess >/etc/v2ray/vmess.txt
 	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
@@ -3573,19 +3515,16 @@ _boom_() {
 	local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 	local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	# local link1=$(curl -s --upload-file /etc/v2ray/233blog_v2ray.zip "https://transfer.sh/${random1}_233blog_v2ray.zip")
 	local link1=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random1}_233blog_v2ray.json")
 	local link2=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random2}_233blog_v2ray.txt")
 	local link3=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random3}_233blog_v2ray.png")
 
-	if [[ $link && $link1 ]] && [[ $link2 && $link3 ]]; then
+	if [[ $link1 ]] && [[ $link2 && $link3 ]]; then
 		echo -e "$yellow 客户端配置文件链接: $cyan$link1$none"
 		echo
 		echo -e "$yellow 配置信息链接: $cyan$link2$none"
 		echo
-		echo -e "$yellow V2RayN / Kitsunebi 二维码链接: $cyan$link3$none"
-		echo
-		echo -e "$yellow Pepi / ShadowRay 二维码链接: $cyan$link$none"
+		echo -e "$yellow V2RayNG v0.4.1+ / Kitsunebi 二维码链接: $cyan$link3$none"
 		echo
 		echo "V2Ray 客户端使用教程: https://233blog.com/post/20/"
 		echo
@@ -3596,8 +3535,6 @@ _boom_() {
 	fi
 	rm -rf /tmp/233blog_v2ray.txt
 	rm -rf /etc/v2ray/vmess_qr.json
-	rm -rf /etc/v2ray/shadowray_qr.txt
-	rm -rf /tmp/233blog_shadowray_qr.png
 	rm -rf /etc/v2ray/vmess.txt
 	rm -rf /tmp/233blog_v2ray.png
 
@@ -3677,6 +3614,10 @@ menu() {
 		echo "反馈问题: https://github.com/233boy/v2ray/issues"
 		echo
 		echo "TG 群组: https://t.me/blog233"
+		echo
+		echo "捐赠脚本作者: https://233blog.com/donate/"
+		echo
+		echo "捐助 V2Ray: https://www.v2ray.com/chapter_00/02_donate.html"
 		echo
 		echo -e "$yellow 1. $none查看 V2Ray 配置"
 		echo
@@ -3802,9 +3743,6 @@ reload)
 	view_v2ray_config_info
 	download_v2ray_config_ask
 	;;
-reconfig)
-	. /etc/v2ray/233boy/v2ray/tools/reconfig.sh
-	;;
 log)
 	view_v2ray_log
 	;;
@@ -3821,8 +3759,34 @@ U | update.sh)
 un | uninstall)
 	uninstall_v2ray
 	;;
+reinstall)
+	uninstall_v2ray
+	if [[ $is_uninstall_v2ray ]]; then
+		cd
+		cd - >/dev/null 2>&1
+		bash <(curl -s -L https://233blog.com/v2ray.sh)
+	fi
+	;;
 233 | 2333 | 233boy | 233blog | 233blog.com)
+	socks_check
 	_boom_
+	;;
+[aA][Ii] | [Dd])
+	socks_check
+	change_v2ray_alterId
+	;;
+[aA][Ii][aA][Ii] | [Dd][Dd])
+	socks_check
+	custom_uuid
+	;;
+reuuid)
+	socks_check
+	backup_config uuid
+	v2ray_id=$uuid
+	config
+	clear
+	view_v2ray_config_info
+	download_v2ray_config_ask
 	;;
 v | version)
 	echo

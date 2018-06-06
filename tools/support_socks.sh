@@ -1,3 +1,7 @@
+#!/bin/bash
+[[ $ws_path_status ]] && path_status=$ws_path_status
+[[ $ws_path ]] && path=$ws_path
+cat >$backup <<-EOF
 # -----------------------------------
 # 警告...请不要修改或删除这个文件...谢谢
 # 警告...请不要修改或删除这个文件...谢谢
@@ -15,55 +19,57 @@
 # 嗯…笨笨的方法
 
 # ---- V2Ray 传输协议 -----
-v2ray_transport=1
+v2ray_transport=$v2ray_transport
 
 #---- V2Ray 端口 -----
-v2ray_port=2333
+v2ray_port=$v2ray_port
 
 #---- UUID -----
-v2ray_id=23332333-2333-2333-2333-233boy233boy
+v2ray_id=$v2ray_id
 
 #---- alterId -----
-alterId=233
+alterId=$alterId
 
 #---- V2Ray 动态端口开始 -----
-v2ray_dynamicPort_start=10000
+v2ray_dynamicPort_start=$v2ray_dynamicPort_start
 
 #---- V2Ray 动态端口结束 -----
-v2ray_dynamicPort_end=20000
+v2ray_dynamicPort_end=$v2ray_dynamicPort_end
 
 #---- 域名 -----
-domain=233blog.com
+domain=$domain
 
 #---- caddy -----
-caddy_status=
+caddy_status=$caddy_status
 
 #---- Shadowsocks -----
-shadowsocks_status=
+shadowsocks_status=$shadowsocks_status
 
 #---- Shadowsocks 端口 -----
-ssport=6666
+ssport=$ssport
 
 #---- Shadowsocks 密码 -----
-sspass=233blog.com
+sspass=$sspass
 
 #---- Shadowsocks 加密协议 -----
-ssciphers=chacha20-ietf
+ssciphers=$ssciphers
 
 #---- 屏蔽广告 -----
-blocked_ad_status=
+blocked_ad_status=$blocked_ad_status
 
 #---- 网站伪装 -----
-path_status=
+path_status=$path_status
 
 #---- 伪装的路径 -----
-path=233blog
+path=$path
 
 #---- 伪装的网址 -----
-proxy_site=https://liyafly.com
+proxy_site=$proxy_site
 
-#---- Socks 用户名 -----
+#---- Socks5 用户名 -----
 username=233blog
 
-#---- Socks 密码 -----
+#---- Socks5 密码 -----
 userpass=233blog.com
+		EOF
+. $backup

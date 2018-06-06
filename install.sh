@@ -62,6 +62,8 @@ transport=(
 	mKCP_utp_dynamicPort
 	mKCP_srtp_dynamicPort
 	mKCP_wechat-video_dynamicPort
+	HTTP/2
+	Socks5
 )
 
 ciphers=(
@@ -97,7 +99,7 @@ v2ray_config() {
 		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport_opt
 		[ -z "$v2ray_transport_opt" ] && v2ray_transport_opt=1
 		case $v2ray_transport_opt in
-		[1-9] | 1[0-5])
+		[1-9] | 1[0-7])
 			echo
 			echo
 			echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport_opt - 1]}$none"
@@ -113,7 +115,8 @@ v2ray_config() {
 	v2ray_port_config
 }
 v2ray_port_config() {
-	if [[ $v2ray_transport_opt -ne 4 && $v2ray_transport_opt -lt 9 ]]; then
+	case $v2ray_transport_opt in
+	[1-3] | [5-9] | 1[0-5] | 17)
 		local random=$(shuf -i20001-65535 -n1)
 		while :; do
 			echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
@@ -133,42 +136,17 @@ v2ray_port_config() {
 				;;
 			esac
 		done
-
-	elif [[ $v2ray_transport_opt -ge 9 ]]; then
-
-		v2ray_dynamic_port_config
-
-	else
-
-		ws_config
-
-	fi
-}
-
-v2ray_dynamic_port_config() {
-
-	echo
-	local random=$(shuf -i20001-65535 -n1)
-	while :; do
-		echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
-		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" v2ray_port
-		[ -z "$v2ray_port" ] && v2ray_port=$random
-		case $v2ray_port in
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			echo
-			echo
-			echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-	done
-
-	v2ray_dynamic_port_start
+		if [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]]; then
+			v2ray_dynamic_port_start
+		elif [[ $v2ray_transport_opt == 17 ]]; then
+			socks_user_config
+			socks_pass_config
+		fi
+		;;
+	*)
+		tls_config
+		;;
+	esac
 }
 
 v2ray_dynamic_port_start() {
@@ -239,7 +217,53 @@ v2ray_dynamic_port_end() {
 
 }
 
-ws_config() {
+socks_user_config() {
+	while :; do
+		read -p "$(echo -e "请输入$yellow用户名$none...(默认用户名: ${cyan}233blog$none)"): " username
+		[ -z "$username" ] && username="233blog"
+		case $username in
+		*[/$]* | *\&*)
+			echo
+			echo -e " 由于这个脚本太辣鸡了..所以用户名不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo
+			error
+			;;
+		*)
+			echo
+			echo
+			echo -e "$yellow 用户名 = $cyan$username$none"
+			echo "----------------------------------------------------------------"
+			echo
+			break
+			;;
+		esac
+	done
+
+}
+socks_pass_config() {
+	while :; do
+		read -p "$(echo -e "请输入$yellow密码$none...(默认密码: ${cyan}233blog.com$none)"): " userpass
+		[ -z "$userpass" ] && userpass="233blog.com"
+		case $userpass in
+		*[/$]* | *\&*)
+			echo
+			echo -e " 由于这个脚本太辣鸡了..所以密码不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo
+			error
+			;;
+		*)
+			echo
+			echo
+			echo -e "$yellow 密码 = $cyan$userpass$none"
+			echo "----------------------------------------------------------------"
+			echo
+			break
+			;;
+		esac
+	done
+}
+
+tls_config() {
 
 	echo
 	local random=$(shuf -i20001-65535 -n1)
@@ -314,6 +338,18 @@ ws_config() {
 
 	done
 
+	if [[ $v2ray_transport_opt -ne 16 ]]; then
+		auto_tls_config
+	else
+		caddy=true
+		install_caddy_info="打开"
+	fi
+
+	if [[ $caddy ]]; then
+		path_config_ask
+	fi
+}
+auto_tls_config() {
 	echo -e "
 
 		安装 Caddy 来实现 自动配置 TLS
@@ -356,20 +392,17 @@ ws_config() {
 		fi
 
 	done
-	if [[ $caddy ]]; then
-		ws_path_config_ask
-	fi
 }
-ws_path_config_ask() {
+path_config_ask() {
 	echo
 	while :; do
 		echo -e "是否开启 网站伪装 和 路径分流 [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认: [${cyan}N$none]):")" is_ws_path
-		[[ -z $is_ws_path ]] && is_ws_path="n"
+		read -p "$(echo -e "(默认: [${cyan}N$none]):")" is_path
+		[[ -z $is_path ]] && is_path="n"
 
-		case $is_ws_path in
+		case $is_path in
 		Y | y)
-			ws_path_config
+			path_config
 			break
 			;;
 		N | n)
@@ -386,14 +419,14 @@ ws_path_config_ask() {
 		esac
 	done
 }
-ws_path_config() {
+path_config() {
 	echo
 	while :; do
 		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
-		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" ws_path
-		[[ -z $ws_path ]] && ws_path="233blog"
+		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" path
+		[[ -z $path ]] && path="233blog"
 
-		case $ws_path in
+		case $path in
 		*[/$]*)
 			echo
 			echo -e " 由于这个脚本太辣鸡了..所以分流的路径不能包含$red / $none或$red $ $none这两个符号.... "
@@ -403,7 +436,7 @@ ws_path_config() {
 		*)
 			echo
 			echo
-			echo -e "$yellow 分流的路径 = ${cyan}/${ws_path}$none"
+			echo -e "$yellow 分流的路径 = ${cyan}/${path}$none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -511,9 +544,12 @@ shadowsocks_port_config() {
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			if [[ $v2ray_transport_opt == "4" && $ssport == "80" ]] || [[ $v2ray_transport_opt == "4" && $ssport == "443" ]]; then
+			if [[ $v2ray_transport_opt == "4" || $v2ray_transport_opt == "16" ]]; then
+				local tls=ture
+			fi
+			if [[ $tls && $ssport == "80" ]] || [[ $tls && $ssport == "443" ]]; then
 				echo
-				echo -e "由于你选择了 "$green"WebSocket + TLS"$none" 传输协议."
+				echo -e "由于你已选择了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
 				echo
 				echo -e "所以不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
 				error
@@ -612,7 +648,7 @@ install_info() {
 	echo
 	echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport_opt - 1]}$none"
 
-	if [[ $v2ray_transport_opt == "4" ]]; then
+	if [[ $v2ray_transport_opt == "4" || $v2ray_transport_opt == 16 ]]; then
 		echo
 		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
 		echo
@@ -626,15 +662,27 @@ install_info() {
 			echo
 			echo -e "$yellow 广告拦截 = $cyan$blocked_ad_info$none"
 		fi
-		if [[ $ws_path ]]; then
+		if [[ $path ]]; then
 			echo
-			echo -e "$yellow 路径分流 = ${cyan}/${ws_path}$none"
+			echo -e "$yellow 路径分流 = ${cyan}/${path}$none"
 		fi
-	elif [[ $v2ray_transport_opt -ge 9 ]]; then
+	elif [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]]; then
 		echo
 		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
 		echo
 		echo -e "$yellow V2Ray 动态端口范围 = $cyan${v2ray_dynamic_port_start_input} - ${v2ray_dynamic_port_end_input}$none"
+
+		if [[ $is_blocked_ad ]]; then
+			echo
+			echo -e "$yellow 广告拦截 = $cyan$blocked_ad_info$none"
+		fi
+	elif [[ $v2ray_transport_opt == 17 ]]; then
+		echo
+		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
+		echo
+		echo -e "$yellow 用户名 = $cyan$username$none"
+		echo
+		echo -e "$yellow 密码 = $cyan$userpass$none"
 
 		if [[ $is_blocked_ad ]]; then
 			echo
@@ -740,23 +788,25 @@ install_caddy() {
 }
 caddy_config() {
 	local email=$(shuf -i1-10000000000 -n1)
-	if [[ $ws_path ]]; then
-		cat >/etc/caddy/Caddyfile <<-EOF
+	case $v2ray_transport_opt in
+	4)
+		if [[ $path ]]; then
+			cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
     gzip
 	timeouts none
     proxy / $proxy_site {
-        without /${ws_path}
+        without /${path}
     }
-    proxy /${ws_path} 127.0.0.1:${v2ray_port} {
-        without /${ws_path}
+    proxy /${path} 127.0.0.1:${v2ray_port} {
+        without /${path}
         websocket
     }
 }
 		EOF
-	else
-		cat >/etc/caddy/Caddyfile <<-EOF
+		else
+			cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
     tls ${email}@gmail.com
 	timeouts none
@@ -765,7 +815,41 @@ $domain {
 	}
 }
 		EOF
-	fi
+		fi
+		;;
+	16)
+		if [[ $path ]]; then
+			cat >/etc/caddy/Caddyfile <<-EOF
+$domain {
+    tls ${email}@gmail.com
+    gzip
+	timeouts none
+    proxy / $proxy_site {
+        without /${path}
+    }
+    proxy /${path} https://127.0.0.1:${v2ray_port} {
+        header_upstream Host {host}
+		header_upstream X-Forwarded-Proto {scheme}
+		insecure_skip_verify
+    }
+}
+		EOF
+		else
+			cat >/etc/caddy/Caddyfile <<-EOF
+$domain {
+    tls ${email}@gmail.com
+	timeouts none
+	proxy / https://127.0.0.1:${v2ray_port} {
+        header_upstream Host {host}
+		header_upstream X-Forwarded-Proto {scheme}
+		insecure_skip_verify
+	}
+}
+		EOF
+		fi
+		;;
+
+	esac
 
 	# systemctl restart caddy
 	do_service restart caddy
@@ -784,6 +868,7 @@ install_v2ray() {
 		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
 
 	if [[ $local_install ]]; then
 		if [[ ! -d $(pwd)/config ]]; then
@@ -874,6 +959,14 @@ install_v2ray() {
 				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_ss_dynamic.json"
 				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
 				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/h2_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/socks_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
+				;;
 			esac
 		else
 			case $v2ray_transport_opt in
@@ -912,6 +1005,14 @@ install_v2ray() {
 			12 | 13 | 14 | 15)
 				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_ss_dynamic.json"
 				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/h2_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/socks_ss.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
 				;;
 			esac
 		fi
@@ -954,6 +1055,14 @@ install_v2ray() {
 				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/kcp_dynamic.json"
 				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
 				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/h2.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/server/socks.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
+				;;
 			esac
 		else
 			case $v2ray_transport_opt in
@@ -992,6 +1101,14 @@ install_v2ray() {
 			12 | 13 | 14 | 15)
 				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp_dynamic.json"
 				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+				;;
+			16)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/h2.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/h2.json"
+				;;
+			17)
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/socks.json"
+				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/socks.json"
 				;;
 			esac
 		fi
@@ -1092,7 +1209,7 @@ config() {
 			sed -i "28s/6666/$ssport/; 30s/chacha20-ietf/$ssciphers/; 31s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		2)
-			sed -i "50s/6666/$ssport/; 52s/chacha20-ietf/$ssciphers/; 53s/233blog.com/$sspass/" $v2ray_server_config
+			sed -i "64s/6666/$ssport/; 66s/chacha20-ietf/$ssciphers/; 67s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		3 | 4)
 			sed -i "31s/6666/$ssport/; 33s/chacha20-ietf/$ssciphers/; 34s/233blog.com/$sspass/" $v2ray_server_config
@@ -1106,9 +1223,14 @@ config() {
 		10)
 			sed -i "67s/6666/$ssport/; 69s/chacha20-ietf/$ssciphers/; 70s/233blog.com/$sspass/; 78s/10000-20000/$multi_port/" $v2ray_server_config
 			;;
-		*)
-
+		1[1-5])
 			sed -i "34s/6666/$ssport/; 36s/chacha20-ietf/$ssciphers/; 37s/233blog.com/$sspass/; 45s/10000-20000/$multi_port/" $v2ray_server_config
+			;;
+		16)
+			sed -i "46s/6666/$ssport/; 48s/chacha20-ietf/$ssciphers/; 49s/233blog.com/$sspass/" $v2ray_server_config
+			;;
+		17)
+			sed -i "30s/6666/$ssport/; 32s/chacha20-ietf/$ssciphers/; 33s/233blog.com/$sspass/" $v2ray_server_config
 			;;
 		esac
 
@@ -1147,7 +1269,7 @@ config() {
 		10)
 			sed -i "67s/10000-20000/$multi_port/" $v2ray_server_config
 			;;
-		11 | 12 | 13 | 14 | 15)
+		1[1-5])
 			sed -i "34s/10000-20000/$multi_port/" $v2ray_server_config
 			;;
 		esac
@@ -1181,20 +1303,35 @@ config() {
 
 	fi
 
-	sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$uuid/" $v2ray_server_config
+	if [[ $v2ray_transport_opt == 17 ]]; then
+		sed -i "8s/2333/$v2ray_port/; 14s/233blog/$username/; 15s/233blog.com/$userpass/" $v2ray_server_config
+	else
+		sed -i "8s/2333/$v2ray_port/; 14s/$old_id/$uuid/" $v2ray_server_config
+	fi
 
-	if [[ $v2ray_transport_opt -eq 4 ]]; then
-		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$uuid/" $v2ray_client_config
-		if [[ $ws_path ]]; then
-			sed -i "41s/233blog/$ws_path/" $v2ray_client_config
+	if [[ $v2ray_transport_opt -eq 16 ]]; then
+		sed -i "24s/233blog.com/$domain/" $v2ray_server_config
+		if [[ $path ]]; then
+			sed -i "26s/233blog/$path/" $v2ray_server_config
 		else
-			sed -i "41s/233blog//" $v2ray_client_config
+			sed -i "26s/233blog//" $v2ray_server_config
 		fi
+	fi
+
+	if [[ $v2ray_transport_opt -eq 4 || $v2ray_transport_opt -eq 16 ]]; then
+		sed -i "s/233blog.com/$domain/; 22s/2333/443/; 25s/$old_id/$uuid/" $v2ray_client_config
+		if [[ $path ]]; then
+			sed -i "40s/233blog/$path/" $v2ray_client_config
+		else
+			sed -i "40s/233blog//" $v2ray_client_config
+		fi
+	elif [[ $v2ray_transport_opt == 17 ]]; then
+		sed -i "21s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/233blog/$username/; 26s/233blog.com/$userpass/" $v2ray_client_config
 	else
 		sed -i "s/233blog.com/$ip/; 22s/2333/$v2ray_port/; 25s/$old_id/$uuid/" $v2ray_client_config
 	fi
 
-	zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
+	# zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
 
 	if [[ $cmd == "apt-get" ]]; then
 		cat >/etc/network/if-pre-up.d/iptables <<-EOF
@@ -1214,11 +1351,11 @@ config() {
 	fi
 
 	[ $shadowsocks ] && open_port $ssport
-	if [[ $v2ray_transport_opt == "4" ]]; then
+	if [[ $v2ray_transport_opt == "4" || $v2ray_transport_opt == 16 ]]; then
 		open_port "80"
 		open_port "443"
 		open_port $v2ray_port
-	elif [[ $v2ray_transport_opt -ge 9 ]]; then
+	elif [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]]; then
 		open_port $v2ray_port
 		open_port "multiport"
 	else
@@ -1232,20 +1369,22 @@ config() {
 
 backup_config() {
 	sed -i "18s/=1/=$v2ray_transport_opt/; 21s/=2333/=$v2ray_port/; 24s/=$old_id/=$uuid/" $backup
-	if [ $v2ray_transport_opt -ge 9 ]; then
+	if [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]]; then
 		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
 	fi
 	if [ $shadowsocks ]; then
 		sed -i "42s/=/=true/; 45s/=6666/=$ssport/; 48s/=233blog.com/=$sspass/; 51s/=chacha20-ietf/=$ssciphers/" $backup
 	fi
-	[ $v2ray_transport_opt == "4" ] && sed -i "36s/=233blog.com/=$domain/" $backup
+	[[ $v2ray_transport_opt == "4" || $v2ray_transport_opt == 16 ]] && sed -i "36s/=233blog.com/=$domain/" $backup
 	[ $caddy ] && sed -i "39s/=/=true/" $backup
 	[ $is_blocked_ad ] && sed -i "54s/=/=true/" $backup
-	if [[ $ws_path ]]; then
-		sed -i "57s/=/=true/; 60s/=233blog/=$ws_path/" $backup
+	if [[ $path ]]; then
+		sed -i "57s/=/=true/; 60s/=233blog/=$path/" $backup
 		sed -i "63s#=https://liyafly.com#=$proxy_site#" $backup
 	fi
-
+	if [[ $v2ray_transport_opt == 17 ]]; then
+		sed -i "66s/=233blog/=$username/; 69s/=233blog.com/=$userpass/" $backup
+	fi
 }
 
 try_enable_bbr() {
@@ -1286,53 +1425,58 @@ do_service() {
 }
 show_config_info() {
 	local header="none"
-	if [[ $ws_path ]]; then
-		local host="/$ws_path"
+	if [[ $path ]]; then
+		local _path="/$path"
 	else
-		local host=""
+		local _path="/"
 	fi
 
 	case $v2ray_transport_opt in
 	1 | 9)
 		local net="tcp"
-		local network="tcp"
-		local obfs="none"
+		# local network="tcp"
+		# local obfs="none"
 		;;
 	2 | 10)
 		local net="tcp"
-		local network="tcp"
+		# local network="tcp"
 		local header="http"
 		local host="www.baidu.com"
-		local obfs="http"
+		# local obfs="http"
 		;;
 	3 | 4 | 11)
 		local net="ws"
-		local network="ws (WebSocket)"
-		local obfs="websocket"
+		# local network="ws"
+		# local obfs="websocket"
 		;;
 	5 | 12)
 		local net="kcp"
-		local network="kcp"
+		# local network="kcp"
 		;;
 	6 | 13)
 		local net="kcp"
-		local network="kcp"
+		# local network="kcp"
 		local header="utp"
 		;;
 	7 | 14)
 		local net="kcp"
-		local network="kcp"
+		# local network="kcp"
 		local header="srtp"
 		;;
 	8 | 15)
 		local net="kcp"
-		local network="kcp"
+		# local network="kcp"
 		local header="wechat-video"
 		;;
+	16)
+		local net="h2"
+		# local network="h2"
+		;;
 	esac
-	if [[ $v2ray_transport_opt == "4" ]]; then
+	if [[ $v2ray_transport_opt == "4" || $v2ray_transport_opt == 16 ]]; then
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
+			"v": "2",
 			"ps": "233blog_v2ray_${domain}",
 			"add": "${domain}",
 			"port": "443",
@@ -1340,13 +1484,15 @@ show_config_info() {
 			"aid": "233",
 			"net": "${net}",
 			"type": "none",
-			"host": "${host}",
+			"host": "${domain}",
+			"path": "$_path",
 			"tls": "tls"
 		}
 		EOF
-	else
+	elif [[ $v2ray_transport_opt != 17 ]]; then
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
+			"v": "2",
 			"ps": "233blog_v2ray_${ip}",
 			"add": "${ip}",
 			"port": "${v2ray_port}",
@@ -1355,19 +1501,10 @@ show_config_info() {
 			"net": "${net}",
 			"type": "${header}",
 			"host": "${host}",
+			"path": "",
 			"tls": ""
 		}
 		EOF
-	fi
-	if [[ $obfs ]]; then
-		if [[ $domain ]]; then
-			ip_or_domain=$domain
-		else
-			ip_or_domain=$ip
-		fi
-		local shadowray_qr="vmess://$(echo -n "aes-128-cfb:${uuid}@${ip_or_domain}:${v2ray_port}" | base64)?remarks=233blog_v2ray_${ip_or_domain}&obfs=${obfs}"
-		echo "${shadowray_qr}" >/etc/v2ray/shadowray_qr.txt
-		sed -i 'N;s/\n//' /etc/v2ray/shadowray_qr.txt
 	fi
 	clear
 	echo
@@ -1382,7 +1519,7 @@ show_config_info() {
 		echo
 	fi
 	echo "---------- V2Ray 配置信息 -------------"
-	if [[ $v2ray_transport_opt == "4" ]]; then
+	if [[ $v2ray_transport_opt == "4" || $v2ray_transport_opt == 16 ]]; then
 		echo
 		echo -e "$yellow 地址 (Address) = $cyan${domain}$none"
 		echo
@@ -1392,19 +1529,30 @@ show_config_info() {
 		echo
 		echo -e "$yellow 额外ID (Alter Id) = ${cyan}233${none}"
 		echo
-		echo -e "$yellow 传输协议 (Network) = ${cyan}${network}$none"
+		echo -e "$yellow 传输协议 (Network) = ${cyan}${net}$none"
 		echo
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
-		if [[ $ws_path ]]; then
-			echo -e "$yellow WebSocket 路径 (WS path) = ${cyan}/${ws_path}$none"
-			echo
-		fi
+		echo -e "$yellow 伪装域名 (host) = ${cyan}${domain}$none"
+		echo
+		echo -e "$yellow 路径 (path) = ${cyan}${_path}$none"
+		echo
 		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
 		echo
-		echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
+	elif [[ $v2ray_transport_opt == 17 ]]; then
 		echo
-
+		echo -e "$yellow 主机 (Hostname) = $cyan${ip}$none"
+		echo
+		echo -e "$yellow 端口 (Port) = $cyan$v2ray_port$none"
+		echo
+		echo -e "$yellow 用户名 (Username) = $cyan${username}$none"
+		echo
+		echo -e "$yellow 密码 (Password) = $cyan${userpass}$none"
+		echo
+		echo -e "$yellow Telegram 代理配置链接 = ${cyan}tg://socks?server=${ip}&port=${v2ray_port}&user=${username}&pass=${userpass}$none"
+		echo
+		echo " 这是 Socks5 协议相关的配置啦.... 不用在乎一些 V2Ray 客户端 怎么没有这些东东配置的"
+		echo
 	else
 		echo
 		echo -e "$yellow 地址 (Address) = $cyan${ip}$none"
@@ -1419,18 +1567,11 @@ show_config_info() {
 		echo
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
-		if [[ $obfs ]]; then
-			echo -e " 请将 Obfs 设置为 $obfs ...并忽略 传输协议... (如果你使用 Pepi / ShadowRay) "
-			echo
-		else
-			echo -e " 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay"
-			echo
-		fi
 	fi
-	if [[ $v2ray_transport_opt -ge 9 && $is_blocked_ad ]]; then
+	if [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]] && [[ $is_blocked_ad ]]; then
 		echo " 备注: 动态端口已启用...广告拦截已开启..."
 		echo
-	elif [[ $v2ray_transport_opt -ge 9 ]]; then
+	elif [[ $v2ray_transport_opt -ge 9 && $v2ray_transport_opt -le 15 ]]; then
 		echo " 备注: 动态端口已启用..."
 		echo
 	elif [[ $is_blocked_ad ]]; then
@@ -1454,11 +1595,15 @@ show_config_info() {
 		echo
 		echo -e " 备注:$red Shadowsocks Win 4.0.6 $none客户端可能无法识别该 SS 链接"
 		echo
+		if [[ $v2ray_transport_opt == 17 ]]; then
+		echo -e " 温馨提示: 使用${cyan} v2ray ssqr ${none}即可生成 Shadowsocks 配置信息二维码"
+		echo
+		fi
 	fi
 
 }
 create_qr_link_ask() {
-	if [[ $shadowsocks ]]; then
+	if [[ $shadowsocks && $v2ray_transport_opt != 17 ]]; then
 		echo
 		while :; do
 			echo -e "是否需要生成$yellow V2Ray 和 Shadowsocks $none配置信息二维码链接 [${magenta}Y/N$none]"
@@ -1469,13 +1614,13 @@ create_qr_link_ask() {
 				break
 			elif [[ $y_n == [Nn] ]]; then
 				rm -rf /etc/v2ray/vmess_qr.json
-				rm -rf /etc/v2ray/shadowray_qr.txt
+				# rm -rf /etc/v2ray/shadowray_qr.txt
 				break
 			else
 				error
 			fi
 		done
-	else
+	elif [[ $v2ray_transport_opt != 17 ]]; then
 		echo
 		while :; do
 			echo -e "是否需要生成$yellow V2Ray 配置信息 $none二维码链接 [${magenta}Y/N$none]"
@@ -1486,7 +1631,7 @@ create_qr_link_ask() {
 				break
 			elif [[ $y_n == [Nn] ]]; then
 				rm -rf /etc/v2ray/vmess_qr.json
-				rm -rf /etc/v2ray/shadowray_qr.txt
+				# rm -rf /etc/v2ray/shadowray_qr.txt
 				break
 			else
 				error
@@ -1500,49 +1645,23 @@ get_qr_link() {
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
 
-	case $v2ray_transport_opt in
-	[1-4] | 9 | 10 | 11)
-		local ios_qr=true
-		local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		cat /etc/v2ray/shadowray_qr.txt | qrencode -s 50 -o /tmp/233blog_shadowray_qr.png
-		local link3=$(curl -s --upload-file /tmp/233blog_shadowray_qr.png "https://transfer.sh/${random3}_233blog_v2ray.png")
-		;;
-	esac
-
 	if [[ $1 ]]; then
+		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
+		local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 		echo $vmess >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
+		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_233blog_v2ray.png")
 		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
 		echo "${ss}" >/tmp/233blog_shadowsocks.txt
 		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
-		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_233blog_v2ray.png")
 		local link2=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random2}_233blog_shadowsocks.png")
 		if [[ $link1 && $link2 ]]; then
 			echo
 			echo "---------- V2Ray 二维码链接 -------------"
 			echo
-			echo -e "$yellow 适用于 V2RayNG / Kitsunebi = $cyan${link1}$none"
+			echo -e "$yellow 适用于 V2RayNG v0.4.1+ / Kitsunebi = $cyan${link1}$none"
 			echo
-			if [[ $ios_qr && $link3 ]]; then
-				echo -e "$yellow 适用于 Pepi / ShadowRay = $cyan${link3}$none"
-				echo
-				echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 233 (如果你使用 Pepi / ShadowRay)"
-				if [[ $v2ray_transport_opt == 4 ]]; then
-					echo
-					echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
-					if [[ $ws_path ]]; then
-						echo
-						echo -e "$yellow 记得要将 WebSocket 路径 (WS path) 设置为: ${cyan}/${ws_path}$none"
-					fi
-				fi
-			elif [[ $ios_qr ]]; then
-				echo -e "$red 生成适用于 Pepi / ShadowRay 的二维码链接 出错.... $none 请尝试使用${cyan} v2ray qr ${none}重新生成"
-			else
-				echo -e "$red 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay...$none"
-			fi
 			echo
 			echo
 			echo "---------- Shadowsocks 二维码链接 -------------"
@@ -1571,34 +1690,19 @@ get_qr_link() {
 		rm -rf /tmp/233blog_shadowsocks.png
 		rm -rf /tmp/233blog_shadowsocks.txt
 	else
+		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
 		echo $vmess >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
-		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
 		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_233blog_v2ray.png")
+
 		if [[ $link1 ]]; then
 			echo
 			echo "---------- V2Ray 二维码链接 -------------"
 			echo
-			echo -e "$yellow 适用于 V2RayNG / Kitsunebi = $cyan${link1}$none"
+
+			echo -e "$yellow 适用于 V2RayNG v0.4.1+ / Kitsunebi = $cyan${link1}$none"
 			echo
-			if [[ $ios_qr && $link3 ]]; then
-				echo -e "$yellow 适用于 Pepi / ShadowRay = $cyan${link3}$none"
-				echo
-				echo " 请在 Pepi / ShadowRay 配置界面将 Alter Id 设置为 233 (如果你使用 Pepi / ShadowRay)"
-				if [[ $v2ray_transport_opt == 4 ]]; then
-					echo
-					echo " 请在 Pepi / ShadowRay 配置界面打开 TLS (Enable TLS) (如果你使用 Pepi / ShadowRay)"
-					if [[ $ws_path ]]; then
-						echo
-						echo -e "$yellow 记得要将 WebSocket 路径 (WS path) 设置为: ${cyan}/${ws_path}$none"
-					fi
-				fi
-			elif [[ $ios_qr ]]; then
-				echo -e "$red 生成适用于 Pepi / ShadowRay 的二维码链接 出错.... $none 请尝试使用${cyan} v2ray qr ${none}重新生成"
-			else
-				echo -e "$red 帅帅的提示...此 V2Ray 配置不支持 Pepi / ShadowRay...$none"
-			fi
 			echo
 			echo
 			echo "----------------------------------------------------------------"
@@ -1615,15 +1719,13 @@ get_qr_link() {
 			echo
 		fi
 	fi
+
 	rm -rf /tmp/233blog_v2ray.png
 	rm -rf /etc/v2ray/vmess_qr.json
 	rm -rf /etc/v2ray/vmess.txt
-	if [[ $ios_qr ]]; then
-		rm -rf /tmp/233blog_shadowray_qr.png
-		rm -rf /etc/v2ray/shadowray_qr.txt
-	fi
 
 }
+
 install() {
 	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		echo
@@ -1730,11 +1832,11 @@ uninstall() {
 				del_port $ssport
 			fi
 
-			if [[ $v2ray_transport == "4" ]]; then
+			if [[ $v2ray_transport == "4" || $v2ray_transport == 16 ]]; then
 				del_port "80"
 				del_port "443"
 				del_port $v2ray_port
-			elif [[ $v2ray_transport -ge 9 ]]; then
+			elif [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 				del_port $v2ray_port
 				del_port "multiport"
 			else
@@ -1788,11 +1890,11 @@ uninstall() {
 				del_port $ssport
 			fi
 
-			if [[ $v2ray_transport == "4" ]]; then
+			if [[ $v2ray_transport == "4" || $v2ray_transport == 16 ]]; then
 				del_port "80"
 				del_port "443"
 				del_port $v2ray_port
-			elif [[ $v2ray_transport -ge 9 ]]; then
+			elif [[ $v2ray_transport -ge 9 && $v2ray_transport -le 15 ]]; then
 				del_port $v2ray_port
 				del_port "multiport"
 			else

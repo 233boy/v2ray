@@ -14,34 +14,21 @@
         }
     },
     "outbound": {
-        "protocol": "vmess",
+        "protocol": "socks",
         "settings": {
-            "vnext": [
+            "servers": [
                 {
                     "address": "233blog.com",
                     "port": 2333,
                     "users": [
                         {
-                            "id": "23332333-2333-2333-2333-233boy233boy",
-                            "alterId": 233,
-                            "security": "auto"
+                            "user": "233blog",
+                            "pass": "233blog.com",
+                            "level": 1
                         }
                     ]
                 }
             ]
-        },
-        "streamSettings": {
-            "network": "ws",
-            "security": "tls",
-            "tlsSettings": {
-                "serverName": "233blog.com"
-            },
-            "wsSettings": {
-                "path": "/233blog",
-                "headers": {
-                    "Host": "233blog.com"
-                }
-            }
         },
         "mux": {
             "enabled": true
