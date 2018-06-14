@@ -1596,8 +1596,8 @@ show_config_info() {
 		echo -e " 备注:$red Shadowsocks Win 4.0.6 $none客户端可能无法识别该 SS 链接"
 		echo
 		if [[ $v2ray_transport_opt == 17 ]]; then
-		echo -e " 温馨提示: 使用${cyan} v2ray ssqr ${none}即可生成 Shadowsocks 配置信息二维码"
-		echo
+			echo -e " 温馨提示: 使用${cyan} v2ray ssqr ${none}即可生成 Shadowsocks 配置信息二维码"
+			echo
 		fi
 	fi
 
@@ -1648,8 +1648,8 @@ get_qr_link() {
 	if [[ $1 ]]; then
 		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
 		local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
-		echo $vmess >/etc/v2ray/vmess.txt
+		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | tr -d '\n' | base64 -w 0)"
+		echo $vmess | tr -d '\n' >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_233blog_v2ray.png")
 		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233blog_ss_${ip}"
@@ -1691,8 +1691,8 @@ get_qr_link() {
 		rm -rf /tmp/233blog_shadowsocks.txt
 	else
 		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
-		echo $vmess >/etc/v2ray/vmess.txt
+		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | tr -d '\n' | base64 -w 0)"
+		echo $vmess | tr -d '\n' >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_233blog_v2ray.png")
 
