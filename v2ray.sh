@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.30"
+_version="v2.31"
 
 cmd="apt-get"
 
@@ -318,7 +318,7 @@ get_shadowsocks_config() {
 view_shadowsocks_config_info() {
 	if [[ $shadowsocks ]]; then
 		get_ip
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233blog_ss_${ip}"
 		echo
 		echo
 		echo "---------- Shadowsocks 配置信息 -------------"
@@ -345,11 +345,11 @@ get_shadowsocks_config_qr_link() {
 		echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 		echo
 		get_ip
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233blog_ss_${ip}"
 		echo "${ss}" >/tmp/233blog_shadowsocks.txt
 		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
 
-		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
+		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
 		local link=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random}_233blog_shadowsocks.png")
 		if [[ $link ]]; then
 			echo
@@ -2528,7 +2528,7 @@ get_v2ray_config_link() {
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
-	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
+	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
 	local link=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random}_233blog_v2ray.json")
 	if [[ $link ]]; then
 		echo
@@ -2624,7 +2624,7 @@ get_v2ray_config_info_link() {
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
 	create_v2ray_config_text >/tmp/233blog_v2ray.txt
-	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
+	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
 	local link=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random}_233blog_v2ray.txt")
 	if [[ $link ]]; then
 		echo
@@ -2653,10 +2653,10 @@ get_v2ray_config_qr_link() {
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
-	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
-	echo $vmess >/etc/v2ray/vmess.txt
+	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | tr -d '\n' | base64 -w 0)"
+	echo $vmess | tr -d '\n' >/etc/v2ray/vmess.txt
 	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
-	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
+	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
 	local link=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random}_233blog_v2ray.png")
 	if [[ $link ]]; then
 		echo
@@ -2679,17 +2679,17 @@ get_v2ray_config_qr_link() {
 		echo
 	fi
 	rm -rf /tmp/233blog_v2ray.png
-	rm -rf /etc/v2ray/vmess_qr.json
-	rm -rf /etc/v2ray/vmess.txt
+	# rm -rf /etc/v2ray/vmess_qr.json
+	# rm -rf /etc/v2ray/vmess.txt
 }
 get_v2ray_vmess_URL_link() {
 	socks_check
 	create_vmess_URL_config
-	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
+	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
 	echo
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
 	echo
-	echo $vmess
+	echo -e ${cyan}$vmess${none}
 	echo
 	rm -rf /etc/v2ray/vmess_qr.json
 }
@@ -3508,13 +3508,13 @@ _boom_() {
 
 	create_vmess_URL_config
 
-	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
+	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
 	echo $vmess >/etc/v2ray/vmess.txt
 	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 
-	local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-	local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
+	local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
+	local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
+	local random3=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
 	local link1=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random1}_233blog_v2ray.json")
 	local link2=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random2}_233blog_v2ray.txt")
 	local link3=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random3}_233blog_v2ray.png")

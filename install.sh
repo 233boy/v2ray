@@ -1579,7 +1579,7 @@ show_config_info() {
 		echo
 	fi
 	if [ $shadowsocks ]; then
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233blog_ss_${ip}"
 		echo
 		echo "---------- Shadowsocks 配置信息 -------------"
 		echo
@@ -1646,13 +1646,13 @@ get_qr_link() {
 	echo
 
 	if [[ $1 ]]; then
-		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
+		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
+		local random2=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
+		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
 		echo $vmess >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_233blog_v2ray.png")
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64)#233blog_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233blog_ss_${ip}"
 		echo "${ss}" >/tmp/233blog_shadowsocks.txt
 		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
 		local link2=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random2}_233blog_shadowsocks.png")
@@ -1690,8 +1690,8 @@ get_qr_link() {
 		rm -rf /tmp/233blog_shadowsocks.png
 		rm -rf /tmp/233blog_shadowsocks.txt
 	else
-		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64)
-		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64)"
+		local random1=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
+		local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
 		echo $vmess >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_233blog_v2ray.png")
