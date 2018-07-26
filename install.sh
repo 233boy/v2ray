@@ -1040,7 +1040,7 @@ install_v2ray() {
 				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
 				;;
 			9)
-				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/sblocked_hosts/erver/tcp_dynamic.json"
+				v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/blocked_hosts/erver/tcp_dynamic.json"
 				v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
 				;;
 			10)
