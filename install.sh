@@ -159,6 +159,8 @@ v2ray_dynamic_port_start() {
 		$v2ray_port)
 			echo
 			echo " 不能和 V2Ray 端口一毛一样...."
+			echo
+			echo -e " 当前 V2Ray 端口：${cyan}$v2ray_port${none}"
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
@@ -194,10 +196,14 @@ v2ray_dynamic_port_end() {
 			if [[ $v2ray_dynamic_port_end_input -le $v2ray_dynamic_port_start_input ]]; then
 				echo
 				echo " 不能小于或等于 V2Ray 动态端口开始范围"
+				echo
+				echo -e " 当前 V2Ray 动态端口开始：${cyan}$v2ray_dynamic_port_start_input${none}"
 				error
 			elif [ $lt_v2ray_port ] && [[ ${v2ray_dynamic_port_end_input} -ge $v2ray_port ]]; then
 				echo
 				echo " V2Ray 动态端口结束范围 不能包括 V2Ray 端口..."
+				echo
+				echo -e " 当前 V2Ray 端口：${cyan}$v2ray_port${none}"
 				error
 			else
 				echo
@@ -279,7 +285,7 @@ tls_config() {
 			;;
 		443)
 			echo
-			echo " ..都说了不能选择 433 端口了咯....."
+			echo " ..都说了不能选择 443 端口了咯....."
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
