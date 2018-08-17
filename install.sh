@@ -45,6 +45,7 @@ old_id="23332333-2333-2333-2333-233boy233boy"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
 backup="/etc/v2ray/233blog_v2ray_backup.conf"
+_v2ray_sh="/usr/local/sbin/v2ray"
 
 transport=(
 	TCP
@@ -1205,8 +1206,8 @@ config() {
 	cp -f $v2ray_server_config_file $v2ray_server_config
 	cp -f $v2ray_client_config_file $v2ray_client_config
 	cp -f /etc/v2ray/233boy/v2ray/config/backup.conf $backup
-	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh /usr/local/bin/v2ray
-	chmod +x /usr/local/bin/v2ray
+	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
+	chmod +x $_v2ray_sh
 
 	local multi_port="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
 	if [ $shadowsocks ]; then
@@ -1856,7 +1857,7 @@ uninstall() {
 			[ $v2ray_pid ] && do_service stop v2ray
 
 			rm -rf /usr/bin/v2ray
-			rm -rf /usr/local/bin/v2ray
+			rm -rf $_v2ray_sh
 			rm -rf /etc/v2ray
 			rm -rf /var/log/v2ray
 
@@ -1913,7 +1914,7 @@ uninstall() {
 			# [ $v2ray_pid ] && systemctl stop v2ray
 			[ $v2ray_pid ] && do_service stop v2ray
 			rm -rf /usr/bin/v2ray
-			rm -rf /usr/local/bin/v2ray
+			rm -rf $_v2ray_sh
 			rm -rf /etc/v2ray
 			rm -rf /var/log/v2ray
 			if [[ $systemd ]]; then

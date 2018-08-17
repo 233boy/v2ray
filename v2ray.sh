@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.34"
+_version="v2.35"
 
 cmd="apt-get"
 
@@ -83,6 +83,12 @@ v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
 v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
 caddy_pid=$(pgrep "caddy")
+_v2ray_sh="/usr/local/sbin/v2ray"
+
+if [[ ! -f $_v2ray_sh ]]; then
+	mv -f /usr/local/bin/v2ray $_v2ray_sh
+	chmod +x $_v2ray_sh
+fi
 
 if [ $v2ray_pid ]; then
 	v2ray_status="$green正在运行$none"
@@ -2937,8 +2943,8 @@ update_v2ray.sh() {
 		echo
 		cd /etc/v2ray/233boy/v2ray
 		git pull
-		cp -f /etc/v2ray/233boy/v2ray/v2ray.sh /usr/local/bin/v2ray
-		chmod +x /usr/local/bin/v2ray
+		cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
+		chmod +x $_v2ray_sh
 		echo
 		echo -e "$green 更新成功啦...当前 V2Ray 管理脚本 版本: ${cyan}$latest_version$none"
 		echo
@@ -3027,7 +3033,7 @@ uninstall_v2ray() {
 		[ $v2ray_pid ] && do_service stop v2ray
 
 		rm -rf /usr/bin/v2ray
-		rm -rf /usr/local/bin/v2ray
+		rm -rf $_v2ray_sh
 		rm -rf /etc/v2ray
 		rm -rf /var/log/v2ray
 
@@ -3083,7 +3089,7 @@ uninstall_v2ray() {
 		[ $v2ray_pid ] && do_service stop v2ray
 
 		rm -rf /usr/bin/v2ray
-		rm -rf /usr/local/bin/v2ray
+		rm -rf $_v2ray_sh
 		rm -rf /etc/v2ray
 		rm -rf /var/log/v2ray
 		if [[ $systemd ]]; then
