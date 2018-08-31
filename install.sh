@@ -773,6 +773,7 @@ install_caddy() {
 	if [[ $systemd ]]; then
 		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
 		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
+		sed -i "s/on-failure/always/" /lib/systemd/system/caddy.service
 		systemctl enable caddy
 	else
 		cp -f ${caddy_tmp}init/linux-sysvinit/caddy /etc/init.d/caddy
@@ -794,7 +795,8 @@ install_caddy() {
 
 }
 caddy_config() {
-	local email=$(shuf -i1-10000000000 -n1)
+	# local email=$(shuf -i1-10000000000 -n1)
+	local email=$(((RANDOM << 22)))
 	case $v2ray_transport_opt in
 	4)
 		if [[ $path ]]; then
@@ -914,6 +916,7 @@ install_v2ray() {
 
 	if [[ $systemd ]]; then
 		cp -f "/tmp/v2ray/v2ray-${v2ray_ver}-linux-${v2ray_bit}/systemd/v2ray.service" "/lib/systemd/system/"
+		sed -i "s/on-failure/always/" /lib/systemd/system/v2ray.service
 		systemctl enable v2ray
 	else
 		apt-get install -y daemon

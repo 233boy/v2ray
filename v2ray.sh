@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.36"
+_version="v2.37"
 
 cmd="apt-get"
 
@@ -1457,6 +1457,7 @@ install_caddy() {
 	if [[ $systemd ]]; then
 		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
 		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
+		sed -i "s/on-failure/always/" /lib/systemd/system/caddy.service
 		systemctl enable caddy
 	else
 		cp -f ${caddy_tmp}init/linux-sysvinit/caddy /etc/init.d/caddy
@@ -1477,7 +1478,8 @@ install_caddy() {
 
 }
 caddy_config() {
-	local email=$(shuf -i1-10000000000 -n1)
+	# local email=$(shuf -i1-10000000000 -n1)
+	local email=$(((RANDOM << 22)))
 	case $v2ray_transport in
 	4)
 		if [[ $is_path ]]; then
