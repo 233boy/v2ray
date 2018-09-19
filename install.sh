@@ -1673,6 +1673,8 @@ get_qr_link() {
 			echo -e "$yellow 适用于 V2RayNG v0.4.1+ / Kitsunebi = $cyan${link1}$none"
 			echo
 			echo
+			echo -e "$red 友情提醒: 请务必核对扫码结果 (V2RayNG 除外) $none"
+			echo
 			echo
 			echo "---------- Shadowsocks 二维码链接 -------------"
 			echo
@@ -1710,9 +1712,10 @@ get_qr_link() {
 			echo
 			echo "---------- V2Ray 二维码链接 -------------"
 			echo
-
 			echo -e "$yellow 适用于 V2RayNG v0.4.1+ / Kitsunebi = $cyan${link1}$none"
 			echo
+			echo
+			echo -e "$red 友情提醒: 请务必核对扫码结果 (V2RayNG 除外) $none"
 			echo
 			echo
 			echo "----------------------------------------------------------------"

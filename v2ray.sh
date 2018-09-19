@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.38"
+_version="v2.39"
 
 cmd="apt-get"
 
@@ -2688,6 +2688,9 @@ get_v2ray_config_qr_link() {
 		echo -e "$yellow 适用于 V2RayNG v0.4.1+ / Kitsunebi = $cyan$link$none"
 		echo
 		echo
+		echo -e "$red 友情提醒: 请务必核对扫码结果 (V2RayNG 除外) $none"
+		echo
+		echo
 		echo " V2Ray 客户端使用教程: https://v2ray666.com/post/4/"
 		echo
 		echo "备注...链接将在 14 天后失效"
@@ -2702,8 +2705,8 @@ get_v2ray_config_qr_link() {
 		echo
 	fi
 	rm -rf /tmp/233blog_v2ray.png
-	# rm -rf /etc/v2ray/vmess_qr.json
-	# rm -rf /etc/v2ray/vmess.txt
+	rm -rf /etc/v2ray/vmess_qr.json
+	rm -rf /etc/v2ray/vmess.txt
 }
 get_v2ray_vmess_URL_link() {
 	socks_check
