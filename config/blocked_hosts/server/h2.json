@@ -18,39 +18,21 @@
             ]
         },
         "streamSettings": {
-            "network": "tcp",
-            "tcpSettings": {
-                "header": {
-                    "type": "http",
-                    "response": {
-                        "version": "1.1",
-                        "status": "200",
-                        "reason": "OK",
-                        "headers": {
-                            "Content-encoding": [
-                                "gzip"
-                            ],
-                            "Content-Type": [
-                                "text/html; charset=utf-8"
-                            ],
-                            "Cache-Control": [
-                                "no-cache"
-                            ],
-                            "Vary": [
-                                "Accept-Encoding"
-                            ],
-                            "X-Frame-Options": [
-                                "deny"
-                            ],
-                            "X-XSS-Protection": [
-                                "1; mode=block"
-                            ],
-                            "X-content-type-options": [
-                                "nosniff"
-                            ]
-                        }
+            "network": "h2",
+            "httpSettings": {
+                "host": [
+                    "233blog.com"
+                ],
+                "path": "/233blog"
+            },
+            "security": "tls",
+            "tlsSettings": {
+                "certificates": [
+                    {
+                        "certificateFile": "/etc/v2ray/233boy/v2ray/config/233blog.com.cer",
+                        "keyFile": "/etc/v2ray/233boy/v2ray/config/233blog.com.key"
                     }
-                }
+                ]
             }
         }
     },
@@ -58,19 +40,6 @@
         "protocol": "freedom",
         "settings": {}
     },
-    "inboundDetour": [
-        {
-            "protocol": "shadowsocks",
-            "port": 6666,
-            "settings": {
-                "method": "chacha20-ietf",
-                "password": "233blog.com",
-                "udp": true,
-                "level": 1,
-                "ota": false
-            }
-        }
-    ],
     "outboundDetour": [
         {
             "protocol": "blackhole",

@@ -6,52 +6,18 @@
     },
     "inbound": {
         "port": 2333,
-        "protocol": "vmess",
+        "protocol": "socks",
         "settings": {
-            "udp": true,
-            "clients": [
+            "auth": "password",
+            "accounts": [
                 {
-                    "id": "23332333-2333-2333-2333-233boy233boy",
-                    "level": 1,
-                    "alterId": 233
+                    "user": "233blog",
+                    "pass": "233blog.com"
                 }
-            ]
-        },
-        "streamSettings": {
-            "network": "tcp",
-            "tcpSettings": {
-                "header": {
-                    "type": "http",
-                    "response": {
-                        "version": "1.1",
-                        "status": "200",
-                        "reason": "OK",
-                        "headers": {
-                            "Content-encoding": [
-                                "gzip"
-                            ],
-                            "Content-Type": [
-                                "text/html; charset=utf-8"
-                            ],
-                            "Cache-Control": [
-                                "no-cache"
-                            ],
-                            "Vary": [
-                                "Accept-Encoding"
-                            ],
-                            "X-Frame-Options": [
-                                "deny"
-                            ],
-                            "X-XSS-Protection": [
-                                "1; mode=block"
-                            ],
-                            "X-content-type-options": [
-                                "nosniff"
-                            ]
-                        }
-                    }
-                }
-            }
+            ],
+            "udp": true,
+            "timeout": 0,
+            "userLevel": 1
         }
     },
     "outbound": {
