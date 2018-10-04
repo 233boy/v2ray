@@ -894,6 +894,15 @@ install_v2ray() {
 		git clone https://github.com/233boy/v2ray /etc/v2ray/233boy/v2ray
 	fi
 
+	if [[ ! -d /etc/v2ray/233boy/v2ray ]]; then
+		echo
+		echo -e "$red 哎呀呀...克隆脚本仓库出错了...$none"
+		echo
+		echo -e " 温馨提示..... 请尝试自行安装 Git: ${green}$cmd install -y git $none 之后再安装此脚本"
+		echo
+		exit 1
+	fi
+
 	[ -d /tmp/v2ray ] && rm -rf /tmp/v2ray
 	mkdir -p /tmp/v2ray
 
