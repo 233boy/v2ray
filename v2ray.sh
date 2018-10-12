@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.40"
+_version="v2.41"
 
 cmd="apt-get"
 
@@ -2903,7 +2903,19 @@ update_v2ray() {
 	mkdir -p /tmp/v2ray
 
 	v2ray_tmp_file="/tmp/v2ray/v2ray.zip"
-	v2ray_latest_ver="$(curl -s "https://api.github.com/repos/v2ray/v2ray-core/releases/latest?r=$RANDOM" | grep 'tag_name' | cut -d\" -f4)"
+	v2ray_latest_ver="$(curl -H 'Cache-Control: no-cache' -s "https://api.github.com/repos/v2ray/v2ray-core/releases/latest" | grep 'tag_name' | cut -d\" -f4)"
+
+	if [[ ! $v2ray_latest_ver ]]; then
+		echo
+		echo -e " $red获取 V2Ray 最新版本失败!!!$none"
+		echo
+		echo -e " 请尝试执行如下命令: $green echo 'nameserver 8.8.8.8' >/etc/resolv.conf $none"
+		echo
+		echo " 然后再继续...."
+		echo
+		exit 1
+	fi
+
 	if [[ $v2ray_ver != $v2ray_latest_ver ]]; then
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
@@ -2918,9 +2930,9 @@ update_v2ray() {
 
 		unzip $v2ray_tmp_file -d "/tmp/v2ray/"
 		mkdir -p /usr/bin/v2ray
-		cp -f "/tmp/v2ray/v2ray-${v2ray_latest_ver}-linux-${v2ray_bit}/v2ray" "/usr/bin/v2ray/v2ray"
+		cp -f "/tmp/v2ray/v2ray" "/usr/bin/v2ray/v2ray"
 		chmod +x "/usr/bin/v2ray/v2ray"
-		cp -f "/tmp/v2ray/v2ray-${v2ray_latest_ver}-linux-${v2ray_bit}/v2ctl" "/usr/bin/v2ray/v2ctl"
+		cp -f "/tmp/v2ray/v2ctl" "/usr/bin/v2ray/v2ctl"
 		chmod +x "/usr/bin/v2ray/v2ctl"
 		# systemctl restart v2ray
 		# service v2ray restart >/dev/null 2>&1
