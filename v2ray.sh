@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.41"
+_version="v2.42"
 
 cmd="apt-get"
 
@@ -47,7 +47,7 @@ backup="/etc/v2ray/233blog_v2ray_backup.conf"
 if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 
 	. $backup
-	v2ray_ver=$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)
+	v2ray_ver="v$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
 	if [[ ! $username ]]; then
 		. /etc/v2ray/233boy/v2ray/tools/support_socks.sh
 	fi
