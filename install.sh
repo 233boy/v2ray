@@ -98,8 +98,8 @@ v2ray_config() {
 		echo "备注1: 含有 [dynamicPort] 的即启用动态端口.."
 		echo "备注2: [utp | srtp | wechat-video] 分别为 伪装成 [BT下载 | 视频通话 | 微信视频通话]"
 		echo
-		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport_opt
-		[ -z "$v2ray_transport_opt" ] && v2ray_transport_opt=1
+		read -p "$(echo -e "(默认协议: ${cyan}WebSocket$none)"):" v2ray_transport_opt
+		[ -z "$v2ray_transport_opt" ] && v2ray_transport_opt=3
 		case $v2ray_transport_opt in
 		[1-9] | 1[0-7])
 			echo
