@@ -1,3 +1,7 @@
+#!/bin/bash
+[[ $ws_path_status ]] && path_status=$ws_path_status
+[[ $ws_path ]] && path=$ws_path
+cat >$backup <<-EOF
 # -----------------------------------
 # 警告...请不要修改或删除这个文件...谢谢
 # 警告...请不要修改或删除这个文件...谢谢
@@ -13,55 +17,59 @@
 # 那就把 V2Ray 配置文件的一些重要参数提取出来
 # 然后..在修改 V2Ray 配置的时候再重写一下就 OK 啦...
 # 嗯…笨笨的方法
+
 # ---- V2Ray 传输协议 -----
-v2ray_transport=1
+v2ray_transport=$v2ray_transport
 
 #---- V2Ray 端口 -----
-v2ray_port=80
+v2ray_port=$v2ray_port
 
 #---- UUID -----
-v2ray_id=fea41d6f-9764-4822-9289-f007409ff55b
+v2ray_id=$v2ray_id
 
 #---- alterId -----
-alterId=255
+alterId=$alterId
+
 #---- V2Ray 动态端口开始 -----
-v2ray_dynamicPort_start=10000
+v2ray_dynamicPort_start=$v2ray_dynamicPort_start
 
 #---- V2Ray 动态端口结束 -----
-v2ray_dynamicPort_end=20000
+v2ray_dynamicPort_end=$v2ray_dynamicPort_end
 
 #---- 域名 -----
-domain=jamesmarc.com
+domain=$domain
 
 #---- caddy -----
-caddy_status=
+caddy_status=$caddy_status
 
 #---- Shadowsocks -----
-shadowsocks_status=
+shadowsocks_status=$shadowsocks_status
 
 #---- Shadowsocks 端口 -----
-ssport=6666
+ssport=$ssport
 
 #---- Shadowsocks 密码 -----
-sspass=jamesmarc.com
+sspass=$sspass
 
 #---- Shadowsocks 加密协议 -----
-ssciphers=chacha20-ietf
+ssciphers=$ssciphers
 
 #---- 屏蔽广告 -----
-blocked_ad_status=true
+blocked_ad_status=$blocked_ad_status
 
 #---- 网站伪装 -----
-path_status=
+path_status=$path_status
 
 #---- 伪装的路径 -----
-path=233blog
+path=$path
 
 #---- 伪装的网址 -----
-proxy_site=https://liyafly.com
+proxy_site=$proxy_site
 
-#---- Socks 用户名 -----
-username=jamesmarc
+#---- Socks5 用户名 -----
+username=233blog
 
-#---- Socks 密码 -----
-userpass=jamesmarc.com
+#---- Socks5 密码 -----
+userpass=233blog.com
+		EOF
+. $backup
