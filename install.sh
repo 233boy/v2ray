@@ -1433,7 +1433,7 @@ try_enable_bbr() {
 }
 
 get_ip() {
-	ip=$(curl -s ipinfo.io/ip)
+	ip=$(curl -s https://ipinfo.io/ip)
 }
 
 error() {
