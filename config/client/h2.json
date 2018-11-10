@@ -31,16 +31,13 @@
             ]
         },
         "streamSettings": {
-            "network": "ws",
+            "network": "h2",
             "security": "tls",
-            "tlsSettings": {
-                "serverName": "233blog.com"
-            },
-            "wsSettings": {
-                "path": "/233blog",
-                "headers": {
-                    "Host": "233blog.com"
-                }
+            "httpSettings": {
+                "host": [
+                    "233blog.com"
+                ],
+                "path": "/233blog"
             }
         },
         "mux": {
