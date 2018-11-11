@@ -1,0 +1,38 @@
+{
+	"port": 2333, // v2ray port
+	"protocol": "vmess",
+	"settings": {
+		"clients": [
+			{
+				"id": "e55c8d17-2cf3-b21a-bcf1-eeacb011ed79", // uuid
+				"level": 1,
+				"alterId": 233 // alterid
+			}
+		]
+	},
+	"streamSettings": {
+		"network": "h2",
+		"httpSettings": {
+			"host": [
+				"233blog.com" // domain
+			],
+			"path": "/233blog" // path
+		},
+		"security": "tls",
+		"tlsSettings": {
+			"certificates": [
+				{
+					"certificateFile": "/etc/v2ray/233boy/v2ray/config/233blog.com.cer",
+					"keyFile": "/etc/v2ray/233boy/v2ray/config/233blog.com.key"
+				}
+			]
+		}
+	},
+	"sniffing": {
+		"enabled": true,
+		"destOverride": [
+			"http",
+			"tls"
+		]
+	}
+}

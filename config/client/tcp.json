@@ -3,38 +3,45 @@
         "error": "error.log",
         "loglevel": "warning"
     },
-    "inbound": {
-        "port": 2333,
-        "listen": "127.0.0.1",
-        "protocol": "socks",
-        "settings": {
-            "auth": "noauth",
-            "udp": true,
-            "ip": "127.0.0.1"
-        }
-    },
-    "outbound": {
-        "protocol": "vmess",
-        "settings": {
-            "vnext": [
-                {
-                    "address": "233blog.com",
-                    "port": 2333,
-                    "users": [
-                        {
-                            "id": "23332333-2333-2333-2333-233boy233boy",
-                            "alterId": 233,
-                            "security": "auto"
-                        }
-                    ]
-                }
-            ]
+    "outbounds": [
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "233blog.com",
+                        "port": 2333,
+                        "users": [
+                            {
+                                "id": "e55c8d17-2cf3-b21a-bcf1-eeacb011ed79",
+                                "alterId": 233,
+                                "security": "auto"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "mux": {
+                "enabled": true
+            }
         },
-        "mux": {
-            "enabled": true
+        {
+            "protocol": "freedom",
+            "settings": {},
+            "tag": "direct"
         }
-    },
-    "inboundDetour": [
+    ],
+    "inbounds": [
+        {
+            "port": 2333,
+            "listen": "127.0.0.1",
+            "protocol": "socks",
+            "settings": {
+                "auth": "noauth",
+                "udp": true,
+                "ip": "127.0.0.1"
+            }
+        },
         {
             "port": 6666,
             "listen": "127.0.0.1",
@@ -46,13 +53,6 @@
             }
         }
     ],
-    "outboundDetour": [
-        {
-            "protocol": "freedom",
-            "settings": {},
-            "tag": "direct"
-        }
-    ],
     "dns": {
         "servers": [
             "8.8.8.8",
@@ -61,44 +61,41 @@
         ]
     },
     "routing": {
-        "strategy": "rules",
-        "settings": {
-            "domainStrategy": "IPIfNonMatch",
-            "rules": [
-                {
-                    "type": "field",
-                    "ip": [
-                        "0.0.0.0/8",
-                        "10.0.0.0/8",
-                        "100.64.0.0/10",
-                        "127.0.0.0/8",
-                        "169.254.0.0/16",
-                        "172.16.0.0/12",
-                        "192.0.0.0/24",
-                        "192.0.2.0/24",
-                        "192.168.0.0/16",
-                        "198.18.0.0/15",
-                        "198.51.100.0/24",
-                        "203.0.113.0/24",
-                        "::1/128",
-                        "fc00::/7",
-                        "fe80::/10",
-                        "geoip:cn"
-                    ],
-                    "domain": [
-                        "geosite:cn"
-                    ],
-                    "outboundTag": "direct"
-                },
-                {
-                    "type": "chinasites",
-                    "outboundTag": "direct"
-                },
-                {
-                    "type": "chinaip",
-                    "outboundTag": "direct"
-                }
-            ]
-        }
+        "domainStrategy": "IPOnDemand",	
+        "rules": [
+            {
+                "type": "field",
+                "ip": [
+                    "0.0.0.0/8",
+                    "10.0.0.0/8",
+                    "100.64.0.0/10",
+                    "127.0.0.0/8",
+                    "169.254.0.0/16",
+                    "172.16.0.0/12",
+                    "192.0.0.0/24",
+                    "192.0.2.0/24",
+                    "192.168.0.0/16",
+                    "198.18.0.0/15",
+                    "198.51.100.0/24",
+                    "203.0.113.0/24",
+                    "::1/128",
+                    "fc00::/7",
+                    "fe80::/10",
+                    "geoip:cn"
+                ],
+                "domain": [
+                    "geosite:cn"
+                ],
+                "outboundTag": "direct"
+            },
+            {
+                "type": "chinasites",
+                "outboundTag": "direct"
+            },
+            {
+                "type": "chinaip",
+                "outboundTag": "direct"
+            }
+        ]
     }
 }
