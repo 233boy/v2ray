@@ -973,7 +973,14 @@ uninstall() {
 
 	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		. $backup
-		_load uninstall.sh
+		if [[ $mark ]]; then
+			_load uninstall.sh
+		else
+			echo
+			echo -e " $yellow输入 ${cyan}v2ray uninstall${none} $yellow即可卸载${none}"
+			echo
+		fi
+
 	elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
 		echo
 		echo -e " $yellow输入 ${cyan}v2ray uninstall${none} $yellow即可卸载${none}"

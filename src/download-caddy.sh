@@ -27,7 +27,7 @@ _install_caddy_service() {
 	if [[ $systemd ]]; then
 		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
 		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
-		sed -i "s/on-failure/always/" /lib/systemd/system/caddy.service
+		sed -i "s/on-abnormal/always/" /lib/systemd/system/caddy.service
 		systemctl enable caddy
 	else
 		cp -f ${caddy_tmp}init/linux-sysvinit/caddy /etc/init.d/caddy
