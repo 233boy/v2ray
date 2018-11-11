@@ -290,6 +290,7 @@ tls_config() {
 			error
 		else
 			if [[ "$record" == [Yy] ]]; then
+				domain_check
 				echo
 				echo
 				echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
@@ -362,10 +363,10 @@ path_config_ask() {
 	echo
 	while :; do
 		echo -e "是否开启 网站伪装 和 路径分流 [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认: [${cyan}N$none]):")" is_path
-		[[ -z $is_path ]] && is_path="n"
+		read -p "$(echo -e "(默认: [${cyan}N$none]):")" path_ask
+		[[ -z $path_ask ]] && path_ask="n"
 
-		case $is_path in
+		case $path_ask in
 		Y | y)
 			path_config
 			break
@@ -701,7 +702,7 @@ install_caddy() {
 }
 caddy_config() {
 	# local email=$(shuf -i1-10000000000 -n1)
-	_load caddy_config.sh
+	_load caddy-config.sh
 
 	# systemctl restart caddy
 	do_service restart caddy
@@ -953,7 +954,7 @@ install() {
 	shadowsocks_config
 	install_info
 	try_enable_bbr
-	[[ $caddy ]] && domain_check
+	# [[ $caddy ]] && domain_check
 	install_v2ray
 	if [[ $caddy || $v2ray_port == "80" ]]; then
 		if [[ $cmd == "yum" ]]; then

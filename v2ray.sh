@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.03"
+_version="v3.04"
 
 cmd="apt-get"
 
@@ -1007,6 +1007,7 @@ tls_config() {
 			error
 		else
 			if [[ "$record" == [Yy] ]]; then
+				domain_check
 				echo
 				echo
 				echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
@@ -1023,7 +1024,7 @@ tls_config() {
 	if [[ $caddy ]]; then
 		path_config_ask
 		pause
-		domain_check
+		# domain_check
 		backup_config v2ray_transport domain
 		if [[ $new_path ]]; then
 			backup_config +path
@@ -1252,7 +1253,7 @@ install_caddy() {
 }
 caddy_config() {
 	# local email=$(shuf -i1-10000000000 -n1)
-	_load caddy_config.sh
+	_load caddy-config.sh
 	# systemctl restart caddy
 	do_service restart caddy
 }
@@ -1603,13 +1604,14 @@ change_domain() {
 				error
 			else
 				if [[ "$record" == [Yy] ]]; then
+					domain_check
 					echo
 					echo
 					echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
 					echo "----------------------------------------------------------------"
 					echo
 					pause
-					domain_check
+					# domain_check
 					backup_config domain
 					domain=$new_domain
 					caddy_config
