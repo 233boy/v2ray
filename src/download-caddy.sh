@@ -1,6 +1,7 @@
 _download_caddy_file() {
 	local caddy_tmp="/tmp/install_caddy/"
 	local caddy_tmp_file="/tmp/install_caddy/caddy.tar.gz"
+	[[ -d $caddy_tmp ]] && rm -rf $caddy_tmp
 	if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
 		local caddy_download_link="https://caddyserver.com/download/linux/386?license=personal"
 	else
@@ -19,7 +20,6 @@ _download_caddy_file() {
 	if [[ ! -f /usr/local/bin/caddy ]]; then
 		echo -e "$red 安装 Caddy 出错！" && exit 1
 	fi
-    rm -rf $caddy_tmp
 }
 _install_caddy_service() {
 	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
