@@ -71,8 +71,8 @@ uuid=$(cat /proc/sys/kernel/random/uuid)
 old_id="e55c8d17-2cf3-b21a-bcf1-eeacb011ed79"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
-v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
-caddy_pid=$(pgrep "caddy")
+v2ray_pid=$(pgrep -f /usr/bin/v2ray/v2ray)
+caddy_pid=$(pgrep -f /usr/local/bin/caddy)
 _v2ray_sh="/usr/local/sbin/v2ray"
 v2ray_ver="$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
 . /etc/v2ray/233boy/v2ray/src/init.sh
@@ -346,7 +346,7 @@ shadowsocks_config() {
 			config
 			clear
 			view_shadowsocks_config_info
-			get_shadowsocks_config_qr_ask
+			# get_shadowsocks_config_qr_ask
 			break
 		elif [[ "$install_shadowsocks" == [Nn] ]]; then
 			echo
@@ -531,7 +531,7 @@ change_shadowsocks_port() {
 				config
 				clear
 				view_shadowsocks_config_info
-				get_shadowsocks_config_qr_ask
+				# get_shadowsocks_config_qr_ask
 				break
 			fi
 			;;
@@ -572,7 +572,7 @@ change_shadowsocks_password() {
 			config
 			clear
 			view_shadowsocks_config_info
-			get_shadowsocks_config_qr_ask
+			# get_shadowsocks_config_qr_ask
 			break
 			;;
 		esac
@@ -612,7 +612,7 @@ change_shadowsocks_ciphers() {
 			config
 			clear
 			view_shadowsocks_config_info
-			get_shadowsocks_config_qr_ask
+			# get_shadowsocks_config_qr_ask
 			break
 			;;
 		*)
@@ -800,7 +800,7 @@ change_v2ray_port() {
 					config
 					clear
 					view_v2ray_config_info
-					download_v2ray_config_ask
+					# download_v2ray_config_ask
 					break
 				fi
 				;;
@@ -940,7 +940,7 @@ change_v2ray_transport() {
 		config
 		clear
 		view_v2ray_config_info
-		download_v2ray_config_ask
+		# download_v2ray_config_ask
 	else
 		old_transport
 		backup_config v2ray_transport
@@ -948,7 +948,7 @@ change_v2ray_transport() {
 		config
 		clear
 		view_v2ray_config_info
-		download_v2ray_config_ask
+		# download_v2ray_config_ask
 	fi
 
 }
@@ -1053,7 +1053,7 @@ tls_config() {
 		config
 		clear
 		view_v2ray_config_info
-		download_v2ray_config_ask
+		# download_v2ray_config_ask
 	else
 		if [[ $v2ray_transport_opt == 5 ]]; then
 			path_config_ask
@@ -1079,7 +1079,7 @@ tls_config() {
 			caddy=true
 			clear
 			view_v2ray_config_info
-			download_v2ray_config_ask
+			# download_v2ray_config_ask
 		else
 			auto_tls_config
 		fi
@@ -1135,7 +1135,7 @@ auto_tls_config() {
 				caddy=true
 				clear
 				view_v2ray_config_info
-				download_v2ray_config_ask
+				# download_v2ray_config_ask
 				break
 			elif [[ "$auto_install_caddy" == [Nn] ]]; then
 				echo
@@ -1156,7 +1156,7 @@ auto_tls_config() {
 				config
 				clear
 				view_v2ray_config_info
-				download_v2ray_config_ask
+				# download_v2ray_config_ask
 				break
 			else
 				error
@@ -1557,7 +1557,7 @@ change_v2ray_id() {
 				config
 				clear
 				view_v2ray_config_info
-				download_v2ray_config_ask
+				# download_v2ray_config_ask
 				break
 			elif [[ $y_n == [Nn] ]]; then
 				echo
@@ -1621,7 +1621,7 @@ change_domain() {
 					config
 					clear
 					view_v2ray_config_info
-					download_v2ray_config_ask
+					# download_v2ray_config_ask
 					break
 				else
 					error
@@ -1683,7 +1683,7 @@ change_path_config() {
 		config
 		clear
 		view_v2ray_config_info
-		download_v2ray_config_ask
+		# download_v2ray_config_ask
 	elif [[ $v2ray_transport == [45] ]] && [[ $caddy ]]; then
 		path_config_ask
 		if [[ $new_path ]]; then
@@ -1695,7 +1695,7 @@ change_path_config() {
 			config
 			clear
 			view_v2ray_config_info
-			download_v2ray_config_ask
+			# download_v2ray_config_ask
 		else
 			echo
 			echo
@@ -1772,7 +1772,7 @@ change_proxy_site_config() {
 			config
 			clear
 			view_v2ray_config_info
-			download_v2ray_config_ask
+			# download_v2ray_config_ask
 		else
 			echo
 			echo
@@ -1835,7 +1835,7 @@ disable_path() {
 				config
 				clear
 				view_v2ray_config_info
-				download_v2ray_config_ask
+				# download_v2ray_config_ask
 				break
 			elif [[ "$y_n" == [Nn] ]]; then
 				echo
@@ -1971,7 +1971,7 @@ change_v2ray_alterId() {
 			config
 			clear
 			view_v2ray_config_info
-			download_v2ray_config_ask
+			# download_v2ray_config_ask
 			break
 			;;
 		*)
@@ -2015,7 +2015,7 @@ custom_uuid() {
 			config
 			clear
 			view_v2ray_config_info
-			download_v2ray_config_ask
+			# download_v2ray_config_ask
 			break
 			;;
 		esac
@@ -2964,7 +2964,7 @@ reuuid)
 	config
 	clear
 	view_v2ray_config_info
-	download_v2ray_config_ask
+	# download_v2ray_config_ask
 	;;
 v | version)
 	echo
