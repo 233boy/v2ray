@@ -885,7 +885,7 @@ install_v2ray() {
 			echo
 			echo -e "$red 哎呀呀...安装失败了咯...$none"
 			echo
-			echo -e " 请确保你有完整的上传 v2ray66.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
+			echo -e " 请确保你有完整的上传 233yes.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
 			echo
 			exit 1
 		fi
@@ -1509,7 +1509,7 @@ show_config_info() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "v2ray66.com_${domain}",
+			"ps": "233yes.com_${domain}",
 			"add": "${domain}",
 			"port": "443",
 			"id": "${uuid}",
@@ -1525,7 +1525,7 @@ show_config_info() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "v2ray66.com_${ip}",
+			"ps": "233yes.com_${ip}",
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${uuid}",
@@ -1544,10 +1544,10 @@ show_config_info() {
 	echo
 	echo -e " $yellow输入 ${cyan}v2ray${none} $yellow即可管理 V2Ray${none}"
 	echo
-	echo -e " ${yellow}V2Ray 客户端使用教程: https://v2ray66.com/post/4/$none"
+	echo -e " ${yellow}V2Ray 客户端使用教程: https://233yes.com/post/4/$none"
 	echo
 	if [[ $v2ray_transport_opt == "4" && ! $caddy ]]; then
-		echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://v2ray66.com/post/3/$none"
+		echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://233yes.com/post/3/$none"
 		echo
 	fi
 	echo "---------- V2Ray 配置信息 -------------"
@@ -1611,7 +1611,7 @@ show_config_info() {
 		echo
 	fi
 	if [ $shadowsocks ]; then
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray66.com_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233yes.com_ss_${ip}"
 		echo
 		echo "---------- Shadowsocks 配置信息 -------------"
 		echo
@@ -1684,7 +1684,7 @@ get_qr_link() {
 		echo $vmess | tr -d '\n' >/etc/v2ray/vmess.txt
 		cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 		local link1=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random1}_v2ray666_v2ray.png")
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray66.com_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233yes.com_ss_${ip}"
 		echo "${ss}" >/tmp/233blog_shadowsocks.txt
 		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
 		local link2=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random2}_v2ray666_shadowsocks.png")
@@ -2140,7 +2140,7 @@ uninstall() {
 		echo -e "
 		$red 大胸弟...你貌似毛有安装 V2Ray ....卸载个鸡鸡哦...$none
 
-		备注...仅支持卸载使用我 (v2ray66.com) 提供的 V2Ray 一键安装脚本
+		备注...仅支持卸载使用我 (233yes.com) 提供的 V2Ray 一键安装脚本
 		" && exit 1
 	fi
 
@@ -2172,11 +2172,11 @@ esac
 clear
 while :; do
 	echo
-	echo "........... V2Ray 一键安装脚本 & 管理脚本 by v2ray66.com .........."
+	echo "........... V2Ray 一键安装脚本 & 管理脚本 by 233yes.com .........."
 	echo
-	echo "帮助说明: https://v2ray66.com/post/1/"
+	echo "帮助说明: https://233yes.com/post/1/"
 	echo
-	echo "搭建教程: https://v2ray66.com/post/2/"
+	echo "搭建教程: https://233yes.com/post/2/"
 	echo
 	echo " 1. 安装"
 	echo
