@@ -2927,7 +2927,6 @@ reload)
 	[[ $v2ray_transport == [45] && $caddy ]] && caddy_config
 	clear
 	view_v2ray_config_info
-	download_v2ray_config_ask
 	;;
 log)
 	view_v2ray_log
