@@ -74,10 +74,13 @@ v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
 v2ray_pid=$(ps ux | grep "/usr/bin/v2ray/v2ray" | grep -v grep | awk '{print $2}')
 caddy_pid=$(pgrep "caddy")
 _v2ray_sh="/usr/local/sbin/v2ray"
-v2ray_ver="v$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
+v2ray_ver="$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
 . /etc/v2ray/233boy/v2ray/src/init.sh
 _test=true
 
+if [[ $v2ray_ver != v* ]]; then
+    v2ray_ver="v$v2ray_ver"
+fi
 if [[ ! -f $_v2ray_sh ]]; then
 	mv -f /usr/local/bin/v2ray $_v2ray_sh
 	chmod +x $_v2ray_sh

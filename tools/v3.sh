@@ -12,6 +12,9 @@ case $v2ray_transport in
 17)
 	_transport=1
 	;;
+*)
+	_transport=$v2ray_transport
+	;;
 esac
 
 if [[ $v2ray_transport == 17 ]]; then
