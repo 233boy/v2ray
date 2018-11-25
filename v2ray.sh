@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.45"
+_version="v2.46"
 
 cmd="apt-get"
 
@@ -3792,6 +3792,9 @@ reload)
 	clear
 	view_v2ray_config_info
 	download_v2ray_config_ask
+	;;
+time)
+	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
 	;;
 log)
 	view_v2ray_log
