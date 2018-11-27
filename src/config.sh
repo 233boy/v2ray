@@ -22,5 +22,3 @@ _load mtproto-config.sh
 
 # custom config
 _load custom_config.sh
-
-
