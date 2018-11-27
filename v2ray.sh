@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.06"
+_version="v3.07-test"
 
 cmd="apt-get"
 
@@ -79,7 +79,7 @@ v2ray_ver="$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
 _test=true
 
 if [[ $v2ray_ver != v* ]]; then
-    v2ray_ver="v$v2ray_ver"
+	v2ray_ver="v$v2ray_ver"
 fi
 if [[ ! -f $_v2ray_sh ]]; then
 	mv -f /usr/local/bin/v2ray $_v2ray_sh
@@ -2785,23 +2785,27 @@ menu() {
 		echo
 		echo "捐助 V2Ray: https://www.v2ray.com/chapter_00/02_donate.html"
 		echo
-		echo -e "$yellow 1. $none查看 V2Ray 配置"
+		echo -e "$yellow  1. $none查看 V2Ray 配置"
 		echo
-		echo -e "$yellow 2. $none修改 V2Ray 配置"
+		echo -e "$yellow  2. $none修改 V2Ray 配置"
 		echo
-		echo -e "$yellow 3. $none下载 V2Ray 配置 / 生成配置信息链接 / 生成二维码链接"
+		echo -e "$yellow  3. $none下载 V2Ray 配置 / 生成配置信息链接 / 生成二维码链接"
 		echo
-		echo -e "$yellow 4. $none查看 Shadowsocks 配置 / 生成二维码链接"
+		echo -e "$yellow  4. $none查看 Shadowsocks 配置 / 生成二维码链接"
 		echo
-		echo -e "$yellow 5. $none修改 Shadowsocks 配置"
+		echo -e "$yellow  5. $none修改 Shadowsocks 配置"
 		echo
-		echo -e "$yellow 6. $none启动 / 停止 / 重启 / 查看日志"
+		echo -e "$yellow  6. $none查看 MTProto 配置 / 修改 MTProto 配置"
 		echo
-		echo -e "$yellow 7. $none更新 V2Ray / 更新 V2Ray 管理脚本"
+		echo -e "$yellow  7. $none查看 Socks5 配置 / 修改 Socks5 配置"
 		echo
-		echo -e "$yellow 8. $none卸载 V2Ray"
+		echo -e "$yellow  8. $none启动 / 停止 / 重启 / 查看日志"
 		echo
-		echo -e "$yellow 9. $none其他"
+		echo -e "$yellow  9. $none更新 V2Ray / 更新 V2Ray 管理脚本"
+		echo
+		echo -e "$yellow 10. $none卸载 V2Ray"
+		echo
+		echo -e "$yellow 11. $none其他"
 		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
@@ -2831,18 +2835,28 @@ menu() {
 				break
 				;;
 			6)
-				v2ray_service
+				_load mtproto.sh
+				_mtproto_main
 				break
 				;;
 			7)
-				update
+				_load socks.sh
+				_socks_main
 				break
 				;;
 			8)
-				uninstall_v2ray
+				v2ray_service
 				break
 				;;
 			9)
+				update
+				break
+				;;
+			10)
+				uninstall_v2ray
+				break
+				;;
+			11)
 				other
 				break
 				;;
