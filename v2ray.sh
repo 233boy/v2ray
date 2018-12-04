@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.07-test"
+_version="v3.08-test"
 
 cmd="apt-get"
 
@@ -59,7 +59,7 @@ fi
 if [[ $mark != "v3" ]]; then
 	. /etc/v2ray/233boy/v2ray/tools/v3.sh
 fi
-if [[ $v2ray_transport -ge 12 ]]; then
+if [[ $v2ray_transport -ge 18 ]]; then
 	dynamicPort=true
 	port_range="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
 fi
@@ -98,29 +98,7 @@ else
 	caddy_run_status="$red未在运行$none"
 fi
 
-transport=(
-	TCP
-	TCP_HTTP
-	WebSocket
-	"WebSocket + TLS"
-	HTTP/2
-	mKCP
-	mKCP_utp
-	mKCP_srtp
-	mKCP_wechat-video
-	mKCP_dtls
-	mKCP_wireguard
-	TCP_dynamicPort
-	TCP_HTTP_dynamicPort
-	WebSocket_dynamicPort
-	mKCP_dynamicPort
-	mKCP_utp_dynamicPort
-	mKCP_srtp_dynamicPort
-	mKCP_wechat-video_dynamicPort
-	mKCP_dtls_dynamicPort
-	mKCP_wireguard_dynamicPort
-)
-
+_load transport.sh
 ciphers=(
 	aes-128-cfb
 	aes-256-cfb
@@ -928,7 +906,7 @@ change_v2ray_transport() {
 
 	if [[ $v2ray_transport_opt == [45] ]]; then
 		tls_config
-	elif [[ $v2ray_transport_opt -ge 12 ]]; then
+	elif [[ $v2ray_transport_opt -ge 18 ]]; then
 		v2ray_dynamic_port_start
 		v2ray_dynamic_port_end
 		pause
@@ -973,7 +951,7 @@ old_transport() {
 		if [[ $is_path ]]; then
 			backup_config -path
 		fi
-	elif [[ $v2ray_transport -ge 12 ]]; then
+	elif [[ $v2ray_transport -ge 18 ]]; then
 		del_port "multiport"
 	fi
 }
@@ -1036,7 +1014,7 @@ tls_config() {
 			is_path=true
 		fi
 
-		if [[ $v2ray_transport -ge 12 ]]; then
+		if [[ $v2ray_transport -ge 18 ]]; then
 			del_port "multiport"
 		fi
 		domain=$new_domain
@@ -1066,7 +1044,7 @@ tls_config() {
 				proxy_site=$new_proxy_site
 				is_path=true
 			fi
-			if [[ $v2ray_transport -ge 12 ]]; then
+			if [[ $v2ray_transport -ge 18 ]]; then
 				del_port "multiport"
 			fi
 			domain=$new_domain
@@ -1122,7 +1100,7 @@ auto_tls_config() {
 					proxy_site=$new_proxy_site
 					is_path=true
 				fi
-				if [[ $v2ray_transport -ge 12 ]]; then
+				if [[ $v2ray_transport -ge 18 ]]; then
 					del_port "multiport"
 				fi
 				domain=$new_domain
@@ -1146,7 +1124,7 @@ auto_tls_config() {
 				pause
 				domain_check
 				backup_config v2ray_transport domain
-				if [[ $v2ray_transport -ge 12 ]]; then
+				if [[ $v2ray_transport -ge 18 ]]; then
 					del_port "multiport"
 				fi
 				domain=$new_domain
@@ -1377,7 +1355,7 @@ v2ray_dynamic_port_end() {
 
 }
 change_v2ray_dynamicport() {
-	if [[ $v2ray_transport -ge 12 ]]; then
+	if [[ $v2ray_transport -ge 18 ]]; then
 		change_v2ray_dynamic_port_start
 		change_v2ray_dynamic_port_end
 		pause
@@ -2282,10 +2260,10 @@ create_v2ray_config_text() {
 		echo "伪装类型 (header type) = ${header}"
 		echo
 	fi
-	if [[ $v2ray_transport -ge 12 ]] && [[ $ban_ad ]]; then
+	if [[ $v2ray_transport -ge 18 ]] && [[ $ban_ad ]]; then
 		echo "备注: 动态端口已启用...广告拦截已开启..."
 		echo
-	elif [[ $v2ray_transport -ge 12 ]]; then
+	elif [[ $v2ray_transport -ge 18 ]]; then
 		echo "备注: 动态端口已启用..."
 		echo
 	elif [[ $ban_ad ]]; then

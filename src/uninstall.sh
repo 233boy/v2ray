@@ -72,7 +72,7 @@ if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
 		del_port "80"
 		del_port "443"
 		del_port $v2ray_port
-	elif [[ $v2ray_transport -ge 12 ]]; then
+	elif [[ $v2ray_transport -ge 18 ]]; then
 		del_port $v2ray_port
 		del_port "multiport"
 	else
@@ -134,7 +134,7 @@ elif [[ $is_uninstall_v2ray ]]; then
 		del_port "80"
 		del_port "443"
 		del_port $v2ray_port
-	elif [[ $v2ray_transport -ge 12 ]]; then
+	elif [[ $v2ray_transport -ge 18 ]]; then
 		del_port $v2ray_port
 		del_port "multiport"
 	else

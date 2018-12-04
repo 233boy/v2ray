@@ -7,41 +7,64 @@ _v2_args() {
 		_path="/"
 	fi
 	case $v2ray_transport in
-	1 | 12)
+	1 | 18)
 		net="tcp"
 		;;
-	2 | 13)
+	2 | 19)
 		net="tcp"
 		header="http"
 		host="www.baidu.com"
 		;;
-	3 | 4 | 14)
+	3 | 4 | 20)
 		net="ws"
 		;;
 	5)
 		net="h2"
 		;;
-	6 | 15)
+	6 | 21)
 		net="kcp"
 		;;
-	7 | 16)
+	7 | 22)
 		net="kcp"
 		header="utp"
 		;;
-	8 | 17)
+	8 | 23)
 		net="kcp"
 		header="srtp"
 		;;
-	9 | 18)
+	9 | 24)
 		net="kcp"
 		header="wechat-video"
 		;;
-	10 | 19)
+	10 | 25)
 		net="kcp"
 		header="dtls"
 		;;
-	11 | 20)
+	11 | 26)
 		net="kcp"
+		header="wireguard"
+		;;
+	12 | 27)
+		net="quic"
+		;;
+	13 | 28)
+		net="quic"
+		header="utp"
+		;;
+	14 | 29)
+		net="quic"
+		header="srtp"
+		;;
+	15 | 30)
+		net="quic"
+		header="wechat-video"
+		;;
+	16 | 31)
+		net="quic"
+		header="dtls"
+		;;
+	17 | 32)
+		net="quic"
 		header="wireguard"
 		;;
 	esac
@@ -94,10 +117,10 @@ _v2_info() {
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
 	fi
-	if [[ $v2ray_transport -ge 12 ]] && [[ $ban_ad ]]; then
+	if [[ $v2ray_transport -ge 18 ]] && [[ $ban_ad ]]; then
 		echo " 备注: 动态端口已启用...广告拦截已开启..."
 		echo
-	elif [[ $v2ray_transport -ge 12 ]]; then
+	elif [[ $v2ray_transport -ge 18 ]]; then
 		echo " 备注: 动态端口已启用..."
 		echo
 	elif [[ $ban_ad ]]; then

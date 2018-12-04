@@ -58,6 +58,12 @@ transport=(
 	mKCP_wechat-video
 	mKCP_dtls
 	mKCP_wireguard
+	QUIC
+	QUIC_utp
+	QUIC_srtp
+	QUIC_wechat-video
+	QUIC_dtls
+	QUIC_wireguard
 	TCP_dynamicPort
 	TCP_HTTP_dynamicPort
 	WebSocket_dynamicPort
@@ -67,6 +73,12 @@ transport=(
 	mKCP_wechat-video_dynamicPort
 	mKCP_dtls_dynamicPort
 	mKCP_wireguard_dynamicPort
+	QUIC_dynamicPort
+	QUIC_utp_dynamicPort
+	QUIC_srtp_dynamicPort
+	QUIC_wechat-video_dynamicPort
+	QUIC_dtls_dynamicPort
+	QUIC_wireguard_dynamicPort
 )
 
 ciphers=(
@@ -147,7 +159,7 @@ v2ray_port_config() {
 				;;
 			esac
 		done
-		if [[ $v2ray_transport -ge 12 ]]; then
+		if [[ $v2ray_transport -ge 18 ]]; then
 			v2ray_dynamic_port_start
 		fi
 		;;
@@ -633,7 +645,7 @@ install_info() {
 			echo
 			echo -e "$yellow 路径分流 = ${cyan}/${path}$none"
 		fi
-	elif [[ $v2ray_transport -ge 12 ]]; then
+	elif [[ $v2ray_transport -ge 18 ]]; then
 		echo
 		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
 		echo
@@ -832,7 +844,7 @@ config() {
 	v2ray_id=$uuid
 	alterId=233
 	ban_bt=true
-	if [[ $v2ray_transport -ge 12 ]]; then
+	if [[ $v2ray_transport -ge 18 ]]; then
 		v2ray_dynamicPort_start=${v2ray_dynamic_port_start_input}
 		v2ray_dynamicPort_end=${v2ray_dynamic_port_end_input}
 	fi
@@ -860,7 +872,7 @@ config() {
 		open_port "80"
 		open_port "443"
 		open_port $v2ray_port
-	elif [[ $v2ray_transport -ge 12 ]]; then
+	elif [[ $v2ray_transport -ge 18 ]]; then
 		open_port $v2ray_port
 		open_port "multiport"
 	else
@@ -874,7 +886,7 @@ config() {
 
 backup_config() {
 	sed -i "18s/=1/=$v2ray_transport/; 21s/=2333/=$v2ray_port/; 24s/=$old_id/=$uuid/" $backup
-	if [[ $v2ray_transport -ge 12 ]]; then
+	if [[ $v2ray_transport -ge 18 ]]; then
 		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
 	fi
 	if [[ $shadowsocks ]]; then

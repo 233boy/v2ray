@@ -24,21 +24,29 @@ case $v2ray_transport in
 	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/kcp.json"
 	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
 	;;
-12)
+1[2-7])
+	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/quic.json"
+	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/quic.json"
+	;;
+18)
 	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/dynamic/tcp.json"
 	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/tcp.json"
 	;;
-13)
+19)
 	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/dynamic/http.json"
 	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/http.json"
 	;;
-14)
+20)
 	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/dynamic/ws.json"
 	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/ws.json"
 	;;
-*)
+2[1-6])
 	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/dynamic/kcp.json"
 	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
+	;;
+*)
+	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/dynamic/quic.json"
+	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/quic.json"
 	;;
 esac
 
@@ -50,12 +58,12 @@ cp -f $v2ray_client_config_file $v2ray_client_config
 sed -i "9s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/; 16s/233/$alterId/" $v2ray_server_config
 
 # change dynamic port
-if [[ $v2ray_transport -ge 12 ]]; then
+if [[ $v2ray_transport -ge 18 ]]; then
 	local multi_port="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
 	sed -i "s/10000-20000/$multi_port/" $v2ray_server_config
 fi
 
-# change domain and path, or mkcp headers
+# change domain and path, or header type
 case $v2ray_transport in
 5)
 	sed -i "24s/233blog.com/$domain/" $v2ray_server_config
@@ -65,23 +73,23 @@ case $v2ray_transport in
 		sed -i "26s/233blog//" $v2ray_server_config
 	fi
 	;;
-7 | 16)
+7 | 13 | 22 | 28)
 	sed -i "s/none/utp/" $v2ray_server_config
 	sed -i "s/none/utp/" $v2ray_client_config
 	;;
-8 | 17)
+8 | 14 | 23 | 29)
 	sed -i "s/none/srtp/" $v2ray_server_config
 	sed -i "s/none/srtp/" $v2ray_client_config
 	;;
-9 | 18)
+9 | 15 | 24 | 30)
 	sed -i "s/none/wechat-video/" $v2ray_server_config
 	sed -i "s/none/wechat-video/" $v2ray_client_config
 	;;
-10 | 19)
+10 | 16 | 25 | 31)
 	sed -i "s/none/dtls/" $v2ray_server_config
 	sed -i "s/none/dtls/" $v2ray_client_config
 	;;
-11 | 20)
+11 | 17 | 26 | 32)
 	sed -i "s/none/wireguard/" $v2ray_server_config
 	sed -i "s/none/wireguard/" $v2ray_client_config
 	;;
