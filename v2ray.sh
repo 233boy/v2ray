@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.09-test"
+_version="v3.10-test"
 
 cmd="apt-get"
 
@@ -209,7 +209,7 @@ get_shadowsocks_config_qr_link() {
 		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
 
 		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-		local link=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random}_v2ray666_shadowsocks.png")
+		local link=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random}_233yes_shadowsocks.png")
 		if [[ $link ]]; then
 			echo
 			echo "---------- Shadowsocks 二维码链接 -------------"
@@ -2186,7 +2186,7 @@ get_v2ray_config_link() {
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-	local link=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random}_v2ray666_v2ray.json")
+	local link=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random}_233yes_v2ray.json")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 客户端配置文件链接 -------------"
@@ -2281,7 +2281,7 @@ get_v2ray_config_info_link() {
 	echo
 	create_v2ray_config_text >/tmp/233blog_v2ray.txt
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-	local link=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random}_v2ray666_v2ray.txt")
+	local link=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random}_233yes_v2ray.txt")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 配置信息链接-------------"
@@ -2312,7 +2312,7 @@ get_v2ray_config_qr_link() {
 	echo $vmess | tr -d '\n' >/etc/v2ray/vmess.txt
 	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-	local link=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random}_v2ray666_v2ray.png")
+	local link=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random}_233yes_v2ray.png")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 二维码链接 -------------"
