@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.08-test"
+_version="v3.09-test"
 
 cmd="apt-get"
 
@@ -887,7 +887,7 @@ change_v2ray_transport() {
 					break
 				fi
 				;;
-			[1-9] | 1[0-9] | 20)
+			[1-9] | [1-2][0-9] | 3[0-2])
 				echo
 				echo
 				echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport_opt - 1]}$none"

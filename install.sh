@@ -119,7 +119,7 @@ v2ray_config() {
 		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport
 		[ -z "$v2ray_transport" ] && v2ray_transport=1
 		case $v2ray_transport in
-		[1-9] | 1[0-9] | 20)
+		[1-9] | [1-2][0-9] | 3[0-2])
 			echo
 			echo
 			echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport - 1]}$none"
