@@ -4,7 +4,7 @@ case $v2ray_transport in
 	_transport=$(($v2ray_transport + 1))
 	;;
 9 | 1[0-5])
-	_transport=$(($v2ray_transport + 3))
+	_transport=$(($v2ray_transport + 9))
 	;;
 16)
 	_transport=5
