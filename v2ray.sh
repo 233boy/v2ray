@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v2.47"
+_version="v2.48"
 
 cmd="apt-get"
 
@@ -2801,76 +2801,76 @@ uninstall_lotserver() {
 }
 
 open_port() {
-	if [[ $1 != "multiport" ]]; then
-		# if [[ $cmd == "apt-get" ]]; then
-		iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-		iptables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-		ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-		ip6tables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-
-		# iptables-save >/etc/iptables.rules.v4
-		# ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	firewall-cmd --permanent --zone=public --add-port=$1/tcp
-		# 	firewall-cmd --permanent --zone=public --add-port=$1/udp
-		# 	firewall-cmd --reload
-		# fi
-	else
-		# if [[ $cmd == "apt-get" ]]; then
-		local multiport="${v2ray_dynamic_port_start_input}:${v2ray_dynamic_port_end_input}"
-		iptables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-		iptables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-		ip6tables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-		ip6tables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-
-		# iptables-save >/etc/iptables.rules.v4
-		# ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	local multi_port="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
-		# 	firewall-cmd --permanent --zone=public --add-port=$multi_port/tcp
-		# 	firewall-cmd --permanent --zone=public --add-port=$multi_port/udp
-		# 	firewall-cmd --reload
-		# fi
-	fi
 	if [[ $cmd == "apt-get" ]]; then
+		if [[ $1 != "multiport" ]]; then
+			# if [[ $cmd == "apt-get" ]]; then
+			iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
+			iptables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
+			ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
+			ip6tables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
+
+			# iptables-save >/etc/iptables.rules.v4
+			# ip6tables-save >/etc/iptables.rules.v6
+			# else
+			# 	firewall-cmd --permanent --zone=public --add-port=$1/tcp
+			# 	firewall-cmd --permanent --zone=public --add-port=$1/udp
+			# 	firewall-cmd --reload
+			# fi
+		else
+			# if [[ $cmd == "apt-get" ]]; then
+			local multiport="${v2ray_dynamic_port_start_input}:${v2ray_dynamic_port_end_input}"
+			iptables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
+			iptables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
+			ip6tables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
+			ip6tables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
+
+			# iptables-save >/etc/iptables.rules.v4
+			# ip6tables-save >/etc/iptables.rules.v6
+			# else
+			# 	local multi_port="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
+			# 	firewall-cmd --permanent --zone=public --add-port=$multi_port/tcp
+			# 	firewall-cmd --permanent --zone=public --add-port=$multi_port/udp
+			# 	firewall-cmd --reload
+			# fi
+		fi
 		iptables-save >/etc/iptables.rules.v4
 		ip6tables-save >/etc/iptables.rules.v6
-	else
-		service iptables save >/dev/null 2>&1
-		service ip6tables save >/dev/null 2>&1
+		# else
+		# 	service iptables save >/dev/null 2>&1
+		# 	service ip6tables save >/dev/null 2>&1
 	fi
 
 }
 del_port() {
-	if [[ $1 != "multiport" ]]; then
-		# if [[ $cmd == "apt-get" ]]; then
-		iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-		iptables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-		ip6tables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-		ip6tables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-		# else
-		# 	firewall-cmd --permanent --zone=public --remove-port=$1/tcp
-		# 	firewall-cmd --permanent --zone=public --remove-port=$1/udp
-		# fi
-	else
-		# if [[ $cmd == "apt-get" ]]; then
-		local ports="${v2ray_dynamicPort_start}:${v2ray_dynamicPort_end}"
-		iptables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-		iptables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-		ip6tables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-		ip6tables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-		# else
-		# 	local ports="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
-		# 	firewall-cmd --permanent --zone=public --remove-port=$ports/tcp
-		# 	firewall-cmd --permanent --zone=public --remove-port=$ports/udp
-		# fi
-	fi
 	if [[ $cmd == "apt-get" ]]; then
+		if [[ $1 != "multiport" ]]; then
+			# if [[ $cmd == "apt-get" ]]; then
+			iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
+			iptables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
+			ip6tables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
+			ip6tables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
+			# else
+			# 	firewall-cmd --permanent --zone=public --remove-port=$1/tcp
+			# 	firewall-cmd --permanent --zone=public --remove-port=$1/udp
+			# fi
+		else
+			# if [[ $cmd == "apt-get" ]]; then
+			local ports="${v2ray_dynamicPort_start}:${v2ray_dynamicPort_end}"
+			iptables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
+			iptables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
+			ip6tables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
+			ip6tables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
+			# else
+			# 	local ports="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
+			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/tcp
+			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/udp
+			# fi
+		fi
 		iptables-save >/etc/iptables.rules.v4
 		ip6tables-save >/etc/iptables.rules.v6
-	else
-		service iptables save >/dev/null 2>&1
-		service ip6tables save >/dev/null 2>&1
+		# else
+		# 	service iptables save >/dev/null 2>&1
+		# 	service ip6tables save >/dev/null 2>&1
 	fi
 }
 update() {
