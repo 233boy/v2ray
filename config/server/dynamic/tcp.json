@@ -15,43 +15,13 @@
 						"level": 1,
 						"alterId": 233
 					}
-				]
+				],
+				"detour": {
+					"to": "dynamic"
+				}
 			},
 			"streamSettings": {
-				"network": "tcp",
-				"tcpSettings": {
-					"header": {
-						"type": "http",
-						"response": {
-							"version": "1.1",
-							"status": "200",
-							"reason": "OK",
-							"headers": {
-								"Content-encoding": [
-									"gzip"
-								],
-								"Content-Type": [
-									"text/html; charset=utf-8"
-								],
-								"Cache-Control": [
-									"no-cache"
-								],
-								"Vary": [
-									"Accept-Encoding"
-								],
-								"X-Frame-Options": [
-									"deny"
-								],
-								"X-XSS-Protection": [
-									"1; mode=block"
-								],
-								"X-content-type-options": [
-									"nosniff"
-								]
-							}
-						}
-					}
-				}
+				"network": "tcp"
 			},
 			"sniffing": {
 				"enabled": true,
@@ -60,7 +30,23 @@
 					"tls"
 				]
 			}
-		}
+		},
+        {
+            "protocol": "vmess",
+            "port": "10000-20000",
+            "tag": "dynamic",
+            "settings": {
+                "default": {
+                    "level": 1,
+                    "alterId": 32
+                }
+            },
+            "allocate": {
+                "strategy": "random",
+                "concurrency": 2,
+                "refresh": 5
+            }
+        }
 		//include_ss
 		//include_socks
 		//include_mtproto

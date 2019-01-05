@@ -1,0 +1,15 @@
+{
+    "type": "field",
+    "domain": [
+        "domain:google.com",
+        "domain:github.com", 
+        "youtube.com"
+    ],
+    "outboundTag": "direct" // don't change this tag
+}, // ignore this error
+{
+    "type": "field",
+    "network": "tcp,udp",
+    "outboundTag": "blocked" // don't change this tag
+}
+// https://v2ray.com/chapter_02/03_routing.html

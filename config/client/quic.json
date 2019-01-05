@@ -22,17 +22,14 @@
                 ]
             },
             "streamSettings": {
-                "network": "ws",
-                "security": "tls",
-                "tlsSettings": {
-                    "serverName": "233blog.com"
-                },
-                "wsSettings": {
-                    "path": "/233blog",
-                    "headers": {
-                        "Host": "233blog.com"
-                    }
-                }
+				"network": "quic",
+				"quicSettings": {
+					"security": "aes-128-gcm",
+					"key": "",
+					"header": {
+						"type": "none"
+					}
+				}
             },
             "mux": {
                 "enabled": true

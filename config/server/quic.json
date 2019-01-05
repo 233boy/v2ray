@@ -18,38 +18,12 @@
 				]
 			},
 			"streamSettings": {
-				"network": "tcp",
-				"tcpSettings": {
+				"network": "quic",
+				"quicSettings": {
+					"security": "aes-128-gcm",
+					"key": "",
 					"header": {
-						"type": "http",
-						"response": {
-							"version": "1.1",
-							"status": "200",
-							"reason": "OK",
-							"headers": {
-								"Content-encoding": [
-									"gzip"
-								],
-								"Content-Type": [
-									"text/html; charset=utf-8"
-								],
-								"Cache-Control": [
-									"no-cache"
-								],
-								"Vary": [
-									"Accept-Encoding"
-								],
-								"X-Frame-Options": [
-									"deny"
-								],
-								"X-XSS-Protection": [
-									"1; mode=block"
-								],
-								"X-content-type-options": [
-									"nosniff"
-								]
-							}
-						}
+						"type": "none"
 					}
 				}
 			},
@@ -76,8 +50,8 @@
 			"protocol": "blackhole",
 			"settings": {},
 			"tag": "blocked"
-		},
-		{
+        },
+        {
 			"protocol": "freedom",
 			"settings": {},
 			"tag": "direct"
@@ -98,7 +72,7 @@
 		]
 	},
 	"routing": {
-		"domainStrategy": "IPOnDemand",
+		"domainStrategy": "IPOnDemand",		
 		"rules": [
 			{
 				"type": "field",
