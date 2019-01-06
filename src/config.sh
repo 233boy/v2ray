@@ -2,6 +2,9 @@
 # vmess
 _load vmess-config.sh
 
+# ban domain
+_load ban_xx.sh
+
 # ban bt
 _load ban_bt.sh
 
