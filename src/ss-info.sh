@@ -1,6 +1,6 @@
 [[ -z $ip ]] && get_ip
 if [[ $shadowsocks ]]; then
-	local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233yes.com_ss_${ip}"
+	local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#233now.com_ss_${ip}"
 	echo
 	echo "---------- Shadowsocks 配置信息 -------------"
 	echo
