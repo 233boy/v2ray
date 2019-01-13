@@ -16,7 +16,7 @@ _mtproto_info() {
 	echo
 	echo -e "$yellow 密钥 (Secret) = $cyan$mtproto_secret$none"
 	echo
-	echo -e "$yellow Telegram 代理配置链接 = ${cyan}tg://proxy?server=${ip}&port=${mtproto_port}&secret=${mtproto_secret}$none"
+	echo -e "$yellow Telegram 代理配置链接 = ${cyan}https://t.me/proxy?server=${ip}&port=${mtproto_port}&secret=${mtproto_secret}$none"
 	echo
 }
 _mtproto_main() {
@@ -70,7 +70,7 @@ _mtproto_ask() {
 	echo -e " $red大佬...你没有配置 Telegram MTProto $none...不过现在想要配置的话也是可以的 ^_^"
 	echo
 	echo
-	new_mtproto_secret=$(date | md5sum | cut -c-32)
+	new_mtproto_secret="dd$(date | md5sum | cut -c-30)"
 	while :; do
 		echo -e "是否配置 ${yellow}Telegram MTProto${none} [${magenta}Y/N$none]"
 		read -p "$(echo -e "(默认 [${cyan}N$none]):") " new_mtproto
@@ -191,7 +191,7 @@ mtproto_port_config() {
 
 }
 change_mtproto_secret() {
-	new_mtproto_secret=$(date | md5sum | cut -c-32)
+	new_mtproto_secret="dd$(date | md5sum | cut -c-30)"
 	echo
 	while :; do
 		read -p "$(echo -e "是否更改 ${yellow}Telegram MTProto 密钥${none} [${magenta}Y/N$none]"): " y_n
