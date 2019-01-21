@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.04"
+_version="v3.05"
 
 cmd="apt-get"
 
@@ -2941,7 +2941,7 @@ reinstall)
 	if [[ $is_uninstall_v2ray ]]; then
 		cd
 		cd - >/dev/null 2>&1
-		bash <(curl -s -L https://233blog.com/v2ray.sh)
+		bash <(curl -s -L https://git.io/v2ray.sh)
 	fi
 	;;
 [aA][Ii] | [Dd])
