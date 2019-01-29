@@ -745,18 +745,20 @@ install_v2ray() {
 			echo
 			echo -e "$red 哎呀呀...安装失败了咯...$none"
 			echo
-			echo -e " 请确保你有完整的上传 233yes.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
+			echo -e " 请确保你有完整的上传 v2ray6.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
 			echo
 			exit 1
 		fi
 		mkdir -p /etc/v2ray/233boy/v2ray
 		cp -rf $(pwd)/* /etc/v2ray/233boy/v2ray
 	else
+		pushd /tmp
 		if [[ $_test ]]; then
 			git clone https://github.com/233boy/v2ray -b test /etc/v2ray/233boy/v2ray
 		else
 			git clone https://github.com/233boy/v2ray /etc/v2ray/233boy/v2ray
 		fi
+		popd
 
 	fi
 
@@ -1019,7 +1021,7 @@ uninstall() {
 		echo -e "
 		$red 大胸弟...你貌似毛有安装 V2Ray ....卸载个鸡鸡哦...$none
 
-		备注...仅支持卸载使用我 (233yes.com) 提供的 V2Ray 一键安装脚本
+		备注...仅支持卸载使用我 (v2ray6.com) 提供的 V2Ray 一键安装脚本
 		" && exit 1
 	fi
 
@@ -1051,11 +1053,11 @@ esac
 clear
 while :; do
 	echo
-	echo "........... V2Ray 一键安装脚本 & 管理脚本 by 233yes.com .........."
+	echo "........... V2Ray 一键安装脚本 & 管理脚本 by v2ray6.com .........."
 	echo
-	echo "帮助说明: https://233yes.com/post/1/"
+	echo "帮助说明: https://v2ray6.com/post/1/"
 	echo
-	echo "搭建教程: https://233yes.com/post/2/"
+	echo "搭建教程: https://v2ray6.com/post/2/"
 	echo
 	echo " 1. 安装"
 	echo
