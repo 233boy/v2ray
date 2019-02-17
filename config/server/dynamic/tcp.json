@@ -50,7 +50,7 @@
 		//include_ss
 		//include_socks
 		//include_mtproto
-		//include_config
+		//include_in_config
 		//
 	],
 	"outbounds": [
@@ -73,13 +73,15 @@
 			"settings": {},
 			"tag": "tg-out"
 		}
+		//include_out_config
+		//
 	],
 	"dns": {
 		"server": [
-			"8.8.8.8",
-			"8.8.4.4",
 			"1.1.1.1",
 			"1.0.0.1",
+			"8.8.8.8",
+			"8.8.4.4",
 			"localhost"
 		]
 	},
