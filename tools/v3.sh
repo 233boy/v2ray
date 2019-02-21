@@ -74,6 +74,9 @@ sspass=$sspass
 #---- Shadowsocks 加密协议 -----
 ssciphers=$ssciphers
 
+#---- Shadowsocks V2ray  -----
+ssray=$ssray_status
+
 #---- Shadowsocks V2ray-plugin 端口 -----
 ssrayport=$ssrayport
 

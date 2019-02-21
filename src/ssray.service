@@ -12,7 +12,7 @@ User=root
 Group=root
 
 EnvironmentFile=/etc/v2ray/233boy/ssray.conf
-ExecStart=/usr/local/bin/v2ray-plugin
+ExecStart=/usr/local/bin/v2ray-plugin -cert /etc/v2ray/233boy/v2ray/config/233blog.com.cer -key /etc/v2ray/233boy/v2ray/config/233blog.com.key
 ExecReload=/bin/kill -USR1 $MAINPID
 
 ; Use graceful shutdown with a reasonable timeout

@@ -9,7 +9,7 @@ if [[ $shadowsocks ]]; then
 	rm -rf $ss_file_tmp
 
 
-	if [[ $install_ssray ]]; then
+	if [[ $ssray ]]; then
 		ssray_conf=/etc/v2ray/233boy/ssray.conf
 		sed -i "s/##REMOTEPORT##/${ssrayport}/; s/##LOCALPORT##/${ssport}/; s/##OPTION##/${ssrayopt}/;" $ssray_conf
 	fi

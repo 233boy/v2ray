@@ -629,7 +629,11 @@ shadowsocks_ciphers_config() {
 }
 
 ssray_config() {
-
+	echo
+	echo
+	echo
+	echo
+	echo
 	echo
 
 	while :; do
@@ -750,7 +754,7 @@ ssray_proto_config() {
 	done
 }
 
-do_install_ssray() {
+install_ssray() {
 	_load download-ssray.sh
 	_download_ssray_file
 	_install_ssray_service
@@ -812,7 +816,7 @@ install_info() {
 		echo
 		echo -e "$yellow Shadowsocks 加密协议 = $cyan${ssciphers}$none"
 
-		if [[ $install_ssray ]]; then
+		if [[ $ssray ]]; then
 			echo
 			echo -e "$yellow v2ray-plugin 端口 = $cyan$ssrayport$none"
 			echo
@@ -1023,7 +1027,7 @@ config() {
 
 	if [[ $shadowsocks ]]; then
 		open_port $ssport
-		if [[ $install_ssray ]]; then
+		if [[ $ssray ]]; then
 			open_port $ssrayport
 			do_service restart ssray
 		fi
@@ -1150,7 +1154,7 @@ install() {
 		fi
 	fi
 	[[ $caddy ]] && install_caddy
-	[[ $install_ssray ]] && do_install_ssray
+	[[ $ssray ]] && install_ssray
 	get_ip
 	config
 	show_config_info
