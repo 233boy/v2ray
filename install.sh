@@ -763,21 +763,20 @@ ssray_proto_config() {
 			echo "----------------------------------------------------------------"
 			echo
 			read -rsp "$(echo -e "按$green Enter 回车键 $none继续....或按$red Ctrl + C $none取消.")" -d $'\n'
+			case $ssray_transport in
+			2)
+				ssrayopt="server;tls;host=${ssray_domain}"
+				break
+				;;
+			3)
+				ssrayopt="server;mode=quic;host=${ssray_domain}"
+				break
+				;;
+			esac
 			break
 			;;
 		*)
 			error
-			;;
-		esac
-
-		case $ssray_transport in
-		2)
-			ssrayopt="server;tls;host=${ssray_domain}"
-			break
-			;;
-		3)
-			ssrayopt="server;mode=quic;host=${ssray_domain}"
-			break
 			;;
 		esac
 	done
@@ -788,12 +787,13 @@ ssray_proto_config() {
 		echo -e "$yellow 开始安装acme.sh $none"
 		curl https://get.acme.sh | bash
 
-		echo -e "$yellow 开始申请 $ssray_domain 的证书，如果有正在使用80端口的程序先让它们退下~ $none"
-		pkill -9 caddy
-		pkill -9 httpd
-		pkill -9 nginx
+		echo -e "$yellow 开始申请 $ssray_domain 的证书，如果有正在使用80端口的程序先让它们退下~... $none"
+		pkill caddy
+		pkill httpd
+		pkill nginx
+		sleep 3
 
-		if acme.sh --issue --standalone -d $ssray_domain ; then
+		if /root/.acme.sh/acme.sh --issue --standalone -d $ssray_domain ; then
 			echo -e "$yellow 好了搞定了。$none"
 		else
 			echo -e "$yellow 不知道什么鬼，上面的出错提示截图找人问吧！$none"
@@ -869,7 +869,7 @@ install_info() {
 			echo
 			echo -e "$yellow v2ray-plugin 协议 = $cyan ${ssray_transports[$ssray_transport - 1]}$none"
 			echo 
-			echo -e "$yellow v2ray-plugin 参数 = $cyan ${ssrayopt} $none"
+			echo -e "$yellow v2ray-plugin 参数 = $cyan ${ssrayopt}$none"
 		fi
 	else
 		echo
@@ -920,7 +920,7 @@ caddy_config() {
 	do_service restart caddy
 }
 
-install_v2ray() {
+install_basic() {
 	# undo
 	#$cmd update -y
 	if [[ $cmd == "apt-get" ]]; then
@@ -929,8 +929,11 @@ install_v2ray() {
 		echo 
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
 		#undo
-		#$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
+		#$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap
 	fi
+}
+
+install_v2ray() {
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	# undo
 	# [ -d /etc/v2ray ] && rm -rf /etc/v2ray
@@ -1184,6 +1187,7 @@ install() {
 		echo
 		exit 1
 	fi
+	install_basic
 	v2ray_config
 	blocked_hosts
 	shadowsocks_config
