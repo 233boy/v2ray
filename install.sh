@@ -816,8 +816,7 @@ install_ssray() {
 }
 
 install_info() {
-	##undo
-	#clear
+	clear
 	echo
 	echo " ....准备安装了咯..看看有毛有配置正确了..."
 	echo
@@ -928,22 +927,19 @@ caddy_config() {
 }
 
 install_basic() {
-	# undo
-	#$cmd update -y
+	$cmd update -y
 	if [[ $cmd == "apt-get" ]]; then
-		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap2-bin
+		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin
 	else
 		echo 
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
-		#undo
-		#$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap
+		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap
 	fi
 }
 
 install_v2ray() {
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	# undo
-	# [ -d /etc/v2ray ] && rm -rf /etc/v2ray
+	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
 	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
 
 	if [[ $local_install ]]; then
@@ -1169,8 +1165,7 @@ do_service() {
 	fi
 }
 show_config_info() {
-	#undo
-	#clear
+	clear
 	_load v2ray-info.sh
 	_v2_args
 	_v2_info
