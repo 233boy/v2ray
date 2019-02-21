@@ -7,4 +7,11 @@ if [[ $shadowsocks ]]; then
 	sed -i "/\/\/include_ss/r $ss_file_tmp" $v2ray_server_config
 	sed -i "s#//include_ss#,#" $v2ray_server_config
 	rm -rf $ss_file_tmp
+
+
+	if [[ $install_ssray ]]; then
+		ssray_conf=/etc/v2ray/233boy/ssray.conf
+		sed -i "s/##REMOTEPORT##/${ssrayport}/; s/##LOCALPORT##/${ssport}/; s/##OPTION##/${ssrayopt}/;" $ssray_conf
+	fi
+
 fi

@@ -16,8 +16,10 @@ sys_bit=$(uname -m)
 
 if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
 	v2ray_bit="32"
+	v2arch="386"
 elif [[ $sys_bit == "x86_64" ]]; then
 	v2ray_bit="64"
+	v2arch="amd64"
 else
 	echo -e " 
 	哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}
@@ -626,8 +628,138 @@ shadowsocks_ciphers_config() {
 	pause
 }
 
+ssray_config() {
+
+	echo
+
+	while :; do
+		echo -e "是否配置 ${yellow}Shadowsocks - V2ray Plugin ${none} [${magenta}Y/N$none]"
+		echo -e "${yellow}注：v2ray-plugin跟刚才配置的v2ray是互相独立的程序，眉有关系。${none}"
+		read -p "$(echo -e "(默认 [${cyan}N$none]):") " install_ssray
+		[[ -z "$install_ssray" ]] && install_ssray="n"
+		if [[ "$install_ssray" == [Yy] ]]; then
+			echo
+			ssray=true
+			ssray_port_config
+			break
+		elif [[ "$install_ssray" == [Nn] ]]; then
+			break
+		else
+			error
+		fi
+
+	done
+}
+
+ssray_port_config() {
+	local random=$(shuf -i20001-65535 -n1)
+	while :; do
+		echo -e "请输入 "$yellow"Shadowsocks - v2ray-plugin"$none" 端口 ["$magenta"1-65535"$none"]，不能和 "$yellow"V2Ray / shadowsocks "$none" 端口相同"
+		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):") " ssrayport
+		[ -z "$ssrayport" ] && ssrayport=$random
+		case $ssrayport in
+		$ssport)
+			echo
+			echo " 不能和 Shadowsocks 端口一毛一样...."
+			error
+			;;		
+		$v2ray_port)
+			echo
+			echo " 不能和 V2Ray 端口一毛一样...."
+			error
+			;;
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
+			if [[ $v2ray_transport == [45] ]]; then
+				local tls=ture
+			fi
+			if [[ $tls && $ssrayport == "80" ]] || [[ $tls && $ssrayport == "443" ]]; then
+				echo
+				echo -e "由于你已选择了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
+				echo
+				echo -e "所以不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
+				error
+			elif [[ $v2ray_dynamic_port_start_input == $ssrayport || $v2ray_dynamic_port_end_input == $ssrayport ]]; then
+				local multi_port="${v2ray_dynamic_port_start_input} - ${v2ray_dynamic_port_end_input}"
+				echo
+				echo " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：$multi_port"
+				error
+			elif [[ $v2ray_dynamic_port_start_input -lt $ssrayport && $ssrayport -le $v2ray_dynamic_port_end_input ]]; then
+				local multi_port="${v2ray_dynamic_port_start_input} - ${v2ray_dynamic_port_end_input}"
+				echo
+				echo " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：$multi_port"
+				error
+			else
+				echo
+				echo
+				echo -e "$yellow Shadowsocks v2ray-plugin 端口 = $cyan$ssrayport$none"
+				echo "----------------------------------------------------------------"
+				echo
+				break
+			fi
+			;;
+		*)
+			error
+			;;
+		esac
+
+	done
+
+	ssray_proto_config
+}
+
+ssray_proto_config() {
+
+	ssray_transports=(
+		http
+		https
+		quic
+	)
+	echo
+	while :; do
+		echo -e "请选择 "$yellow"V2Ray-Plugin"$none" 传输协议 [${magenta}1-${#transport[*]}$none]"
+		echo
+		for ((i = 1; i <= ${#ssray_transports[*]}; i++)); do
+			Stream="${ssray_transports[$i - 1]}"
+			echo -e "$yellow  $i. $none${Stream}"
+		done
+		echo
+		echo
+		read -p "$(echo -e "(默认协议: ${cyan}http$none)"):" ssray_transport
+		[ -z "$ssray_transport" ] && ssray_transport=1
+		echo -e "$yellow V2Ray-Plugin 传输协议 = $cyan${ssray_transports[$ssray_transport - 1]}$none"
+		echo
+		echo
+		echo "----------------------------------------------------------------"
+		case $ssray_transport in
+		1)
+			ssrayopt="server"
+			break
+			;;
+		2)
+			ssrayopt="server;tls;host=mydomain.me"
+			break
+			;;
+		3)
+			ssrayopt="server;mode=quic;host=mydomain.me"
+			break
+			;;
+		*)
+			error
+			;;
+		esac
+	done
+}
+
+do_install_ssray() {
+	_load download-ssray.sh
+	_download_ssray_file
+	_install_ssray_service
+	caddy_config
+}
+
 install_info() {
-	clear
+	##undo
+	#clear
 	echo
 	echo " ....准备安装了咯..看看有毛有配置正确了..."
 	echo
@@ -679,6 +811,15 @@ install_info() {
 		echo -e "$yellow Shadowsocks 密码 = $cyan$sspass$none"
 		echo
 		echo -e "$yellow Shadowsocks 加密协议 = $cyan${ssciphers}$none"
+
+		if [[ $install_ssray ]]; then
+			echo
+			echo -e "$yellow v2ray-plugin 端口 = $cyan$ssrayport$none"
+			echo
+			echo -e "$yellow v2ray-plugin 协议 = $cyan ${ssray_transports[$ssray_transport - 1]}$none"
+			echo 
+			echo -e "$yellow v2ray-plugin 参数 = $cyan ${ssrayopt} $none"
+		fi
 	else
 		echo
 		echo -e "$yellow 是否配置 Shadowsocks = ${cyan}未配置${none}"
@@ -729,15 +870,18 @@ caddy_config() {
 }
 
 install_v2ray() {
-	$cmd update -y
+	# undo
+	#$cmd update -y
 	if [[ $cmd == "apt-get" ]]; then
 		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap2-bin
 	else
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
-		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
+		#undo
+		#$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
+	# undo
+	# [ -d /etc/v2ray ] && rm -rf /etc/v2ray
 	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
 
 	if [[ $local_install ]]; then
@@ -877,7 +1021,14 @@ config() {
 		# 	systemctl start ip6tables
 	fi
 
-	[[ $shadowsocks ]] && open_port $ssport
+	if [[ $shadowsocks ]]; then
+		open_port $ssport
+		if [[ $install_ssray ]]; then
+			open_port $ssrayport
+			do_service restart ssray
+		fi
+	fi
+
 	if [[ $v2ray_transport == [45] ]]; then
 		open_port "80"
 		open_port "443"
@@ -956,7 +1107,8 @@ do_service() {
 	fi
 }
 show_config_info() {
-	clear
+	#undo
+	#clear
 	_load v2ray-info.sh
 	_v2_args
 	_v2_info
@@ -983,6 +1135,7 @@ install() {
 	v2ray_config
 	blocked_hosts
 	shadowsocks_config
+	ssray_config
 	install_info
 	try_enable_bbr
 	# [[ $caddy ]] && domain_check
@@ -997,6 +1150,7 @@ install() {
 		fi
 	fi
 	[[ $caddy ]] && install_caddy
+	[[ $install_ssray ]] && do_install_ssray
 	get_ip
 	config
 	show_config_info

@@ -18,8 +18,10 @@ sys_bit=$(uname -m)
 
 if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
 	v2ray_bit="32"
+	v2arch="386"
 elif [[ $sys_bit == "x86_64" ]]; then
 	v2ray_bit="64"
+	v2arch="amd64"
 else
 	echo -e " 哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}" && exit 1
 fi
