@@ -74,21 +74,6 @@ sspass=$sspass
 #---- Shadowsocks 加密协议 -----
 ssciphers=$ssciphers
 
-#---- Shadowsocks V2ray  -----
-ssray=$ssray_status
-
-#---- Shadowsocks V2ray-plugin 端口 -----
-ssrayport=$ssrayport
-
-#---- Shadowsocks V2ray-plugin 参数 -----
-ssrayopt=$ssrayopt
-
-#---- Shadowsocks V2ray-plugin 用户选择的 -----
-ssray_transport=$ssray_transport
-
-#---- Shadowsocks V2ray-plugin 版本-----
-ssray_ver=$ssray_ver
-
 #---- 屏蔽广告 -----
 ban_ad=$blocked_ad_status
 

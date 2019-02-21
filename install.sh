@@ -509,6 +509,7 @@ shadowsocks_config() {
 			echo
 			shadowsocks=true
 			shadowsocks_port_config
+			ssray_config
 			break
 		elif [[ "$install_shadowsocks" == [Nn] ]]; then
 			break
@@ -631,13 +632,12 @@ shadowsocks_ciphers_config() {
 ssray_config() {
 	echo
 	echo
-	echo
-	echo
-	echo
-	echo
 
 	while :; do
 		echo -e "是否配置 ${yellow}Shadowsocks - V2ray Plugin ${none} [${magenta}Y/N$none]"
+		echo
+		echo
+		echo
 		echo -e "${yellow}注：v2ray-plugin跟刚才配置的v2ray是互相独立的程序，眉有关系。${none}"
 		read -p "$(echo -e "(默认 [${cyan}N$none]):") " install_ssray
 		[[ -z "$install_ssray" ]] && install_ssray="n"
@@ -735,9 +735,11 @@ ssray_proto_config() {
 		echo
 		echo
 		echo "----------------------------------------------------------------"
+		get_ip
 		case $ssray_transport in
 		1)
 			ssrayopt="server"
+			ssray_domain=$ip
 			break
 			;;
 		[2-3])
@@ -752,7 +754,6 @@ ssray_proto_config() {
 				echo "----------------------------------------------------------------"
 				break
 			done
-			get_ip
 			echo
 			echo
 			echo -e "$yellow 请将 $magenta$ssray_domain$none $yellow解析到: $cyan$ip$none"
@@ -781,25 +782,31 @@ ssray_proto_config() {
 		esac
 	done
 
-	if [[ -f /root/.acme.sh/$ssray_domain/fullchain.cer ]] && [[ -f /root/.acme.sh/$ssray_domain/$ssray_domain.key ]]; then
-		echo -e "$yellow 噫！好像已经有证书了！ 皮皮虾咋们走！ $none"
-	else
-		echo -e "$yellow 开始安装acme.sh $none"
-		curl https://get.acme.sh | bash
-
-		echo -e "$yellow 开始申请 $ssray_domain 的证书，如果有正在使用80端口的程序先让它们退下~... $none"
-		pkill caddy
-		pkill httpd
-		pkill nginx
-		sleep 3
-
-		if /root/.acme.sh/acme.sh --issue --standalone -d $ssray_domain ; then
-			echo -e "$yellow 好了搞定了。$none"
+	echo
+	echo
+	echo
+	if [[ $ssray_transport -gt 1 ]]; then
+		if [[  -f /root/.acme.sh/$ssray_domain/fullchain.cer && -f /root/.acme.sh/$ssray_domain/$ssray_domain.key ]]; then
+			echo -e "$yellow 噫！好像已经有证书了！ 皮皮虾咋们走！ $none"
 		else
-			echo -e "$yellow 不知道什么鬼，上面的出错提示截图找人问吧！$none"
-			exit 1
+			echo -e "$yellow 开始安装acme.sh $none"
+			curl https://get.acme.sh | bash
+
+			echo -e "$yellow 开始申请 $ssray_domain 的证书，如果有正在使用80端口的程序先让它们退下~... $none"
+			pkill caddy
+			pkill httpd
+			pkill nginx
+			sleep 3
+
+			if /root/.acme.sh/acme.sh --issue --standalone -d $ssray_domain ; then
+				echo -e "$yellow 好了搞定了。$none"
+			else
+				echo -e "$yellow 不知道什么鬼，上面的出错提示截图找人问吧！$none"
+				exit 1
+			fi
 		fi
 	fi
+	read -rsp "$(echo -e "按$green Enter 回车键 $none继续....或按$red Ctrl + C $none取消.")" -d $'\n'
 }
 
 install_ssray() {
@@ -1187,11 +1194,12 @@ install() {
 		echo
 		exit 1
 	fi
+	( set -o posix ; set ) >/tmp/variables.before
 	install_basic
 	v2ray_config
 	blocked_hosts
 	shadowsocks_config
-	ssray_config
+	( set -o posix ; set ) >/tmp/variables.before
 	install_info
 	try_enable_bbr
 	# [[ $caddy ]] && domain_check
