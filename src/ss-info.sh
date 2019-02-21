@@ -1,6 +1,13 @@
 [[ -z $ip ]] && get_ip
 if [[ $shadowsocks ]]; then
-	local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray6.com_ss_${ip}"
+	#local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray6.com_ss_${ip}"
+	local cipherstr=$(echo -n ${ssciphers}:${sspass} | base64 -w 0 | sed 's/=*$//')
+	local clientopt=$(echo ${ssrayopt} | sed 's/server;\?//')
+	local opt="?plugin=$(echo "v2ray-plugin;${clientopt}" | sed 's/=/%3d/g; s/;/%3b/g;')"
+
+	local ss="ss://${cipherstr}@${ip}:${ssport}#v2ray6.com_ss_${ip}"
+	local ssplugin="ss://${cipherstr}@${ssray_domain}:${ssrayport}/${opt}#v2ray6.com_ssv2_${ssray_domain}"
+
 	echo
 	echo "---------- Shadowsocks 配置信息 -------------"
 	echo
@@ -14,8 +21,10 @@ if [[ $shadowsocks ]]; then
 	echo
 	echo -e "$yellow SS 链接 = ${cyan}$ss$none"
 	echo
-	echo -e " 备注:$red Shadowsocks Win 4.0.6 $none客户端可能无法识别该 SS 链接"
-	echo
+	if [[ $ssray ]]; then
+		echo -e "$yellow SS + V2ray - Plugin 链接 = ${cyan}$ssplugin$none"
+		echo
+	fi
 	echo -e "提示: 输入$cyan v2ray ssqr $none可生成 Shadowsocks 二维码链接"	
 	echo
 fi

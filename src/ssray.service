@@ -1,0 +1,29 @@
+[Unit]
+Description=Yet another SIP003 plugin for shadowsocks, based on v2ray
+Documentation=https://github.com/shadowsocks/v2ray-plugin
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+Restart=always
+
+; User and group the process will run as.
+User=root
+Group=root
+
+EnvironmentFile=/etc/v2ray/ssray.conf
+ExecStart=/usr/local/bin/v2ray-plugin
+ExecReload=/bin/kill -USR1 $MAINPID
+
+; Use graceful shutdown with a reasonable timeout
+KillMode=mixed
+KillSignal=SIGQUIT
+TimeoutStopSec=5s
+
+; Limit the number of file descriptors; see `man systemd.exec` for more limit settings.
+LimitNOFILE=1048576
+; Unmodified caddy is not expected to use more than that.
+LimitNPROC=512
+
+[Install]
+WantedBy=multi-user.target
