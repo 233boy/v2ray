@@ -927,6 +927,11 @@ caddy_config() {
 }
 
 install_basic() {
+	echo
+	echo
+	echo -e "$yellow 同步系统仓库并安装必须组件，请骚后~~~~~~~~~ $none"
+	echo
+	echo
 	$cmd update -y
 	if [[ $cmd == "apt-get" ]]; then
 		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin
@@ -1194,7 +1199,7 @@ install() {
 	v2ray_config
 	blocked_hosts
 	shadowsocks_config
-	( set -o posix ; set ) >/tmp/variables.before
+	( set -o posix ; set ) >/tmp/variables.after
 	install_info
 	try_enable_bbr
 	# [[ $caddy ]] && domain_check
