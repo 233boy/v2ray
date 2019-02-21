@@ -16,8 +16,10 @@ sys_bit=$(uname -m)
 
 if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
 	v2ray_bit="32"
+	v2arch="386"
 elif [[ $sys_bit == "x86_64" ]]; then
 	v2ray_bit="64"
+	v2arch="amd64"
 else
 	echo -e " 
 	哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}
@@ -729,12 +731,17 @@ caddy_config() {
 }
 
 install_v2ray() {
+	echo
+	echo
+	echo -e "$yellow 同步系统仓库并安装必须组件，请骚吼~~~~~~~~~ $none"
+	echo
+	echo
 	$cmd update -y
 	if [[ $cmd == "apt-get" ]]; then
-		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap2-bin
+		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin
 	else
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
-		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
+		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
@@ -960,7 +967,7 @@ show_config_info() {
 
 }
 
-install() {
+install_233() {
 	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		echo
 		echo " 大佬...你已经安装 V2Ray 啦...无需重新安装"
@@ -997,7 +1004,8 @@ install() {
 	config
 	show_config_info
 }
-uninstall() {
+
+uninstall_233() {
 
 	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		. $backup
@@ -1068,11 +1076,11 @@ while :; do
 	read -p "$(echo -e "请选择 [${magenta}1-2$none]:")" choose
 	case $choose in
 	1)
-		install
+		install_233
 		break
 		;;
 	2)
-		uninstall
+		uninstall_233
 		break
 		;;
 	*)
