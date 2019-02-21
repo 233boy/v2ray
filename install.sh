@@ -727,6 +727,7 @@ ssray_proto_config() {
 			echo -e "$yellow  $i. $none${Stream}"
 		done
 		echo
+		echo "备注: 2)https 3)quic 均要求严格验证【域名】与【证书】，需要输入解析至本机的公共域名"
 		echo
 		read -p "$(echo -e "(默认协议: ${cyan}http$none)"):" ssray_transport
 		[ -z "$ssray_transport" ] && ssray_transport=1
@@ -739,26 +740,72 @@ ssray_proto_config() {
 			ssrayopt="server"
 			break
 			;;
-		2)
-			ssrayopt="server;tls;host=mydomain.me"
-			break
-			;;
-		3)
-			ssrayopt="server;mode=quic;host=mydomain.me"
+		[2-3])
+			while :; do
+				echo
+				echo -e "请输入一个 $magenta正确的域名$none，一定一定一定要正确，不！能！出！错！"
+				read -p "(例如：233blog.com): " ssray_domain
+				[ -z "$ssray_domain" ] && error && continue
+				echo
+				echo
+				echo -e "$yellow 你的域名 = $cyan$ssray_domain$none"
+				echo "----------------------------------------------------------------"
+				break
+			done
+			get_ip
+			echo
+			echo
+			echo -e "$yellow 请将 $magenta$ssray_domain$none $yellow解析到: $cyan$ip$none"
+			echo
+			echo -e "$yellow 请将 $magenta$ssray_domain$none $yellow解析到: $cyan$ip$none"
+			echo
+			echo -e "$yellow 请将 $magenta$ssray_domain$none $yellow解析到: $cyan$ip$none"
+			echo "----------------------------------------------------------------"
+			echo
+			read -rsp "$(echo -e "按$green Enter 回车键 $none继续....或按$red Ctrl + C $none取消.")" -d $'\n'
 			break
 			;;
 		*)
 			error
 			;;
 		esac
+
+		case $ssray_transport in
+		2)
+			ssrayopt="server;tls;host=${ssray_domain}"
+			break
+			;;
+		3)
+			ssrayopt="server;mode=quic;host=${ssray_domain}"
+			break
+			;;
+		esac
 	done
+
+	if [[ -f /root/.acme.sh/$ssray_domain/fullchain.cer ]] && [[ -f /root/.acme.sh/$ssray_domain/$ssray_domain.key ]]; then
+		echo -e "$yellow 噫！好像已经有证书了！ 皮皮虾咋们走！ $none"
+	else
+		echo -e "$yellow 开始安装acme.sh $none"
+		curl https://get.acme.sh | bash
+
+		echo -e "$yellow 开始申请 $ssray_domain 的证书，如果有正在使用80端口的程序先让它们退下~ $none"
+		pkill -9 caddy
+		pkill -9 httpd
+		pkill -9 nginx
+
+		if acme.sh --issue --standalone -d $ssray_domain ; then
+			echo -e "$yellow 好了搞定了。$none"
+		else
+			echo -e "$yellow 不知道什么鬼，上面的出错提示截图找人问吧！$none"
+			exit 1
+		fi
+	fi
 }
 
 install_ssray() {
 	_load download-ssray.sh
 	_download_ssray_file
 	_install_ssray_service
-	caddy_config
 }
 
 install_info() {
@@ -879,6 +926,7 @@ install_v2ray() {
 	if [[ $cmd == "apt-get" ]]; then
 		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap2-bin
 	else
+		echo 
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
 		#undo
 		#$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
