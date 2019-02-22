@@ -68,6 +68,8 @@
     ],
     "dns": {
         "servers": [
+            "1.1.1.1",
+            "1.0.0.1",
             "8.8.8.8",
             "8.8.4.4",
             "localhost"
@@ -96,6 +98,10 @@
                     "fe80::/10",
                     "geoip:cn"
                 ],
+                "outboundTag": "direct"
+            },
+            {
+                "type": "field",
                 "domain": [
                     "geosite:cn"
                 ],
