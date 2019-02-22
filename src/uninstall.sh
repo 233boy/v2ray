@@ -79,19 +79,15 @@ if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
 		del_port $v2ray_port
 	fi
 
-	[ $cmd == "apt-get" ] && rm -rf /etc/network/if-pre-up.d/iptables
+	[[ $cmd == "apt-get" && $(command -v iptables) ]] && rm -rf /etc/network/if-pre-up.d/iptables
 
-	# [ $v2ray_pid ] && systemctl stop v2ray
-	[ $v2ray_pid ] && do_service stop v2ray
-
+	[ $v2ray_pid ] && systemctl stop v2ray
 	rm -rf /usr/bin/v2ray
 	rm -rf $_v2ray_sh
 	rm -rf /etc/v2ray
 	rm -rf /var/log/v2ray
 
-	# [ $caddy_pid ] && systemctl stop caddy
-	[ $caddy_pid ] && do_service stop caddy
-
+	[ $caddy_pid ] && systemctl stop caddy
 	rm -rf /usr/local/bin/caddy
 	rm -rf /etc/caddy
 	rm -rf /etc/ssl/caddy
@@ -101,11 +97,6 @@ if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
 		rm -rf /lib/systemd/system/v2ray.service
 		systemctl disable caddy >/dev/null 2>&1
 		rm -rf /lib/systemd/system/caddy.service
-	else
-		update-rc.d -f caddy remove >/dev/null 2>&1
-		update-rc.d -f v2ray remove >/dev/null 2>&1
-		rm -rf /etc/init.d/caddy
-		rm -rf /etc/init.d/v2ray
 	fi
 	# clear
 	echo
@@ -141,11 +132,9 @@ elif [[ $is_uninstall_v2ray ]]; then
 		del_port $v2ray_port
 	fi
 
-	[ $cmd == "apt-get" ] && rm -rf /etc/network/if-pre-up.d/iptables
+	[[ $cmd == "apt-get" && $(command -v iptables) ]] && rm -rf /etc/network/if-pre-up.d/iptables
 
-	# [ $v2ray_pid ] && systemctl stop v2ray
-	[ $v2ray_pid ] && do_service stop v2ray
-
+	[ $v2ray_pid ] && systemctl stop v2ray
 	rm -rf /usr/bin/v2ray
 	rm -rf $_v2ray_sh
 	rm -rf /etc/v2ray
@@ -153,9 +142,6 @@ elif [[ $is_uninstall_v2ray ]]; then
 	if [[ $systemd ]]; then
 		systemctl disable v2ray >/dev/null 2>&1
 		rm -rf /lib/systemd/system/v2ray.service
-	else
-		update-rc.d -f v2ray remove >/dev/null 2>&1
-		rm -rf /etc/init.d/v2ray
 	fi
 	# clear
 	echo
