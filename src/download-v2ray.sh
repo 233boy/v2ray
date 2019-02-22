@@ -26,23 +26,19 @@ _download_v2ray_file() {
         " && exit 1
 	fi
 
-	unzip $v2ray_tmp_file -d "/tmp/v2ray/"
-	mkdir -p /usr/bin/v2ray
-	cp -f "/tmp/v2ray/v2ray" "/usr/bin/v2ray/v2ray"
-	chmod +x "/usr/bin/v2ray/v2ray"
-	cp -f "/tmp/v2ray/v2ctl" "/usr/bin/v2ray/v2ctl"
-	chmod +x "/usr/bin/v2ray/v2ctl"
+	unzip -o $v2ray_tmp_file -d "/usr/bin/v2ray/"
+	chmod +x /usr/bin/v2ray/v2ray /usr/bin/v2ray/v2ctl
+	setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/v2ray/v2ray
 }
 
 _install_v2ray_service() {
 	if [[ $systemd ]]; then
-		cp -f "/tmp/v2ray/systemd/v2ray.service" "/lib/systemd/system/"
+		install -m 644 "/usr/bin/v2ray/systemd/v2ray.service" "/lib/systemd/system/"
 		sed -i "s/on-failure/always/" /lib/systemd/system/v2ray.service
 		systemctl enable v2ray
 	else
 		apt-get install -y daemon
-		cp "/tmp/v2ray/systemv/v2ray" "/etc/init.d/v2ray"
-		chmod +x "/etc/init.d/v2ray"
+		install -m 755 "/usr/bin/v2ray/systemv/v2ray" "/etc/init.d/v2ray"
 		update-rc.d -f v2ray defaults
 	fi
 }
