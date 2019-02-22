@@ -226,23 +226,6 @@ get_shadowsocks_config_qr_link() {
 
 }
 
-get_shadowsocks_config_qr_ask() {
-	echo
-	while :; do
-		echo -e "是否需要生成$yellow Shadowsocks 配置信息 $none二维码链接 [${magenta}Y/N$none]"
-		read -p "$(echo -e "默认 [${magenta}N$none]:")" y_n
-		[ -z $y_n ] && y_n="n"
-		if [[ $y_n == [Yy] ]]; then
-			get_shadowsocks_config_qr_link
-			break
-		elif [[ $y_n == [Nn] ]]; then
-			break
-		else
-			error
-		fi
-	done
-
-}
 change_shadowsocks_config() {
 	if [[ $shadowsocks ]]; then
 
@@ -321,7 +304,6 @@ shadowsocks_config() {
 			config
 			clear
 			view_shadowsocks_config_info
-			# get_shadowsocks_config_qr_ask
 			break
 		elif [[ "$install_shadowsocks" == [Nn] ]]; then
 			echo
@@ -506,7 +488,6 @@ change_shadowsocks_port() {
 				config
 				clear
 				view_shadowsocks_config_info
-				# get_shadowsocks_config_qr_ask
 				break
 			fi
 			;;
@@ -547,7 +528,6 @@ change_shadowsocks_password() {
 			config
 			clear
 			view_shadowsocks_config_info
-			# get_shadowsocks_config_qr_ask
 			break
 			;;
 		esac
@@ -587,7 +567,6 @@ change_shadowsocks_ciphers() {
 			config
 			clear
 			view_shadowsocks_config_info
-			# get_shadowsocks_config_qr_ask
 			break
 			;;
 		*)
@@ -976,7 +955,6 @@ change_v2ray_port() {
 					config
 					clear
 					view_v2ray_config_info
-					# download_v2ray_config_ask
 					break
 				fi
 				;;
@@ -987,23 +965,6 @@ change_v2ray_port() {
 
 		done
 	fi
-
-}
-download_v2ray_config_ask() {
-	echo
-	while :; do
-		echo -e "是否需要 下载 V2Ray 配置 / 生成配置信息链接 / 生成二维码链接 [${magenta}Y/N$none]"
-		read -p "$(echo -e "默认 [${cyan}N$none]:")" y_n
-		[ -z $y_n ] && y_n="n"
-		if [[ $y_n == [Yy] ]]; then
-			download_v2ray_config
-			break
-		elif [[ $y_n == [Nn] ]]; then
-			break
-		else
-			error
-		fi
-	done
 
 }
 change_v2ray_transport_ask() {
@@ -1116,7 +1077,6 @@ change_v2ray_transport() {
 		config
 		clear
 		view_v2ray_config_info
-		# download_v2ray_config_ask
 	else
 		old_transport
 		backup_config v2ray_transport
@@ -1124,7 +1084,6 @@ change_v2ray_transport() {
 		config
 		clear
 		view_v2ray_config_info
-		# download_v2ray_config_ask
 	fi
 
 }
@@ -1229,7 +1188,6 @@ tls_config() {
 		config
 		clear
 		view_v2ray_config_info
-		# download_v2ray_config_ask
 	else
 		if [[ $v2ray_transport_opt == 5 ]]; then
 			path_config_ask
@@ -1255,7 +1213,6 @@ tls_config() {
 			caddy=true
 			clear
 			view_v2ray_config_info
-			# download_v2ray_config_ask
 		else
 			auto_tls_config
 		fi
@@ -1311,7 +1268,6 @@ auto_tls_config() {
 				caddy=true
 				clear
 				view_v2ray_config_info
-				# download_v2ray_config_ask
 				break
 			elif [[ "$auto_install_caddy" == [Nn] ]]; then
 				echo
@@ -1332,7 +1288,6 @@ auto_tls_config() {
 				config
 				clear
 				view_v2ray_config_info
-				# download_v2ray_config_ask
 				break
 			else
 				error
@@ -1733,7 +1688,6 @@ change_v2ray_id() {
 				config
 				clear
 				view_v2ray_config_info
-				# download_v2ray_config_ask
 				break
 			elif [[ $y_n == [Nn] ]]; then
 				echo
@@ -1797,7 +1751,6 @@ change_domain() {
 					config
 					clear
 					view_v2ray_config_info
-					# download_v2ray_config_ask
 					break
 				else
 					error
@@ -1859,7 +1812,6 @@ change_path_config() {
 		config
 		clear
 		view_v2ray_config_info
-		# download_v2ray_config_ask
 	elif [[ $v2ray_transport == [45] ]] && [[ $caddy ]]; then
 		path_config_ask
 		if [[ $new_path ]]; then
@@ -1871,7 +1823,6 @@ change_path_config() {
 			config
 			clear
 			view_v2ray_config_info
-			# download_v2ray_config_ask
 		else
 			echo
 			echo
@@ -1948,7 +1899,6 @@ change_proxy_site_config() {
 			config
 			clear
 			view_v2ray_config_info
-			# download_v2ray_config_ask
 		else
 			echo
 			echo
@@ -2011,7 +1961,6 @@ disable_path() {
 				config
 				clear
 				view_v2ray_config_info
-				# download_v2ray_config_ask
 				break
 			elif [[ "$y_n" == [Nn] ]]; then
 				echo
@@ -2147,7 +2096,6 @@ change_v2ray_alterId() {
 			config
 			clear
 			view_v2ray_config_info
-			# download_v2ray_config_ask
 			break
 			;;
 		*)
@@ -2191,7 +2139,6 @@ custom_uuid() {
 			config
 			clear
 			view_v2ray_config_info
-			# download_v2ray_config_ask
 			break
 			;;
 		esac
@@ -2600,11 +2547,8 @@ install_bbr() {
 		echo -e "$green BBR 已经启用啦...无需再安装$none"
 		echo
 	elif [[ $try_enable_bbr ]]; then
-		sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-		sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
-		echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
-		echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
-		sysctl -p >/dev/null 2>&1
+		_load bbr.sh
+		_open_bbr
 		echo
 		echo -e "$green ..由于你的 VPS 内核支持开启 BBR ...已经为你启用 BBR 优化....$none"
 		echo
@@ -2627,77 +2571,12 @@ uninstall_lotserver() {
 }
 
 open_port() {
-	if [[ $cmd == "apt-get" ]]; then
-		if [[ $1 != "multiport" ]]; then
-			# if [[ $cmd == "apt-get" ]]; then
-			iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			iptables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			ip6tables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-
-			# iptables-save >/etc/iptables.rules.v4
-			# ip6tables-save >/etc/iptables.rules.v6
-			# else
-			# 	firewall-cmd --permanent --zone=public --add-port=$1/tcp
-			# 	firewall-cmd --permanent --zone=public --add-port=$1/udp
-			# 	firewall-cmd --reload
-			# fi
-		else
-			# if [[ $cmd == "apt-get" ]]; then
-			local multiport="${v2ray_dynamic_port_start_input}:${v2ray_dynamic_port_end_input}"
-			iptables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-			iptables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-			ip6tables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-			ip6tables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-
-			# iptables-save >/etc/iptables.rules.v4
-			# ip6tables-save >/etc/iptables.rules.v6
-			# else
-			# 	local multi_port="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
-			# 	firewall-cmd --permanent --zone=public --add-port=$multi_port/tcp
-			# 	firewall-cmd --permanent --zone=public --add-port=$multi_port/udp
-			# 	firewall-cmd --reload
-			# fi
-		fi
-		iptables-save >/etc/iptables.rules.v4
-		ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	service iptables save >/dev/null 2>&1
-		# 	service ip6tables save >/dev/null 2>&1
-	fi
-
+	_load iptables.sh
+	_iptables_add $1
 }
 del_port() {
-	if [[ $cmd == "apt-get" ]]; then
-		if [[ $1 != "multiport" ]]; then
-			# if [[ $cmd == "apt-get" ]]; then
-			iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			iptables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			ip6tables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			ip6tables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			# else
-			# 	firewall-cmd --permanent --zone=public --remove-port=$1/tcp
-			# 	firewall-cmd --permanent --zone=public --remove-port=$1/udp
-			# fi
-		else
-			# if [[ $cmd == "apt-get" ]]; then
-			local ports="${v2ray_dynamicPort_start}:${v2ray_dynamicPort_end}"
-			iptables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-			iptables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-			ip6tables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-			ip6tables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-			# else
-			# 	local ports="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
-			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/tcp
-			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/udp
-			# fi
-		fi
-		iptables-save >/etc/iptables.rules.v4
-		ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	service iptables save >/dev/null 2>&1
-		# 	service ip6tables save >/dev/null 2>&1
-	fi
+	_load iptables.sh
+	_iptables_del $1
 }
 update() {
 	while :; do
@@ -2882,29 +2761,6 @@ backup_config() {
 
 }
 
-get_ip() {
-	ip=$(curl -s https://ipinfo.io/ip)
-	[[ -z $ip ]] && ip=$(curl -s https://api.ip.sb/ip)
-	[[ -z $ip ]] && ip=$(curl -s https://api.ipify.org)
-	[[ -z $ip ]] && ip=$(curl -s https://ip.seeip.org)
-	[[ -z $ip ]] && ip=$(curl -s https://ifconfig.co/ip)
-	[[ -z $ip ]] && ip=$(curl -s https://api.myip.com | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
-	[[ -z $ip ]] && ip=$(curl -s icanhazip.com)
-	[[ -z $ip ]] && ip=$(curl -s myip.ipip.net | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
-	[[ -z $ip ]] && echo -e "\n$red 这垃圾小鸡扔了吧！$none\n" && exit
-}
-
-error() {
-
-	echo -e "\n$red 输入错误！$none\n"
-
-}
-
-pause() {
-
-	read -rsp "$(echo -e "按$green Enter 回车键 $none继续....或按$red Ctrl + C $none取消.")" -d $'\n'
-	echo
-}
 do_service() {
 	if [[ $systemd ]]; then
 		systemctl $1 $2
@@ -3165,7 +3021,6 @@ reuuid)
 	config
 	clear
 	view_v2ray_config_info
-	# download_v2ray_config_ask
 	;;
 v | version)
 	echo

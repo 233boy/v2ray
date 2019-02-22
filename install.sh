@@ -693,12 +693,6 @@ install_info() {
 }
 
 domain_check() {
-	# if [[ $cmd == "yum" ]]; then
-	# 	yum install bind-utils -y
-	# else
-	# 	$cmd install dnsutils -y
-	# fi
-	# test_domain=$(dig $domain +short)
 	test_domain=$(ping $domain -c 1 | grep -oE -m1 "([0-9]{1,3}\.){3}[0-9]{1,3}")
 	if [[ $test_domain != $ip ]]; then
 		echo
@@ -726,8 +720,7 @@ caddy_config() {
 	# local email=$(shuf -i1-10000000000 -n1)
 	_load caddy-config.sh
 
-	# systemctl restart caddy
-	do_service restart caddy
+	systemctl restart caddy
 }
 
 install_v2ray() {
@@ -782,71 +775,12 @@ install_v2ray() {
 }
 
 open_port() {
-	if [[ $cmd == "apt-get" ]]; then
-		if [[ $1 != "multiport" ]]; then
-
-			iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			iptables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			ip6tables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-
-			# firewall-cmd --permanent --zone=public --add-port=$1/tcp
-			# firewall-cmd --permanent --zone=public --add-port=$1/udp
-			# firewall-cmd --reload
-
-		else
-
-			local multiport="${v2ray_dynamic_port_start_input}:${v2ray_dynamic_port_end_input}"
-			iptables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-			iptables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-			ip6tables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-			ip6tables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-
-			# local multi_port="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
-			# firewall-cmd --permanent --zone=public --add-port=$multi_port/tcp
-			# firewall-cmd --permanent --zone=public --add-port=$multi_port/udp
-			# firewall-cmd --reload
-
-		fi
-		iptables-save >/etc/iptables.rules.v4
-		ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	service iptables save >/dev/null 2>&1
-		# 	service ip6tables save >/dev/null 2>&1
-	fi
+	_load iptables.sh
+	_iptables_add $1
 }
 del_port() {
-	if [[ $cmd == "apt-get" ]]; then
-		if [[ $1 != "multiport" ]]; then
-			# if [[ $cmd == "apt-get" ]]; then
-			iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			iptables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			ip6tables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			ip6tables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			# else
-			# 	firewall-cmd --permanent --zone=public --remove-port=$1/tcp
-			# 	firewall-cmd --permanent --zone=public --remove-port=$1/udp
-			# fi
-		else
-			# if [[ $cmd == "apt-get" ]]; then
-			local ports="${v2ray_dynamicPort_start}:${v2ray_dynamicPort_end}"
-			iptables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-			iptables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-			ip6tables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-			ip6tables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-			# else
-			# 	local ports="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
-			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/tcp
-			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/udp
-			# fi
-		fi
-		iptables-save >/etc/iptables.rules.v4
-		ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	service iptables save >/dev/null 2>&1
-		# 	service ip6tables save >/dev/null 2>&1
-	fi
-
+	_load iptables.sh
+	_iptables_del $1
 }
 
 config() {
@@ -863,22 +797,9 @@ config() {
 	fi
 	_load config.sh
 
-	if [[ $cmd == "apt-get" ]]; then
-		cat >/etc/network/if-pre-up.d/iptables <<-EOF
-#!/bin/sh
-/sbin/iptables-restore < /etc/iptables.rules.v4
-/sbin/ip6tables-restore < /etc/iptables.rules.v6
-	EOF
-		chmod +x /etc/network/if-pre-up.d/iptables
-		# else
-		# 	[ $(pgrep "firewall") ] && systemctl stop firewalld
-		# 	systemctl mask firewalld
-		# 	systemctl disable firewalld
-		# 	systemctl enable iptables
-		# 	systemctl enable ip6tables
-		# 	systemctl start iptables
-		# 	systemctl start ip6tables
-	fi
+	## save iptables rules
+	_load iptables.sh
+	_iptables_save
 
 	[[ $shadowsocks ]] && open_port $ssport
 	if [[ $v2ray_transport == [45] ]]; then
@@ -891,8 +812,7 @@ config() {
 	else
 		open_port $v2ray_port
 	fi
-	# systemctl restart v2ray
-	do_service restart v2ray
+	systemctl restart v2ray
 	backup_config
 
 }
@@ -911,20 +831,6 @@ backup_config() {
 	if [[ $is_path ]]; then
 		sed -i "57s/=/=true/; 60s/=233blog/=$path/" $backup
 		sed -i "63s#=https://liyafly.com#=$proxy_site#" $backup
-	fi
-}
-
-try_enable_bbr() {
-	if [[ $(uname -r | cut -b 1) -eq 4 ]]; then
-		case $(uname -r | cut -b 3-4) in
-		9. | [1-9][0-9])
-			sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-			sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
-			echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
-			echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
-			sysctl -p >/dev/null 2>&1
-			;;
-		esac
 	fi
 }
 
@@ -967,7 +873,7 @@ show_config_info() {
 
 }
 
-install_233() {
+_install() {
 	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		echo
 		echo " 大佬...你已经安装 V2Ray 啦...无需重新安装"
@@ -987,7 +893,6 @@ install_233() {
 	blocked_hosts
 	shadowsocks_config
 	install_info
-	try_enable_bbr
 	# [[ $caddy ]] && domain_check
 	install_v2ray
 	if [[ $caddy || $v2ray_port == "80" ]]; then
@@ -1002,10 +907,15 @@ install_233() {
 	[[ $caddy ]] && install_caddy
 	get_ip
 	config
+
+	## bbr
+	_load bbr.sh
+	_open_bbr
+
 	show_config_info
 }
 
-uninstall_233() {
+_uninstall() {
 
 	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 		. $backup
@@ -1076,11 +986,11 @@ while :; do
 	read -p "$(echo -e "请选择 [${magenta}1-2$none]:")" choose
 	case $choose in
 	1)
-		install_233
+		_install
 		break
 		;;
 	2)
-		uninstall_233
+		_uninstall
 		break
 		;;
 	*)
