@@ -26,12 +26,9 @@ _download_v2ray_file() {
         " && exit 1
 	fi
 
-	unzip $v2ray_tmp_file -d "/tmp/v2ray/"
-	mkdir -p /usr/bin/v2ray
-	cp -f "/tmp/v2ray/v2ray" "/usr/bin/v2ray/v2ray"
-	chmod +x "/usr/bin/v2ray/v2ray"
-	cp -f "/tmp/v2ray/v2ctl" "/usr/bin/v2ray/v2ctl"
-	chmod +x "/usr/bin/v2ray/v2ctl"
+	unzip $v2ray_tmp_file -d "/usr/bin/v2ray/"
+	chmod +x /usr/bin/v2ray/v2ray /usr/bin/v2ray/v2ctl
+	setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/v2ray/v2ray
 }
 
 _install_v2ray_service() {
