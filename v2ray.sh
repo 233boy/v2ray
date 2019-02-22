@@ -641,7 +641,8 @@ ssray_config() {
 	echo -e " $red大佬...你没有配置 Shadowsocks - V2ray - Plugin $none...不过现在想要配置的话也是可以的 ^_^"
 	echo
 	echo
-
+	echo -e " $yellow 唉唉 现在不管有没有配置过都要重新配置的，脚本还没完善好这部分，想改就接着重新配置吧~$none..."
+	echo
 
 	while :; do
 		echo -e "是否配置 ${yellow}Shadowsocks - V2ray Plugin ${none} [${magenta}Y/N$none]"
