@@ -22,7 +22,13 @@ if [[ $shadowsocks ]]; then
 	echo -e "$yellow SS 链接 = ${cyan}$ss$none"
 	echo
 	if [[ $ssray ]]; then
-		echo -e "$yellow SS + V2ray - Plugin 链接 = ${cyan}$ssplugin$none"
+		echo -e "$yellow SS + V2ray - Plugin 地址 = ${cyan}${ssray_domain}$none"
+		echo
+		echo -e "$yellow SS + V2ray - Plugin 端口 = ${cyan}${ssrayport}$none"
+		echo
+		echo -e "$yellow SS + V2ray - Plugin 参数 = ${cyan}${clientopt}$none"
+		echo
+		echo -e "$yellow SS + V2ray - Plugin 链接 = ${cyan}${ssplugin}$none"
 		echo
 	fi
 	echo -e "提示: 输入$cyan v2ray ssqr $none可生成 Shadowsocks 二维码链接"	
