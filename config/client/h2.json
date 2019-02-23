@@ -9,12 +9,12 @@
             "settings": {
                 "vnext": [
                     {
-                        "address": "233blog.com",
-                        "port": 2333,
+                        "address": "##VMADDR##",
+                        "port": ##VMPORT##,
                         "users": [
                             {
-                                "id": "e55c8d17-2cf3-b21a-bcf1-eeacb011ed79",
-                                "alterId": 233,
+                                "id": "##VMUSERID##",
+                                "alterId": ##VMALTID##,
                                 "security": "auto"
                             }
                         ]
@@ -26,9 +26,9 @@
                 "security": "tls",
                 "httpSettings": {
                     "host": [
-                        "233blog.com"
+                        "##H2DOMAIN##"
                     ],
-                    "path": "/233blog"
+                    "path": "##H2PATH##"
                 }
             },
             "mux": {
