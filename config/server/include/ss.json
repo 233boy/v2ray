@@ -1,4 +1,5 @@
         {
+            "tag": "ss-in",
             "protocol": "shadowsocks",
             "port": 6666,
             "settings": {

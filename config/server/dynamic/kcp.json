@@ -1,4 +1,29 @@
 {
+	"stats": {},
+	"api": {
+		"tag": "api",
+		"services": [
+			"HandlerService",
+			"LoggerService",
+			"StatsService"
+		]
+	},
+	"policy": {
+		"levels": {
+			"0": {
+				"statsUserUplink": true,
+				"statsUserDownlink": true
+			},
+			"1": {
+				"statsUserUplink": true,
+				"statsUserDownlink": true
+			}
+		},
+		"system": {
+			"statsInboundUplink": true,
+			"statsInboundDownlink": true
+		}
+	},
 	"log": {
 		"access": "/var/log/v2ray/access.log",
 		"error": "/var/log/v2ray/error.log",
@@ -6,6 +31,16 @@
 	},
 	"inbounds": [
 		{
+			"listen": "127.0.0.1",
+			"port": 10086,
+			"protocol": "dokodemo-door",
+			"settings": {
+				"address": "127.0.0.1"
+			},
+			"tag": "api"
+		},
+		{
+			"tag": "vmess-in",
 			"port": 2333,
 			"protocol": "vmess",
 			"settings": {
@@ -101,6 +136,13 @@
 	"routing": {
 		"domainStrategy": "IPOnDemand",
 		"rules": [
+			{
+				"inboundTag": [
+					"api"
+				],
+				"outboundTag": "api",
+				"type": "field"
+			},
 			{
 				"type": "field",
 				"ip": [
