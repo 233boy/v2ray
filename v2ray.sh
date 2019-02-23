@@ -143,6 +143,13 @@ create_vmess_URL_config() {
 		EOF
 	fi
 }
+view_v2ray_traffic() {
+	_load v2ray-traffic.sh
+	echo
+	echo
+	v2_query_all
+	echo
+}
 view_v2ray_config_info() {
 
 	_load v2ray-info.sh
@@ -2802,6 +2809,8 @@ _help() {
 
 	${green}v2ray update $none更新 V2Ray
 
+	${green}v2ray traffic $none查看 V2Ray 流量
+
 	${green}v2ray update.sh $none更新 V2Ray 管理脚本
 
 	${green}v2ray uninstall $none卸载 V2Ray
@@ -2846,6 +2855,8 @@ menu() {
 		echo -e "$yellow 10. $none卸载 V2Ray"
 		echo
 		echo -e "$yellow 11. $none其他"
+		echo
+		echo -e "$yellow 11. $none查看 V2ray 流量统计"
 		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
@@ -2898,6 +2909,10 @@ menu() {
 				;;
 			11)
 				other
+				break
+				;;
+			12)
+				view_v2ray_traffic
 				break
 				;;
 			*)
@@ -3029,6 +3044,9 @@ v | version)
 	;;
 bbr)
 	other
+	;;
+traffic)
+	view_v2ray_traffic
 	;;
 help | *)
 	_help
