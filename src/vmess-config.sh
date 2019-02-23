@@ -55,7 +55,7 @@ cp -f $v2ray_server_config_file $v2ray_server_config
 cp -f $v2ray_client_config_file $v2ray_client_config
 
 # change port, uuid, alterId
-sed -i "9s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/; 16s/233/$alterId/" $v2ray_server_config
+sed -i "s/##VMPORT##/$v2ray_port/; s/##VMUSERID##/$v2ray_id/; s/##VMALTID##/$alterId/" $v2ray_server_config
 
 # change dynamic port
 if [[ $v2ray_transport -ge 18 ]]; then
@@ -66,11 +66,11 @@ fi
 # change domain and path, or header type
 case $v2ray_transport in
 5)
-	sed -i "24s/233blog.com/$domain/" $v2ray_server_config
+	sed -i "s/##H2DOMAIN##/$domain/" $v2ray_server_config
 	if [[ $is_path ]]; then
-		sed -i "26s/233blog/$path/" $v2ray_server_config
+		sed -i "s/##H2PATH##/$path/" $v2ray_server_config
 	else
-		sed -i "26s/233blog//" $v2ray_server_config
+		sed -i "s/##H2PATH##//" $v2ray_server_config
 	fi
 	;;
 7 | 13 | 22 | 28)
@@ -97,15 +97,14 @@ esac
 
 ## change client config file
 [[ -z $ip ]] && get_ip
+sed -i "s/##VMADDR##/$ip/; s/##VMPORT##/$v2ray_port/; s/##VMUSERID##/$v2ray_id/; s/##VMALTID##/$alterId/" $v2ray_client_config
 if [[ $v2ray_transport == [45] ]]; then
-	sed -i "s/233blog.com/$domain/; 13s/2333/443/; 16s/$old_id/$v2ray_id/; 17s/233/$alterId/" $v2ray_client_config
+	sed -i "s/##H2DOMAIN##/$domain/" $v2ray_client_config
 	if [[ $is_path ]]; then
-		sed -i "31s/233blog/$path/" $v2ray_client_config
+		sed -i "s/##H2PATH##/$path/" $v2ray_client_config
 	else
-		sed -i "31s/233blog//" $v2ray_client_config
+		sed -i "s/##H2PATH##//" $v2ray_client_config
 	fi
-else
-	sed -i "s/233blog.com/$ip/; 13s/2333/$v2ray_port/; 16s/$old_id/$v2ray_id/; 17s/233/$alterId/" $v2ray_client_config
 fi
 
 # zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
