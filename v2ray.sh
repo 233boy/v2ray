@@ -2693,6 +2693,7 @@ update_v2ray() {
 	_update_v2ray_version
 
 	if [[ $ssray ]]; then
+		_load download-ssray.sh
 		_update_ssray_version
 		ssray_save_config
 	fi
