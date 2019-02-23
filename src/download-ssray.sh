@@ -54,7 +54,7 @@ _update_ssray_version() {
 		_download_ssray_file
 		do_service restart ssray
 		echo
-		echo -e " $green 更新成功啦...当前 V2Ray 版本: ${cyan}$ssray_latest_ver$none"
+		echo -e " $green 更新成功啦...当前 V2Ray plugin 版本: ${cyan}$ssray_latest_ver$none"
 		echo
 		echo -e " $yellow 温馨提示: 为了避免出现莫名其妙的问题...V2Ray 客户端的版本最好和服务器的版本保持一致$none"
 		echo
@@ -65,3 +65,10 @@ _update_ssray_version() {
 	fi
 }
 
+_uninstall_ssray() {
+	if [[ $systemd ]]; then
+		systemctl disable ssray
+		rm -f "/lib/systemd/system/ssray.service" /etc/v2ray/ssray.conf 
+	fi
+	rm -f /usr/local/bin/v2ray-plugin 
+}
