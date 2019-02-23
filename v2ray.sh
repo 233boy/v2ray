@@ -2856,7 +2856,7 @@ menu() {
 		echo
 		echo -e "$yellow 11. $none其他"
 		echo
-		echo -e "$yellow 11. $none查看 V2ray 流量统计"
+		echo -e "$yellow 12. $none查看 V2ray 流量统计"
 		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
