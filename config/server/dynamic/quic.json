@@ -41,14 +41,14 @@
 		},
 		{
 			"tag": "vmess-in",
-			"port": ##VMPORT##,
+			"port": __VMPORT__,
 			"protocol": "vmess",
 			"settings": {
 				"clients": [
 					{
-						"id": "##VMUSERID##",
+						"id": "__VMUSERID__",
 						"level": 1,
-						"alterId": ##VMALTID##
+						"alterId": __VMALTID__
 					}
 				],
 				"detour": {
