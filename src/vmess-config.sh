@@ -95,7 +95,7 @@ case $v2ray_transport in
 	;;
 esac
 
-__ change client config file
+# change client config file
 [[ -z $ip ]] && get_ip
 sed -i "s/__VMADDR__/$ip/; s/__VMPORT__/$v2ray_port/; s/__VMUSERID__/$v2ray_id/; s/__VMALTID__/$alterId/" $v2ray_client_config
 if [[ $v2ray_transport == [45] ]]; then
