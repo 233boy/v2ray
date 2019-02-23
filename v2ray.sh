@@ -33,6 +33,7 @@ if [[ -f /usr/bin/yum ]]; then
 fi
 
 backup="/etc/v2ray/233blog_v2ray_backup.conf"
+ssraybackup="/etc/v2ray/233blog_ssray_backup.conf"
 
 if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
 
@@ -56,6 +57,8 @@ fi
 if [[ $path_status ]]; then
 	is_path=true
 fi
+
+[[ -f $ssraybackup ]] && source $ssraybackup
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
 old_id="e55c8d17-2cf3-b21a-bcf1-eeacb011ed79"
@@ -88,6 +91,12 @@ if [[ $v2ray_transport == [45] && $caddy ]] && [[ $caddy_pid ]]; then
 else
 	caddy_run_status="$red未在运行$none"
 fi
+
+ssray_transports=(
+	"HTTP (Websocket)"
+	"HTTPS (Websocket TLS)"
+	"QUIC (udp)"
+)
 
 _load transport.sh
 ciphers=(
@@ -142,6 +151,13 @@ create_vmess_URL_config() {
 		}
 		EOF
 	fi
+}
+view_v2ray_traffic() {
+	_load v2ray-traffic.sh
+	echo
+	echo
+	v2_query_all
+	echo
 }
 view_v2ray_config_info() {
 
@@ -620,8 +636,6 @@ ssray_config() {
 	echo -e " $red大佬...你没有配置 Shadowsocks - V2ray - Plugin $none...不过现在想要配置的话也是可以的 ^_^"
 	echo
 	echo
-	echo -e " $yellow 唉唉 现在不管有没有配置过都要重新配置的，脚本还没完善好这部分，想改就接着重新配置吧~$none..."
-	echo
 
 	while :; do
 		echo -e "是否配置 ${yellow}Shadowsocks - V2ray Plugin ${none} [${magenta}Y/N$none]"
@@ -638,6 +652,7 @@ ssray_config() {
 			echo
 			ssray=true
 			ssray_port_config
+			ssray_proto_config
 			break
 		elif [[ "$install_ssray" == [Nn] ]]; then
 			break
@@ -646,6 +661,11 @@ ssray_config() {
 		fi
 
 	done
+
+	_download_ssray_file
+	ssray_apply_config
+	ssray_save_config
+	_load ss-info.sh
 }
 
 ssray_port_config() {
@@ -666,9 +686,6 @@ ssray_port_config() {
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			if [[ $v2ray_transport == [45] ]]; then
-				local tls=ture
-			fi
 			if [[ $tls && $ssrayport == "80" ]] || [[ $tls && $ssrayport == "443" ]]; then
 				echo
 				echo -e "由于你已选择了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
@@ -700,17 +717,10 @@ ssray_port_config() {
 		esac
 
 	done
-
-	ssray_proto_config
 }
 
 ssray_proto_config() {
 
-	ssray_transports=(
-		"HTTP (Websocket)"
-		"HTTPS (Websocket TLS)"
-		"QUIC (udp)"
-	)
 	echo
 	while :; do
 		echo -e "请选择 "$yellow"V2Ray-Plugin"$none" 传输协议 [${magenta}1-${#transport[*]}$none]"
@@ -781,6 +791,10 @@ ssray_proto_config() {
 			echo -e "$yellow 噫！好像已经有证书了！ 皮皮虾咋们走！ $none"
 		else
 			echo -e "$yellow 开始安装acme.sh $none"
+			if ! command -v socat; then
+				echo -e "$red 需要安装socat $none"
+				exit 1
+			fi
 			curl https://get.acme.sh | bash
 
 			echo -e "$yellow 开始申请 $ssray_domain 的证书，如果有正在使用80端口的程序先让它们退下~... $none"
@@ -800,19 +814,87 @@ ssray_proto_config() {
 }
 
 change_ssray_config() {
+
+	_load download-ssray.sh
+
 	if [[ $ssray ]]; then
-		echo
+
+
+		while :; do
+			echo
+			echo -e "$yellow 1. $none修改 Shadowsocks - V2ray插件 端口"
+			echo
+			echo -e "$yellow 2. $none修改 Shadowsocks - V2ray插件 协议"
+			echo
+			echo -e "$yellow 3. $none升级 Shadowsocks - V2ray插件"
+			echo
+			echo -e "$yellow 4. $none关闭 Shadowsocks - V2ray"
+			echo
+			read -p "$(echo -e "请选择 [${magenta}1-3$none]:")" _opt
+			if [[ -z $_opt ]]; then
+				error
+			else
+				case $_opt in
+				1)
+					local oldssrayport=$ssrayport
+					ssray_port_config
+					ssray_save_config
+					ssray_apply_config
+					del_port $oldssrayport
+					open_port $ssrayport
+					_load ss-info.sh
+					break
+					;;
+				2)
+					ssray_proto_config
+					ssray_save_config
+					ssray_apply_config
+					_load ss-info.sh
+					break
+					;;
+				3)
+					_update_ssray_version
+					ssray_save_config
+					break
+					;;
+				4)
+					del_port $ssrayport
+					_uninstall_ssray
+					ssray=
+					install_ssray=n
+					rm -f $ssraybackup
+					break
+					;;
+				*)
+					error
+					;;
+				esac
+			fi
+
+		done
+
 	else
 		ssray_config
-		_load download-ssray.sh
-		_download_ssray_file
-		_install_ssray_service
-		open_port $ssrayport
-		do_service restart ssray
-		_load ss-info.sh
 	fi
 }
 
+ssray_save_config() {
+	cat > $ssraybackup << EOF
+install_ssray=${install_ssray}
+ssray_ver="$ssray_latest_ver"
+ssray=${ssray}
+ssray_transport=${ssray_transport}
+ssrayport=${ssrayport}
+ssray_domain="${ssray_domain}"
+ssrayopt="${ssrayopt}"
+EOF
+}
+
+ssray_apply_config() {
+	_install_ssray_service
+	open_port $ssrayport
+	do_service restart ssray
+}
 
 change_v2ray_config() {
 	local _menu=(
@@ -2609,6 +2691,12 @@ update() {
 update_v2ray() {
 	_load download-v2ray.sh
 	_update_v2ray_version
+
+	if [[ $ssray ]]; then
+		_load download-ssray.sh
+		_update_ssray_version
+		ssray_save_config
+	fi
 }
 update_v2ray.sh() {
 	if [[ $_test ]]; then
@@ -2802,6 +2890,8 @@ _help() {
 
 	${green}v2ray update $none更新 V2Ray
 
+	${green}v2ray traffic $none查看 V2Ray 流量
+
 	${green}v2ray update.sh $none更新 V2Ray 管理脚本
 
 	${green}v2ray uninstall $none卸载 V2Ray
@@ -2846,6 +2936,8 @@ menu() {
 		echo -e "$yellow 10. $none卸载 V2Ray"
 		echo
 		echo -e "$yellow 11. $none其他"
+		echo
+		echo -e "$yellow 12. $none查看 V2ray 流量统计"
 		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
@@ -2898,6 +2990,10 @@ menu() {
 				;;
 			11)
 				other
+				break
+				;;
+			12)
+				view_v2ray_traffic
 				break
 				;;
 			*)
@@ -3029,6 +3125,9 @@ v | version)
 	;;
 bbr)
 	other
+	;;
+traffic)
+	view_v2ray_traffic
 	;;
 help | *)
 	_help

@@ -1,4 +1,5 @@
         {
+            "tag": "socks-in",
             "protocol": "socks",
             "port": 6666,
             "settings": {
