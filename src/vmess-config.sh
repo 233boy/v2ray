@@ -55,7 +55,7 @@ cp -f $v2ray_server_config_file $v2ray_server_config
 cp -f $v2ray_client_config_file $v2ray_client_config
 
 # change port, uuid, alterId
-sed -i "s/##VMPORT##/$v2ray_port/; s/##VMUSERID##/$v2ray_id/; s/##VMALTID##/$alterId/" $v2ray_server_config
+sed -i "s/__VMPORT__/$v2ray_port/; s/__VMUSERID__/$v2ray_id/; s/__VMALTID__/$alterId/" $v2ray_server_config
 
 # change dynamic port
 if [[ $v2ray_transport -ge 18 ]]; then
@@ -66,11 +66,11 @@ fi
 # change domain and path, or header type
 case $v2ray_transport in
 5)
-	sed -i "s/##H2DOMAIN##/$domain/" $v2ray_server_config
+	sed -i "s/__H2DOMAIN__/$domain/" $v2ray_server_config
 	if [[ $is_path ]]; then
-		sed -i "s/##H2PATH##/$path/" $v2ray_server_config
+		sed -i "s/__H2PATH__/$path/" $v2ray_server_config
 	else
-		sed -i "s/##H2PATH##//" $v2ray_server_config
+		sed -i "s/__H2PATH__//" $v2ray_server_config
 	fi
 	;;
 7 | 13 | 22 | 28)
@@ -95,15 +95,15 @@ case $v2ray_transport in
 	;;
 esac
 
-## change client config file
+__ change client config file
 [[ -z $ip ]] && get_ip
-sed -i "s/##VMADDR##/$ip/; s/##VMPORT##/$v2ray_port/; s/##VMUSERID##/$v2ray_id/; s/##VMALTID##/$alterId/" $v2ray_client_config
+sed -i "s/__VMADDR__/$ip/; s/__VMPORT__/$v2ray_port/; s/__VMUSERID__/$v2ray_id/; s/__VMALTID__/$alterId/" $v2ray_client_config
 if [[ $v2ray_transport == [45] ]]; then
-	sed -i "s/##H2DOMAIN##/$domain/" $v2ray_client_config
+	sed -i "s/__H2DOMAIN__/$domain/" $v2ray_client_config
 	if [[ $is_path ]]; then
-		sed -i "s/##H2PATH##/$path/" $v2ray_client_config
+		sed -i "s/__H2PATH__/$path/" $v2ray_client_config
 	else
-		sed -i "s/##H2PATH##//" $v2ray_client_config
+		sed -i "s/__H2PATH__//" $v2ray_client_config
 	fi
 fi
 

@@ -9,12 +9,12 @@
             "settings": {
                 "vnext": [
                     {
-                        "address": "##VMADDR##",
-                        "port": ##VMPORT##,
+                        "address": "__VMADDR__",
+                        "port": __VMPORT__,
                         "users": [
                             {
-                                "id": "##VMUSERID##",
-                                "alterId": ##VMALTID##,
+                                "id": "__VMUSERID__",
+                                "alterId": __VMALTID__,
                                 "security": "auto"
                             }
                         ]

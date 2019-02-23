@@ -37,7 +37,7 @@ _install_ssray_service() {
 	if [[ $systemd ]]; then
 		install -m644 /etc/v2ray/233boy/v2ray/src/ssray.service "/lib/systemd/system/"
 		install -m644 /etc/v2ray/233boy/v2ray/src/ssray.conf /etc/v2ray/
-		sed -i "s/##REMOTEPORT##/${ssrayport}/; s/##LOCALPORT##/${ssport}/; s/##OPTION##/${ssrayopt}/;" /etc/v2ray/ssray.conf
+		sed -i "s/__REMOTEPORT__/${ssrayport}/; s/__LOCALPORT__/${ssport}/; s/__OPTION__/${ssrayopt}/;" /etc/v2ray/ssray.conf
 		systemctl enable ssray
 	else
         $red 暂时不资瓷...$none
