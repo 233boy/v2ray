@@ -753,11 +753,7 @@ install_v2ray() {
 		cp -rf $(pwd)/* /etc/v2ray/233boy/v2ray
 	else
 		pushd /tmp
-		if [[ $_test ]]; then
-			git clone https://github.com/233boy/v2ray -b test /etc/v2ray/233boy/v2ray
-		else
-			git clone https://github.com/233boy/v2ray /etc/v2ray/233boy/v2ray
-		fi
+		git clone https://github.com/233boy/v2ray -b "$_gitbranch" /etc/v2ray/233boy/v2ray
 		popd
 
 	fi
@@ -1028,10 +1024,12 @@ uninstall() {
 }
 
 args=$1
+_gitbranch=$2
 [ -z $1 ] && args="online"
 case $args in
 online)
 	#hello world
+	[[ -z $_gitbranch ]] && _gitbranch="master"
 	;;
 local)
 	local_install=true
