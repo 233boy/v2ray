@@ -982,6 +982,9 @@ while :; do
 	if [[ $local_install ]]; then
 		echo -e "$yellow 温馨提示.. 本地安装已启用 ..$none"
 		echo
+	elif [[ $_gitbranch != "master" ]]; then
+		echo -e "$yellow 温馨提示.. 脚本将使用 ${green}$_gitbranch $yellow分支进行安装..$none"
+		echo
 	fi
 	read -p "$(echo -e "请选择 [${magenta}1-2$none]:")" choose
 	case $choose in
