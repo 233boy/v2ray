@@ -1,5 +1,5 @@
 ## backup config
-_bakcup() {
+_backup() {
     for keys in $*; do
         case $keys in
         v2ray_transport)
