@@ -6,70 +6,32 @@ _blue() { echo -e "$(tput setaf 4)$*$(tput setaf 9)"; }
 _magenta() { echo -e "$(tput setaf 5)$*$(tput setaf 9)"; }
 _cyan() { echo -e "$(tput setaf 6)$*$(tput setaf 9)"; }
 _white() { echo -e "$(tput setaf 7)$*$(tput setaf 9)"; }
-log () {
-  local TMPDIR="/tmp/"
-  local LOG="${TMPDIR}/233script.log"
-  local TYPE=$1
-  local MSG=$2
-  local TIME=$(date +%Y-%m-%d\ %H:%M:%S)
 
-  [[ ! -d $TMPDIR ]] && mkdir -p $TMPDIR
-  if [[ -z $TERM ]]; then #if in cron
-    echo "[$TIME] $MSG" >> $LOG
-  else
-    case "$TYPE" in
-          info)
-            _green "[$TIME] $MSG" ;;
-          warn)
-            _yellow "[$TIME] $MSG" ;;
-          err)
-            _red "[$TIME] $MSG" ;;
-    esac
-    echo "[$TIME] $MSG" >> $LOG
-  fi
-}
-
-error () { log err "$1"; }
-info () { log info "$1"; }
-warn () { log warn "$1";}
-disableselinux () {
-  # Configure SELinux
-  type selinuxenabled >/dev/null 2>&1 || return 0;
-  [[ ! -f /etc/selinux/config ]] && return 0;
-  if selinuxenabled; then
-    info "disabling SELINUX ..."
-    setenforce Permissive # disable selinux needs reboot, set to Permissive
-    sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-  fi
-}
-
-addtocron () {
+_addtocron () {
   local PROG="$1"
   local CRONLINE="$2"
 
   # empty crontab
   if ! crontab -l >/dev/null 2>&1; then
     echo "$CRONLINE" | crontab
-    info "> crontab empty, added: $CRONLINE"
   else
     # add if $PROG not exists
     if ! crontab -l | grep -q "$PROG";  then
-      info "> added: $CRONLINE"
       (crontab -l; echo "$CRONLINE") | crontab
     else
-      info "> $PROG exists in cron, skipping."
+      echo "> $PROG exists in cron, skipping."
     fi
   fi
 }
 
-removefromcron () {
+_removefromcron () {
   local PROG="$1"
   if crontab -l | grep -q "$PROG";  then
     crontab -l | grep -v "$PROG" | crontab
   fi
 }
 
-disablecronmail() {
+_disablecronmail() {
   if [[ ! -f /etc/sysconfig/crond ]]; then
 	return 0
   fi

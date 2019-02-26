@@ -106,6 +106,10 @@ _v2_info() {
 		echo
 		echo -e "$yellow 地址 (Address) = $cyan${ip}$none"
 		echo
+		if [[ $v6ip ]]; then
+			echo -e "$yellow IPv6 地址 (Address) = $cyan${v6ip}$none"
+			echo
+		fi
 		echo -e "$yellow 端口 (Port) = $cyan$v2ray_port$none"
 		echo
 		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"

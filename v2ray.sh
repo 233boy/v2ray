@@ -150,6 +150,23 @@ create_vmess_URL_config() {
 			"tls": ""
 		}
 		EOF
+		if [[ $v6ip ]]; then
+			cat >/etc/v2ray/vmess_qrv6.json <<-EOF
+			{
+				"v": "2",
+				"ps": "v2ray6.com_${v6ip}",
+				"add": "${ip}",
+				"port": "${v2ray_port}",
+				"id": "${v2ray_id}",
+				"aid": "${alterId}",
+				"net": "${net}",
+				"type": "${header}",
+				"host": "${host}",
+				"path": "",
+				"tls": ""
+			}
+			EOF
+		fi
 	fi
 }
 view_v2ray_traffic() {
@@ -2575,7 +2592,12 @@ get_v2ray_vmess_URL_link() {
 	echo
 	echo -e ${cyan}$vmess${none}
 	echo
-	rm -rf /etc/v2ray/vmess_qr.json
+	if [[ -f /etc/v2ray/vmess_qrv6.json ]]; then
+		local vmessv6="vmess://$(cat /etc/v2ray/vmess_qrv6.json | base64 -w 0)"
+		echo "IPv6:地址直链："
+		echo -e ${cyan}$vmessv6${none}
+	fi
+	rm -f /etc/v2ray/vmess_qr.json /etc/v2ray/vmess_qrv6.json 
 }
 other() {
 	while :; do
