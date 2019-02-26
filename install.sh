@@ -889,6 +889,7 @@ _install() {
 		echo
 		exit 1
 	fi
+	_disableselinux
 	v2ray_config
 	blocked_hosts
 	shadowsocks_config
@@ -939,6 +940,17 @@ _uninstall() {
 		" && exit 1
 	fi
 
+}
+
+_disableselinux () {
+  # Configure SELinux
+  type selinuxenabled >/dev/null 2>&1 || return 0;
+  [[ ! -f /etc/selinux/config ]] && return 0;
+  if selinuxenabled; then
+    setenforce Permissive
+    # disable selinux needs reboot, set to Permissive
+    sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+  fi
 }
 
 args=$1
