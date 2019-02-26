@@ -71,6 +71,7 @@ _v2_args() {
 }
 
 _v2_info() {
+	[[ -z $ip ]] && get_ip
 	echo
 	echo
 	echo "---------- V2Ray 配置信息 -------------"
