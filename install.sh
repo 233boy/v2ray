@@ -729,8 +729,8 @@ install_v2ray() {
 	echo -e "$yellow 同步系统仓库并安装必须组件，请骚吼~~~~~~~~~ $none"
 	echo
 	echo
-	$cmd update -y
 	if [[ $cmd == "apt-get" ]]; then
+		$cmd update -y
 		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin
 	else
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
@@ -835,15 +835,21 @@ backup_config() {
 }
 
 get_ip() {
-	ip=$(curl -s https://ipinfo.io/ip)
-	[[ -z $ip ]] && ip=$(curl -s https://api.ip.sb/ip)
-	[[ -z $ip ]] && ip=$(curl -s https://api.ipify.org)
-	[[ -z $ip ]] && ip=$(curl -s https://ip.seeip.org)
-	[[ -z $ip ]] && ip=$(curl -s https://ifconfig.co/ip)
-	[[ -z $ip ]] && ip=$(curl -s https://api.myip.com | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
-	[[ -z $ip ]] && ip=$(curl -s icanhazip.com)
-	[[ -z $ip ]] && ip=$(curl -s myip.ipip.net | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
+	ip=$(curl -4 -s https://ipinfo.io/ip)
+	[[ -z $ip ]] && ip=$(curl -4 -s https://api.ip.sb/ip)
+	[[ -z $ip ]] && ip=$(curl -4 -s https://api.ipify.org)
+	[[ -z $ip ]] && ip=$(curl -4 -s https://ip.seeip.org)
+	[[ -z $ip ]] && ip=$(curl -4 -s https://ifconfig.co/ip)
+	[[ -z $ip ]] && ip=$(curl -4 -s https://api.myip.com | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
+	[[ -z $ip ]] && ip=$(curl -4 -s icanhazip.com)
+	[[ -z $ip ]] && ip=$(curl -4 -s myip.ipip.net | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
 	[[ -z $ip ]] && echo -e "\n$red 这垃圾小鸡扔了吧！$none\n" && exit
+
+	v6ip=$(curl -6 -s https://ifconfig.co/ip)
+	[[ -z $v6ip ]] && v6ip=$(curl -6 -s https://api.ip.sb/ip)
+	[[ -z $v6ip ]] && v6ip=$(curl -6 -s https://ip.seeip.org)
+	[[ -z $v6ip ]] && v6ip=$(curl -6 -s http://icanhazip.com)
+	[[ -z $v6ip ]] && v6ip=$(curl -6 -s https://api.myip.com | cut -d\" -f4)
 }
 
 error() {
@@ -889,6 +895,7 @@ _install() {
 		echo
 		exit 1
 	fi
+	_disableselinux
 	v2ray_config
 	blocked_hosts
 	shadowsocks_config
@@ -939,6 +946,17 @@ _uninstall() {
 		" && exit 1
 	fi
 
+}
+
+_disableselinux () {
+  # Configure SELinux
+  type selinuxenabled >/dev/null 2>&1 || return 0;
+  [[ ! -f /etc/selinux/config ]] && return 0;
+  if selinuxenabled; then
+    setenforce Permissive
+    # disable selinux needs reboot, set to Permissive
+    sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+  fi
 }
 
 args=$1
