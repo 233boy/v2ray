@@ -1,12 +1,12 @@
 [[ -z $ip ]] && get_ip
 if [[ $shadowsocks ]]; then
-	#local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray6.com_ss_${ip}"
+	#local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#${_site}_ss_${ip}"
 	local cipherstr=$(echo -n ${ssciphers}:${sspass} | base64 -w 0 | sed 's/=*$//')
 	local clientopt=$(echo ${ssrayopt} | sed 's/server;\?//')
 	local opt="?plugin=$(echo "v2ray-plugin;${clientopt}" | sed 's/=/%3d/g; s/;/%3b/g;')"
 
-	local ss="ss://${cipherstr}@${ip}:${ssport}#v2ray6.com_ss_${ip}"
-	local ssplugin="ss://${cipherstr}@${ssray_domain}:${ssrayport}/${opt}#v2ray6.com_ssv2_${ssray_domain}"
+	local ss="ss://${cipherstr}@${ip}:${ssport}#${_site}_ss_${ip}"
+	local ssplugin="ss://${cipherstr}@${ssray_domain}:${ssrayport}/${opt}#${_site}_ssv2_${ssray_domain}"
 
 	echo
 	echo "---------- Shadowsocks 配置信息 -------------"
@@ -14,7 +14,7 @@ if [[ $shadowsocks ]]; then
 	echo -e "$yellow 服务器地址 = $cyan${ip}$none"
 	echo
 	if [[ $v6ip ]]; then
-		local ssv6="ss://${cipherstr}@[${v6ip}]:${ssport}#v2ray6.com_ss_${ip}"
+		local ssv6="ss://${cipherstr}@[${v6ip}]:${ssport}#${_site}_ss_${ip}"
 		echo -e "$yellow 服务器IPv6地址 = $cyan${v6ip}$none"
 		echo
 	fi

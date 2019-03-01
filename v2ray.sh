@@ -61,7 +61,6 @@ fi
 [[ -f $ssraybackup ]] && source $ssraybackup
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
-old_id="e55c8d17-2cf3-b21a-bcf1-eeacb011ed79"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
 v2ray_pid=$(pgrep -f /usr/bin/v2ray/v2ray)
@@ -71,6 +70,9 @@ v2ray_ver="$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
 . /etc/v2ray/233boy/v2ray/src/init.sh
 systemd=true
 # _test=true
+
+# site
+_site="ddog.xyz"
 
 if [[ $v2ray_ver != v* ]]; then
 	v2ray_ver="v$v2ray_ver"
@@ -121,7 +123,7 @@ create_vmess_URL_config() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "v2ray6.com_${domain}",
+			"ps": "${_site}_${domain}",
 			"add": "${domain}",
 			"port": "443",
 			"id": "${v2ray_id}",
@@ -138,7 +140,7 @@ create_vmess_URL_config() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "v2ray6.com_${ip}",
+			"ps": "${_site}_${ip}",
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${v2ray_id}",
@@ -154,7 +156,7 @@ create_vmess_URL_config() {
 			cat >/etc/v2ray/vmess_qrv6.json <<-EOF
 			{
 				"v": "2",
-				"ps": "v2ray6.com_${v6ip}",
+				"ps": "${_site}_${v6ip}",
 				"add": "${ip}",
 				"port": "${v2ray_port}",
 				"id": "${v2ray_id}",
@@ -228,7 +230,7 @@ get_shadowsocks_config_qr_link() {
 		echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 		echo
 		get_ip
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#v2ray6.com_ss_${ip}"
+		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#${_site}_ss_${ip}"
 		echo "${ss}" >/tmp/233blog_shadowsocks.txt
 		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
 
@@ -365,7 +367,7 @@ shadowsocks_port_config() {
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			if [[ $v2ray_transport == [45] ]]; then
-				local tls=ture
+				local tls=true
 			fi
 			if [[ $tls && $new_ssport == "80" ]] || [[ $tls && $new_ssport == "443" ]]; then
 				echo
@@ -483,7 +485,7 @@ change_shadowsocks_port() {
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			if [[ $v2ray_transport == [45] ]]; then
-				local tls=ture
+				local tls=true
 			fi
 			if [[ $tls && $new_ssport == "80" ]] || [[ $tls && $new_ssport == "443" ]]; then
 				echo
@@ -1011,46 +1013,46 @@ change_v2ray_port() {
 		echo
 		while :; do
 			echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
-			read -p "$(echo -e "(当前端口: ${cyan}${v2ray_port}$none):")" v2ray_port_opt
-			[[ -z $v2ray_port_opt ]] && error && continue
-			case $v2ray_port_opt in
+			read -p "$(echo -e "(当前端口: ${cyan}${v2ray_port}$none):")" new_v2ray_port
+			[[ -z $new_v2ray_port ]] && error && continue
+			case $new_v2ray_port in
 			$v2ray_port)
 				echo
 				echo " 哎呀...跟当前端口一毛一样呀...修改个鸡鸡哦"
 				error
 				;;
 			[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-				if [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start == $v2ray_port_opt || $v2ray_dynamicPort_end == $v2ray_port_opt ]]; then
+				if [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start == $new_v2ray_port || $v2ray_dynamicPort_end == $new_v2ray_port ]]; then
 					echo
 					echo -e " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：${cyan}$port_range${none}"
 					error
-				elif [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start -lt $v2ray_port_opt && $v2ray_port_opt -le $v2ray_dynamicPort_end ]]; then
+				elif [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start -lt $new_v2ray_port && $new_v2ray_port -le $v2ray_dynamicPort_end ]]; then
 					echo
 					echo -e " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：${cyan}$port_range${none}"
 					error
-				elif [[ $shadowsocks && $v2ray_port_opt == $ssport ]]; then
+				elif [[ $shadowsocks && $new_v2ray_port == $ssport ]]; then
 					echo
 					echo -e "抱歉, 此端口跟 Shadowsocks 端口冲突...当前 Shadowsocks 端口: ${cyan}$ssport$none"
 					error
-				elif [[ $socks && $v2ray_port_opt == $socks_port ]]; then
+				elif [[ $socks && $new_v2ray_port == $socks_port ]]; then
 					echo
 					echo -e "抱歉, 此端口跟 Socks 端口冲突...当前 Socks 端口: ${cyan}$socks_port$none"
 					error
-				elif [[ $mtproto && $v2ray_port_opt == $mtproto_port ]]; then
+				elif [[ $mtproto && $new_v2ray_port == $mtproto_port ]]; then
 					echo
 					echo -e "抱歉, 此端口跟 MTProto 端口冲突...当前 MTProto 端口: ${cyan}$mtproto_port$none"
 					error
 				else
 					echo
 					echo
-					echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port_opt$none"
+					echo -e "$yellow V2Ray 端口 = $cyan$new_v2ray_port$none"
 					echo "----------------------------------------------------------------"
 					echo
 					pause
 					backup_config v2ray_port
 					del_port $v2ray_port
-					open_port $v2ray_port_opt
-					v2ray_port=$v2ray_port_opt
+					open_port $new_v2ray_port
+					v2ray_port=$new_v2ray_port
 					config
 					clear
 					view_v2ray_config_info
@@ -1101,11 +1103,11 @@ change_v2ray_transport() {
 		echo "备注1: 含有 [dynamicPort] 的即启用动态端口.."
 		echo "备注2: [utp | srtp | wechat-video | dtls | wireguard] 分别伪装成 [BT下载 | 视频通话 | 微信视频通话 | DTLS 1.2 数据包 | WireGuard 数据包]"
 		echo
-		read -p "$(echo -e "(当前传输协议: ${cyan}${transport[$v2ray_transport - 1]}$none)"):" v2ray_transport_opt
-		if [ -z "$v2ray_transport_opt" ]; then
+		read -p "$(echo -e "(当前传输协议: ${cyan}${transport[$v2ray_transport - 1]}$none)"):" new_v2ray_transport
+		if [ -z "$new_v2ray_transport" ]; then
 			error
 		else
-			case $v2ray_transport_opt in
+			case $new_v2ray_transport in
 			$v2ray_transport)
 				echo
 				echo " 哎呀...跟当前传输协议一毛一样呀...修改个鸡鸡哦"
@@ -1114,32 +1116,32 @@ change_v2ray_transport() {
 			4 | 5)
 				if [[ $v2ray_port == "80" || $v2ray_port == "443" ]]; then
 					echo
-					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$v2ray_transport_opt - 1]} $none传输协议.. ${red}V2Ray 端口不能为 80 或者 443 ...$none"
+					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$new_v2ray_transport - 1]} $none传输协议.. ${red}V2Ray 端口不能为 80 或者 443 ...$none"
 					echo
 					echo -e " 当前 V2Ray 端口: ${cyan}$v2ray_port$none"
 					error
 				elif [[ $shadowsocks ]] && [[ $ssport == "80" || $ssport == "443" ]]; then
 					echo
-					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$v2ray_transport_opt - 1]} $none传输协议.. ${red}Shadowsocks 端口不能为 80 或者 443 ...$none"
+					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$new_v2ray_transport - 1]} $none传输协议.. ${red}Shadowsocks 端口不能为 80 或者 443 ...$none"
 					echo
 					echo -e " 当前 Shadowsocks 端口: ${cyan}$ssport$none"
 					error
 				elif [[ $socks ]] && [[ $socks_port == "80" || $socks_port == "443" ]]; then
 					echo
-					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$v2ray_transport_opt - 1]} $none传输协议.. ${red}Socks 端口不能为 80 或者 443 ...$none"
+					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$new_v2ray_transport - 1]} $none传输协议.. ${red}Socks 端口不能为 80 或者 443 ...$none"
 					echo
 					echo -e " 当前 Socks 端口: ${cyan}$socks_port$none"
 					error
 				elif [[ $mtproto ]] && [[ $mtproto_port == "80" || $mtproto_port == "443" ]]; then
 					echo
-					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$v2ray_transport_opt - 1]} $none传输协议.. ${red}MTProto 端口不能为 80 或者 443 ...$none"
+					echo -e " 抱歉...如果你想要使用${cyan} ${transport[$new_v2ray_transport - 1]} $none传输协议.. ${red}MTProto 端口不能为 80 或者 443 ...$none"
 					echo
 					echo -e " 当前 MTProto 端口: ${cyan}$mtproto_port$none"
 					error
 				else
 					echo
 					echo
-					echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport_opt - 1]}$none"
+					echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$new_v2ray_transport - 1]}$none"
 					echo "----------------------------------------------------------------"
 					echo
 					break
@@ -1148,7 +1150,7 @@ change_v2ray_transport() {
 			[1-9] | [1-2][0-9] | 3[0-2])
 				echo
 				echo
-				echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport_opt - 1]}$none"
+				echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$new_v2ray_transport - 1]}$none"
 				echo "----------------------------------------------------------------"
 				echo
 				break
@@ -1162,9 +1164,9 @@ change_v2ray_transport() {
 	done
 	pause
 
-	if [[ $v2ray_transport_opt == [45] ]]; then
+	if [[ $new_v2ray_transport == [45] ]]; then
 		tls_config
-	elif [[ $v2ray_transport_opt -ge 18 ]]; then
+	elif [[ $new_v2ray_transport -ge 18 ]]; then
 		v2ray_dynamic_port_start
 		v2ray_dynamic_port_end
 		pause
@@ -1172,14 +1174,14 @@ change_v2ray_transport() {
 		open_port "multiport"
 		backup_config v2ray_transport v2ray_dynamicPort_start v2ray_dynamicPort_end
 		port_range="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
-		v2ray_transport=$v2ray_transport_opt
+		v2ray_transport=$new_v2ray_transport
 		config
 		clear
 		view_v2ray_config_info
 	else
 		old_transport
 		backup_config v2ray_transport
-		v2ray_transport=$v2ray_transport_opt
+		v2ray_transport=$new_v2ray_transport
 		config
 		clear
 		view_v2ray_config_info
@@ -1282,13 +1284,13 @@ tls_config() {
 		else
 			update-rc.d -f caddy defaults >/dev/null 2>&1
 		fi
-		v2ray_transport=$v2ray_transport_opt
+		v2ray_transport=$new_v2ray_transport
 		caddy_config
 		config
 		clear
 		view_v2ray_config_info
 	else
-		if [[ $v2ray_transport_opt == 5 ]]; then
+		if [[ $new_v2ray_transport == 5 ]]; then
 			path_config_ask
 			pause
 			domain_check
@@ -1306,7 +1308,7 @@ tls_config() {
 			install_caddy
 			open_port "80"
 			open_port "443"
-			v2ray_transport=$v2ray_transport_opt
+			v2ray_transport=$new_v2ray_transport
 			caddy_config
 			config
 			caddy=true
@@ -1361,7 +1363,7 @@ auto_tls_config() {
 				install_caddy
 				open_port "80"
 				open_port "443"
-				v2ray_transport=$v2ray_transport_opt
+				v2ray_transport=$new_v2ray_transport
 				caddy_config
 				config
 				caddy=true
@@ -1383,7 +1385,7 @@ auto_tls_config() {
 				domain=$new_domain
 				open_port "80"
 				open_port "443"
-				v2ray_transport=$v2ray_transport_opt
+				v2ray_transport=$new_v2ray_transport
 				config
 				clear
 				view_v2ray_config_info
@@ -2414,7 +2416,7 @@ get_v2ray_config() {
 				echo
 				echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
 				echo
-				echo "V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
+				echo "V2Ray 客户端使用教程: https://${_site}/post/4/"
 				echo
 				break
 			else
@@ -2441,7 +2443,7 @@ get_v2ray_config_link() {
 		echo
 		echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
 		echo
-		echo " V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
+		echo " V2Ray 客户端使用教程: https://${_site}/post/4/"
 		echo
 		echo "备注...链接将在 14 天后失效"
 		echo
@@ -2463,7 +2465,7 @@ create_v2ray_config_text() {
 	if [[ $v2ray_transport == [45] ]]; then
 		if [[ ! $caddy ]]; then
 			echo
-			echo " 警告！请自行配置 TLS...教程: https://v2ray6.com/post/3/"
+			echo " 警告！请自行配置 TLS...教程: https://${_site}/post/3/"
 		fi
 		echo
 		echo "地址 (Address) = ${domain}"
@@ -2516,7 +2518,7 @@ create_v2ray_config_text() {
 	fi
 	echo "---------- END -------------"
 	echo
-	echo "V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
+	echo "V2Ray 客户端使用教程: https://${_site}/post/4/"
 	echo
 }
 get_v2ray_config_info_link() {
@@ -2532,7 +2534,7 @@ get_v2ray_config_info_link() {
 		echo
 		echo -e "$yellow 链接 = $cyan$link$none"
 		echo
-		echo -e " V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
+		echo -e " V2Ray 客户端使用教程: https://${_site}/post/4/"
 		echo
 		echo "备注...链接将在 14 天后失效..."
 		echo
@@ -2567,7 +2569,7 @@ get_v2ray_config_qr_link() {
 		echo -e "$red 友情提醒: 请务必核对扫码结果 (V2RayNG 除外) $none"
 		echo
 		echo
-		echo " V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
+		echo " V2Ray 客户端使用教程: https://${_site}/post/4/"
 		echo
 		echo "备注...链接将在 14 天后失效"
 		echo
@@ -2788,7 +2790,7 @@ do_service() {
 }
 _help() {
 	echo
-	echo "........... V2Ray 管理脚本帮助信息 by v2ray6.com .........."
+	echo "........... V2Ray 管理脚本帮助信息 by ${_site} .........."
 	echo -e "
 	${green}v2ray menu $none管理 V2Ray (同等于直接输入 v2ray)
 
@@ -2831,17 +2833,17 @@ menu() {
 	clear
 	while :; do
 		echo
-		echo "........... V2Ray 管理脚本 $_version by v2ray6.com .........."
+		echo "........... V2Ray 管理脚本 $_version by ${_site} .........."
 		echo
 		echo -e "## V2Ray 版本: $cyan$v2ray_ver$none  /  V2Ray 状态: $v2ray_status ##"
 		echo
-		echo "帮助说明: https://v2ray6.com/post/1/"
+		echo "帮助说明: https://${_site}/post/1/"
 		echo
 		echo "反馈问题: https://github.com/233boy/v2ray/issues"
 		echo
 		echo "TG 群组: https://t.me/blog233"
 		echo
-		echo "捐赠脚本作者: https://v2ray6.com/donate/"
+		echo "捐赠脚本作者: https://${_site}/donate/"
 		echo
 		echo "捐助 V2Ray: https://www.v2ray.com/chapter_00/02_donate.html"
 		echo
