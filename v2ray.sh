@@ -2830,6 +2830,20 @@ _help() {
 "
 }
 menu() {
+	local _lists=(
+		"查看 V2Ray 配置"
+		"修改 V2Ray 配置"
+		"下载 V2Ray 配置 / 生成配置信息链接 / 生成二维码链接"
+		"查看 Shadowsocks 配置 / 生成二维码链接"
+		"修改 Shadowsocks 配置"
+		"查看 MTProto 配置 / 修改 MTProto 配置"
+		"查看 Socks5 配置 / 修改 Socks5 配置"
+		"启动 / 停止 / 重启 / 查看日志"
+		"更新 V2Ray / 更新 V2Ray 管理脚本"
+		"卸载 V2Ray"
+		"其他"
+		"查看 V2ray 流量统计"
+	)
 	clear
 	while :; do
 		echo
@@ -2846,34 +2860,19 @@ menu() {
 		echo "捐赠脚本作者: https://${_site}/donate/"
 		echo
 		echo "捐助 V2Ray: https://www.v2ray.com/chapter_00/02_donate.html"
-		echo
-		echo -e "$yellow  1. $none查看 V2Ray 配置"
-		echo
-		echo -e "$yellow  2. $none修改 V2Ray 配置"
-		echo
-		echo -e "$yellow  3. $none下载 V2Ray 配置 / 生成配置信息链接 / 生成二维码链接"
-		echo
-		echo -e "$yellow  4. $none查看 Shadowsocks 配置 / 生成二维码链接"
-		echo
-		echo -e "$yellow  5. $none修改 Shadowsocks 配置"
-		echo
-		echo -e "$yellow  6. $none查看 MTProto 配置 / 修改 MTProto 配置"
-		echo
-		echo -e "$yellow  7. $none查看 Socks5 配置 / 修改 Socks5 配置"
-		echo
-		echo -e "$yellow  8. $none启动 / 停止 / 重启 / 查看日志"
-		echo
-		echo -e "$yellow  9. $none更新 V2Ray / 更新 V2Ray 管理脚本"
-		echo
-		echo -e "$yellow 10. $none卸载 V2Ray"
-		echo
-		echo -e "$yellow 11. $none其他"
-		echo
-		echo -e "$yellow 12. $none查看 V2ray 流量统计"
+		for ((i = 1; i <= ${#_lists[*]}; i++)); do
+			if [[ "$i" -le 9 ]]; then
+				echo
+				echo -e "$yellow  $i. $none${_lists[$i - 1]}"
+			else
+				echo
+				echo -e "$yellow $i. $none${_lists[$i - 1]}"
+			fi
+		done
 		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
-		read -p "$(echo -e "请选择菜单 [${magenta}1-11$none]:")" choose
+		read -p "$(echo -e "请选择菜单 [${magenta}1-${#_lists[*]}$none]:")" choose
 		if [[ -z $choose ]]; then
 			exit 1
 		else
