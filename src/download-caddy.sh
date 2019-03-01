@@ -44,4 +44,7 @@ _install_caddy_service() {
 	chown -R www-data.www-data /etc/ssl/caddy
 
 	mkdir -p /etc/caddy/
+
+	## create sites dir
+	mkdir -p /etc/caddy/sites
 }
