@@ -48,13 +48,15 @@ else
 fi
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
-old_id="e55c8d17-2cf3-b21a-bcf1-eeacb011ed79"
 v2ray_server_config="/etc/v2ray/config.json"
 v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
 backup="/etc/v2ray/233blog_v2ray_backup.conf"
 _v2ray_sh="/usr/local/sbin/v2ray"
 systemd=true
 # _test=true
+
+# site
+_site="ddog.xyz"
 
 transport=(
 	TCP
@@ -126,13 +128,13 @@ v2ray_config() {
 		echo "备注1: 含有 [dynamicPort] 的即启用动态端口.."
 		echo "备注2: [utp | srtp | wechat-video | dtls | wireguard] 分别伪装成 [BT下载 | 视频通话 | 微信视频通话 | DTLS 1.2 数据包 | WireGuard 数据包]"
 		echo
-		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport
-		[ -z "$v2ray_transport" ] && v2ray_transport=1
-		case $v2ray_transport in
+		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" new_v2ray_transport
+		[ -z "$new_v2ray_transport" ] && new_v2ray_transport=1
+		case $new_v2ray_transport in
 		[1-9] | [1-2][0-9] | 3[0-2])
 			echo
 			echo
-			echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport - 1]}$none"
+			echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$new_v2ray_transport - 1]}$none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -142,10 +144,10 @@ v2ray_config() {
 			;;
 		esac
 	done
-	v2ray_port_config
+	new_v2ray_port_config
 }
-v2ray_port_config() {
-	case $v2ray_transport in
+new_v2ray_port_config() {
+	case $new_v2ray_transport in
 	4 | 5)
 		tls_config
 		;;
@@ -153,13 +155,13 @@ v2ray_port_config() {
 		local random=$(shuf -i20001-65535 -n1)
 		while :; do
 			echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
-			read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" v2ray_port
-			[ -z "$v2ray_port" ] && v2ray_port=$random
-			case $v2ray_port in
+			read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" new_v2ray_port
+			[ -z "$new_v2ray_port" ] && new_v2ray_port=$random
+			case $new_v2ray_port in
 			[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 				echo
 				echo
-				echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
+				echo -e "$yellow V2Ray 端口 = $cyan$new_v2ray_port$none"
 				echo "----------------------------------------------------------------"
 				echo
 				break
@@ -169,7 +171,7 @@ v2ray_port_config() {
 				;;
 			esac
 		done
-		if [[ $v2ray_transport -ge 18 ]]; then
+		if [[ $new_v2ray_transport -ge 18 ]]; then
 			v2ray_dynamic_port_start
 		fi
 		;;
@@ -183,11 +185,11 @@ v2ray_dynamic_port_start() {
 		read -p "$(echo -e "(默认开始端口: ${cyan}10000$none):")" v2ray_dynamic_port_start_input
 		[ -z $v2ray_dynamic_port_start_input ] && v2ray_dynamic_port_start_input=10000
 		case $v2ray_dynamic_port_start_input in
-		$v2ray_port)
+		$new_v2ray_port)
 			echo
 			echo " 不能和 V2Ray 端口一毛一样...."
 			echo
-			echo -e " 当前 V2Ray 端口：${cyan}$v2ray_port${none}"
+			echo -e " 当前 V2Ray 端口：${cyan}$new_v2ray_port${none}"
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
@@ -205,8 +207,8 @@ v2ray_dynamic_port_start() {
 
 	done
 
-	if [[ $v2ray_dynamic_port_start_input -lt $v2ray_port ]]; then
-		lt_v2ray_port=true
+	if [[ $v2ray_dynamic_port_start_input -lt $new_v2ray_port ]]; then
+		lt_new_v2ray_port=true
 	fi
 
 	v2ray_dynamic_port_end
@@ -226,11 +228,11 @@ v2ray_dynamic_port_end() {
 				echo
 				echo -e " 当前 V2Ray 动态端口开始：${cyan}$v2ray_dynamic_port_start_input${none}"
 				error
-			elif [ $lt_v2ray_port ] && [[ ${v2ray_dynamic_port_end_input} -ge $v2ray_port ]]; then
+			elif [ $lt_new_v2ray_port ] && [[ ${v2ray_dynamic_port_end_input} -ge $new_v2ray_port ]]; then
 				echo
 				echo " V2Ray 动态端口结束范围 不能包括 V2Ray 端口..."
 				echo
-				echo -e " 当前 V2Ray 端口：${cyan}$v2ray_port${none}"
+				echo -e " 当前 V2Ray 端口：${cyan}$new_v2ray_port${none}"
 				error
 			else
 				echo
@@ -256,9 +258,9 @@ tls_config() {
 	local random=$(shuf -i20001-65535 -n1)
 	while :; do
 		echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]，不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
-		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" v2ray_port
-		[ -z "$v2ray_port" ] && v2ray_port=$random
-		case $v2ray_port in
+		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" new_v2ray_port
+		[ -z "$new_v2ray_port" ] && new_v2ray_port=$random
+		case $new_v2ray_port in
 		80)
 			echo
 			echo " ...都说了不能选择 80 端口了咯....."
@@ -272,7 +274,7 @@ tls_config() {
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			echo
 			echo
-			echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
+			echo -e "$yellow V2Ray 端口 = $cyan$new_v2ray_port$none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -326,7 +328,7 @@ tls_config() {
 
 	done
 
-	if [[ $v2ray_transport -ne 5 ]]; then
+	if [[ $new_v2ray_transport -ne 5 ]]; then
 		auto_tls_config
 	else
 		caddy=true
@@ -527,14 +529,14 @@ shadowsocks_port_config() {
 		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):") " ssport
 		[ -z "$ssport" ] && ssport=$random
 		case $ssport in
-		$v2ray_port)
+		$new_v2ray_port)
 			echo
 			echo " 不能和 V2Ray 端口一毛一样...."
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			if [[ $v2ray_transport == [45] ]]; then
-				local tls=ture
+			if [[ $new_v2ray_transport == [45] ]]; then
+				local tls=true
 			fi
 			if [[ $tls && $ssport == "80" ]] || [[ $tls && $ssport == "443" ]]; then
 				echo
@@ -635,11 +637,11 @@ install_info() {
 	echo
 	echo "---------- 安装信息 -------------"
 	echo
-	echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport - 1]}$none"
+	echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$new_v2ray_transport - 1]}$none"
 
-	if [[ $v2ray_transport == [45] ]]; then
+	if [[ $new_v2ray_transport == [45] ]]; then
 		echo
-		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
+		echo -e "$yellow V2Ray 端口 = $cyan$new_v2ray_port$none"
 		echo
 		echo -e "$yellow 你的域名 = $cyan$domain$none"
 		echo
@@ -655,9 +657,9 @@ install_info() {
 			echo
 			echo -e "$yellow 路径分流 = ${cyan}/${path}$none"
 		fi
-	elif [[ $v2ray_transport -ge 18 ]]; then
+	elif [[ $new_v2ray_transport -ge 18 ]]; then
 		echo
-		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
+		echo -e "$yellow V2Ray 端口 = $cyan$new_v2ray_port$none"
 		echo
 		echo -e "$yellow V2Ray 动态端口范围 = $cyan${v2ray_dynamic_port_start_input} - ${v2ray_dynamic_port_end_input}$none"
 
@@ -667,7 +669,7 @@ install_info() {
 		fi
 	else
 		echo
-		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
+		echo -e "$yellow V2Ray 端口 = $cyan$new_v2ray_port$none"
 
 		if [[ $ban_ad ]]; then
 			echo
@@ -745,7 +747,7 @@ install_v2ray() {
 			echo
 			echo -e "$red 哎呀呀...安装失败了咯...$none"
 			echo
-			echo -e " 请确保你有完整的上传 v2ray6.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
+			echo -e " 请确保你有完整的上传 $_site 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
 			echo
 			exit 1
 		fi
@@ -788,10 +790,13 @@ config() {
 	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
 	chmod +x $_v2ray_sh
 
-	v2ray_id=$uuid
-	alterId=233
 	ban_bt=true
-	if [[ $v2ray_transport -ge 18 ]]; then
+	alterId=233
+	v2ray_id=$uuid
+	v2ray_port=$new_v2ray_port
+	v2ray_transport=$new_v2ray_transport
+
+	if [[ $new_v2ray_transport -ge 18 ]]; then
 		v2ray_dynamicPort_start=${v2ray_dynamic_port_start_input}
 		v2ray_dynamicPort_end=${v2ray_dynamic_port_end_input}
 	fi
@@ -802,15 +807,15 @@ config() {
 	_iptables_save
 
 	[[ $shadowsocks ]] && open_port $ssport
-	if [[ $v2ray_transport == [45] ]]; then
+	if [[ $new_v2ray_transport == [45] ]]; then
 		open_port "80"
 		open_port "443"
-		open_port $v2ray_port
-	elif [[ $v2ray_transport -ge 18 ]]; then
-		open_port $v2ray_port
+		open_port $new_v2ray_port
+	elif [[ $new_v2ray_transport -ge 18 ]]; then
+		open_port $new_v2ray_port
 		open_port "multiport"
 	else
-		open_port $v2ray_port
+		open_port $new_v2ray_port
 	fi
 	systemctl restart v2ray
 	backup_config
@@ -818,19 +823,41 @@ config() {
 }
 
 backup_config() {
-	sed -i "18s/=1/=$v2ray_transport/; 21s/=2333/=$v2ray_port/; 24s/=$old_id/=$uuid/" $backup
-	if [[ $v2ray_transport -ge 18 ]]; then
-		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
+
+	# load backup script
+	_load backup.sh
+
+	## v2ray transport, port, uuid
+	_first_backup v2ray
+
+	## dynamic port
+	if [[ $new_v2ray_transport -ge 18 ]]; then
+		_first_backup dynamicPort
 	fi
+
+	## ss
 	if [[ $shadowsocks ]]; then
-		sed -i "42s/=/=true/; 45s/=6666/=$ssport/; 48s/=233blog.com/=$sspass/; 51s/=chacha20-ietf/=$ssciphers/" $backup
+		_first_backup +ss
 	fi
-	[[ $v2ray_transport == [45] ]] && sed -i "36s/=233blog.com/=$domain/" $backup
-	[[ $caddy ]] && sed -i "39s/=/=true/" $backup
-	[[ $ban_ad ]] && sed -i "54s/=/=true/" $backup
+
+	## domain, ws+tls / http2
+	if [[ $new_v2ray_transport == [45] ]]; then
+		_first_backup domain
+	fi
+
+	## ws+tls / http2, auto config tls
+	if [[ $caddy ]]; then
+		_first_backup caddy
+	fi
+
+	## ban ad 
+	if [[ $ban_ad ]]; then
+		_first_backup +ad
+	fi
+
+	## ws+tls / http2, path 
 	if [[ $is_path ]]; then
-		sed -i "57s/=/=true/; 60s/=233blog/=$path/" $backup
-		sed -i "63s#=https://liyafly.com#=$proxy_site#" $backup
+		_first_backup +path
 	fi
 }
 
@@ -902,7 +929,7 @@ _install() {
 	install_info
 	# [[ $caddy ]] && domain_check
 	install_v2ray
-	if [[ $caddy || $v2ray_port == "80" ]]; then
+	if [[ $caddy || $new_v2ray_port == "80" ]]; then
 		if [[ $cmd == "yum" ]]; then
 			[[ $(pgrep "httpd") ]] && systemctl stop httpd
 			[[ $(command -v httpd) ]] && yum remove httpd -y
@@ -942,21 +969,21 @@ _uninstall() {
 		echo -e "
 		$red 大胸弟...你貌似毛有安装 V2Ray ....卸载个鸡鸡哦...$none
 
-		备注...仅支持卸载使用我 (v2ray6.com) 提供的 V2Ray 一键安装脚本
+		备注...仅支持卸载使用我 ($_site) 提供的 V2Ray 一键安装脚本
 		" && exit 1
 	fi
 
 }
 
-_disableselinux () {
-  # Configure SELinux
-  type selinuxenabled >/dev/null 2>&1 || return 0;
-  [[ ! -f /etc/selinux/config ]] && return 0;
-  if selinuxenabled; then
-    setenforce Permissive
-    # disable selinux needs reboot, set to Permissive
-    sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-  fi
+_disableselinux() {
+	# Configure SELinux
+	type selinuxenabled >/dev/null 2>&1 || return 0
+	[[ ! -f /etc/selinux/config ]] && return 0
+	if selinuxenabled; then
+		setenforce Permissive
+		# disable selinux needs reboot, set to Permissive
+		sed -i 's/^SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+	fi
 }
 
 args=$1
@@ -987,11 +1014,11 @@ esac
 clear
 while :; do
 	echo
-	echo "........... V2Ray 一键安装脚本 & 管理脚本 by v2ray6.com .........."
+	echo "........... V2Ray 一键安装脚本 & 管理脚本 by $_site .........."
 	echo
-	echo "帮助说明: https://v2ray6.com/post/1/"
+	echo "帮助说明: https://$_site/post/1/"
 	echo
-	echo "搭建教程: https://v2ray6.com/post/2/"
+	echo "搭建教程: https://$_site/post/2/"
 	echo
 	echo " 1. 安装"
 	echo

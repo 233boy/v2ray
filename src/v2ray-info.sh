@@ -78,7 +78,7 @@ _v2_info() {
 	if [[ $v2ray_transport == [45] ]]; then
 		if [[ ! $caddy ]]; then
 			echo
-			echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://v2ray6.com/post/3/$none"
+			echo -e " $red警告！$none$yellow请自行配置 TLS...教程: https://${_site}/post/3/$none"
 		fi
 		echo
 		echo -e "$yellow 地址 (Address) = $cyan${domain}$none"
@@ -134,7 +134,7 @@ _v2_info() {
 	fi
 	echo "---------- END -------------"
 	echo
-	echo "V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
+	echo "V2Ray 客户端使用教程: https://${_site}/post/4/"
 	echo
 	echo -e "提示: 输入$cyan v2ray url $none可生成 vmess URL 链接 / 输入$cyan v2ray qr $none可生成二维码链接"
 	echo
