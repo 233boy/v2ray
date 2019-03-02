@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.06"
+_version="v3.07"
 
 cmd="apt-get"
 
@@ -2784,7 +2784,7 @@ menu() {
 		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
-		read -p "$(echo -e "请选择菜单 [${magenta}1-9$none]:")" choose
+		read -p "$(echo -e "请选择菜单 [${magenta}1-11$none]:")" choose
 		if [[ -z $choose ]]; then
 			exit 1
 		else
