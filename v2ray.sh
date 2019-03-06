@@ -926,6 +926,7 @@ change_v2ray_config() {
 		"修改 伪装的网址 (如果可以)"
 		"关闭 网站伪装 和 路径分流 (如果可以)"
 		"开启 / 关闭 广告拦截"
+		"增加 V2ray 用户"
 	)
 	while :; do
 		for ((i = 1; i <= ${#_menu[*]}; i++)); do
@@ -979,6 +980,10 @@ change_v2ray_config() {
 				blocked_hosts
 				break
 				;;
+			10)
+				change_vmess_user
+				break
+				;;
 			[aA][Ii][aA][Ii] | [Dd][Dd])
 				custom_uuid
 				break
@@ -994,6 +999,46 @@ change_v2ray_config() {
 		fi
 	done
 }
+
+change_vmess_user () {
+	echo
+	echo
+
+	local uuid=$(cat /proc/sys/kernel/random/uuid)
+	local randomemail=${3:-${uuid:30}@233.com}
+	while :; do
+		echo -e "请输入 "$yellow"新用户AlterId$none (0~65535 整数)" 
+		read -p "[默认：64]" new_alterId
+		[[ -z $new_alterId ]] && new_alterId=64
+		if [[ $new_alterId =~ ^[0-9]+$ ]]; then
+			break;
+		else
+			_red "$new_alterId 是啥？？？"
+		fi
+	done
+
+	echo -e "请输入 "$yellow"新用户 Email"$none"(任意字符，仅作统计识别)"
+	read -p "[默认：${randomemail}]" new_email
+	[[ -z $new_email ]] && new_email=$randomemail
+
+    echo
+    echo
+	_load jqcmd.sh
+	jq_gen_jsonpatch
+	jq_vmess_adduser $uuid $new_alterId $new_email
+	jq_printvmess $ip "[233]"
+	[[ $v6ip ]] && jq_printvmess $v6ip "[233]"
+	jq_patchback 
+	jq_clear_tmp
+    echo
+    echo
+	_yellow " ----  搞定了。"
+	_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+    echo
+    echo
+
+}
+
 change_v2ray_port() {
 	if [[ $v2ray_transport == 4 ]]; then
 		echo
@@ -2587,6 +2632,16 @@ get_v2ray_config_qr_link() {
 	rm -rf /etc/v2ray/vmess.txt
 }
 get_v2ray_vmess_URL_link() {
+
+	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
+	get_ip
+	_load jqcmd.sh
+	jq_gen_json
+	jq_printvmess $ip "[233]"
+	[[ $v6ip ]] && jq_printvmess $v6ip "[233]"
+
+	return
+
 	create_vmess_URL_config
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
 	echo
@@ -2879,6 +2934,7 @@ menu() {
 			case $choose in
 			1)
 				view_v2ray_config_info
+				_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
 				break
 				;;
 			2)
@@ -2942,6 +2998,8 @@ menu)
 	;;
 i | info)
 	view_v2ray_config_info
+	_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+    echo
 	;;
 c | config)
 	change_v2ray_config
