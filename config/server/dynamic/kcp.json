@@ -46,6 +46,7 @@
 			"settings": {
 				"clients": [
 					{
+						"email":"default@233.com",
 						"id": "__VMUSERID__",
 						"level": 1,
 						"alterId": __VMALTID__

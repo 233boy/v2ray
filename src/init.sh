@@ -1,11 +1,17 @@
-_black() { echo -e "$(tput setaf 0)$*$(tput setaf 9)"; }
-_red() { echo -e "$(tput setaf 1)$*$(tput setaf 9)"; }
-_green() { echo -e "$(tput setaf 2)$*$(tput setaf 9)"; }
-_yellow() { echo -e "$(tput setaf 3)$*$(tput setaf 9)"; }
-_blue() { echo -e "$(tput setaf 4)$*$(tput setaf 9)"; }
-_magenta() { echo -e "$(tput setaf 5)$*$(tput setaf 9)"; }
-_cyan() { echo -e "$(tput setaf 6)$*$(tput setaf 9)"; }
-_white() { echo -e "$(tput setaf 7)$*$(tput setaf 9)"; }
+
+red='\e[91m'
+green='\e[92m'
+yellow='\e[93m'
+magenta='\e[95m'
+cyan='\e[96m'
+none='\e[0m'
+
+_red() { echo -e ${red}$*${none}; }
+_green()   { echo -e ${green}$*${none}; }
+_yellow()  { echo -e ${yellow}$*${none}; }
+_magenta() { echo -e ${magenta}$*${none}; }
+_cyan()    { echo -e ${cyan}$*${none}; }
+
 
 _addtocron () {
   local PROG="$1"
