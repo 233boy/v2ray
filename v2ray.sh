@@ -1033,8 +1033,9 @@ change_vmess_user () {
     echo
     echo
 	_yellow " ----  搞定了。"
+	restart_v2ray
 	_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
-    echo
+	_yellow " ----  翻查各个用户的流量，可用v2ray traffic查看（重启v2ray后会清空）。"
     echo
 
 }
