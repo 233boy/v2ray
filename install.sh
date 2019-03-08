@@ -733,10 +733,10 @@ install_v2ray() {
 	echo
 	if [[ $cmd == "apt-get" ]]; then
 		$cmd update -y
-		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin patch
+		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin patch diff jq
 	else
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
-		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap patch
+		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap patch diff
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
