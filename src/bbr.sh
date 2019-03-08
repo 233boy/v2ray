@@ -6,10 +6,12 @@ _open_bbr() {
 	sysctl -p >/dev/null 2>&1
 }
 
-if [[ $(uname -r | cut -b 1) -eq 4 ]]; then
-	case $(uname -r | cut -b 3-4) in
-	9. | [1-9][0-9])
+_kernel_ver() {
+	local _test1=$(uname -r | cut -d\. -f1)
+	local _test2=$(uname -r | cut -d\. -f2)
+	if [[ $_test1 -eq 4 && $_test2 -ge 9 ]] || [[ $_test1 -ge 5 ]]; then
 		_open_bbr
-		;;
-	esac
-fi
+	fi
+}
+
+_kernel_ver
