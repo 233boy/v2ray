@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.07"
+_version="v3.08"
 
 cmd="apt-get"
 
@@ -1034,7 +1034,7 @@ change_vmess_user () {
     echo
 	_yellow " ----  搞定了。"
 	restart_v2ray
-	_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+	_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
 	_yellow " ----  翻查各个用户的流量，可用v2ray traffic查看（重启v2ray后会清空）。"
     echo
 
@@ -2597,41 +2597,21 @@ get_v2ray_config_qr_link() {
 
 	create_vmess_URL_config
 
-	echo
-	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
-	echo
-	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | tr -d '\n' | base64 -w 0)"
-	echo $vmess | tr -d '\n' >/etc/v2ray/vmess.txt
-	cat /etc/v2ray/vmess.txt | qrencode -s 50 -o /tmp/233blog_v2ray.png
-	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-	local link=$(curl -s --upload-file /tmp/233blog_v2ray.png "https://transfer.sh/${random}_v2ray6_v2ray.png")
-	if [[ $link ]]; then
-		echo
-		echo "---------- V2Ray 二维码链接 -------------"
-		echo
-		echo -e "$yellow 适用于 V2RayNG v0.4.1+ / Kitsunebi = $cyan$link$none"
-		echo
-		echo
-		echo -e "$red 友情提醒: 请务必核对扫码结果 (V2RayNG 除外) $none"
-		echo
-		echo
-		echo " V2Ray 客户端使用教程: https://${_site}/post/4/"
-		echo
-		echo "备注...链接将在 14 天后失效"
-		echo
-		echo "提醒...请不要把链接分享出去...除非你有特别的理由...."
-		echo
-	else
-		echo
-		echo -e "$red 哎呀呀呀...出错咯...$none"
-		echo
-		echo -e "请尝试使用${cyan} v2ray qr ${none}重新生成"
-		echo
-	fi
-	rm -rf /tmp/233blog_v2ray.png
-	rm -rf /etc/v2ray/vmess_qr.json
-	rm -rf /etc/v2ray/vmess.txt
+	_load qr.sh
+	_qr_create
 }
+
+get_v2ray_multi_vmess_URL_QR() {
+	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
+	get_ip
+	_load jqcmd.sh
+	jq_gen_json
+	jq_printvmess $ip "[233]"
+	[[ $v6ip ]] && jq_printvmess $v6ip "[233]"
+
+	return
+}
+
 get_v2ray_vmess_URL_link() {
 
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
@@ -2935,7 +2915,7 @@ menu() {
 			case $choose in
 			1)
 				view_v2ray_config_info
-				_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+				_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
 				break
 				;;
 			2)
@@ -2999,7 +2979,7 @@ menu)
 	;;
 i | info)
 	view_v2ray_config_info
-	_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+	_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
     echo
 	;;
 c | config)
@@ -3076,6 +3056,9 @@ log)
 	;;
 url | URL)
 	get_v2ray_vmess_URL_link
+	;;
+murl | MURL | mqr | MQR)
+	get_v2ray_multi_vmess_URL_QR
 	;;
 u | update)
 	update_v2ray

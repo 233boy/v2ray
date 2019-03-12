@@ -872,11 +872,11 @@ get_ip() {
 	[[ -z $ip ]] && ip=$(curl -4 -s myip.ipip.net | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
 	[[ -z $ip ]] && echo -e "\n$red 这垃圾小鸡扔了吧！$none\n" && exit
 
-	v6ip=$(curl -6 -s https://ifconfig.co/ip)
-	[[ -z $v6ip ]] && v6ip=$(curl -6 -s https://api.ip.sb/ip)
-	[[ -z $v6ip ]] && v6ip=$(curl -6 -s https://ip.seeip.org)
-	[[ -z $v6ip ]] && v6ip=$(curl -6 -s http://icanhazip.com)
-	[[ -z $v6ip ]] && v6ip=$(curl -6 -s https://api.myip.com | cut -d\" -f4)
+	v6ip=$(curl -m 5 -6 -s https://ifconfig.co/ip)
+	[[ -z $v6ip ]] && v6ip=$(curl -m 5 -6 -s https://api.ip.sb/ip)
+	[[ -z $v6ip ]] && v6ip=$(curl -m 5 -6 -s https://ip.seeip.org)
+	[[ -z $v6ip ]] && v6ip=$(curl -m 5 -6 -s http://icanhazip.com)
+	[[ -z $v6ip ]] && v6ip=$(curl -m 5 -6 -s https://api.myip.com | cut -d\" -f4)
 }
 
 error() {
