@@ -120,7 +120,10 @@ jq_printvmess() {
             local EMAIL=$(echo $IN | jq 'if .settings.clients['${CLINTIDX}'].email then .settings.clients['${CLINTIDX}'].email else "DEFAULT" end')
             local _ps="${_MAKPREFIX}${ADDRESS}/${_NETTRIM}"
             _green "${EMAIL//\"/} -- ${_ps}"
-            echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":.streamSettings.network,"type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0)
+            local _VMESS=$(echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":.streamSettings.network,"type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0))
+            echo ${_VMESS}
+            _green "二维码链接：（v2rayN/v2rayNG）"
+            echo "https://233boy.github.io/tools/qr.html#${_VMESS}"
             echo
         done
     done

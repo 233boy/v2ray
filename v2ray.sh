@@ -1034,7 +1034,7 @@ change_vmess_user () {
     echo
 	_yellow " ----  搞定了。"
 	restart_v2ray
-	_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+	_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
 	_yellow " ----  翻查各个用户的流量，可用v2ray traffic查看（重启v2ray后会清空）。"
     echo
 
@@ -2632,6 +2632,18 @@ get_v2ray_config_qr_link() {
 	rm -rf /etc/v2ray/vmess_qr.json
 	rm -rf /etc/v2ray/vmess.txt
 }
+
+get_v2ray_multi_vmess_URL_QR() {
+	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
+	get_ip
+	_load jqcmd.sh
+	jq_gen_json
+	jq_printvmess $ip "[233]"
+	[[ $v6ip ]] && jq_printvmess $v6ip "[233]"
+
+	return
+}
+
 get_v2ray_vmess_URL_link() {
 
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
@@ -2935,7 +2947,7 @@ menu() {
 			case $choose in
 			1)
 				view_v2ray_config_info
-				_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+				_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
 				break
 				;;
 			2)
@@ -2999,7 +3011,7 @@ menu)
 	;;
 i | info)
 	view_v2ray_config_info
-	_yellow " ----  翻查多用户的vmess link请用v2ray url查看。"
+	_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
     echo
 	;;
 c | config)
@@ -3076,6 +3088,9 @@ log)
 	;;
 url | URL)
 	get_v2ray_vmess_URL_link
+	;;
+murl | MURL | mqr | MQR)
+	get_v2ray_multi_vmess_URL_QR
 	;;
 u | update)
 	update_v2ray
