@@ -77,10 +77,16 @@ _site="ddog.xyz"
 if [[ $v2ray_ver != v* ]]; then
 	v2ray_ver="v$v2ray_ver"
 fi
+
 if [[ ! -f $_v2ray_sh ]]; then
-	mv -f /usr/local/bin/v2ray $_v2ray_sh
-	chmod +x $_v2ray_sh
+	[[ -f /usr/local/bin/v2ray ]] && rm -f /usr/local/bin/v2ray
+	ln -s /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
 	echo -e "\n $yellow 警告: 请重新登录 SSH 以避免出现 v2ray 命令未找到的情况。$none  \n" && exit 1
+fi
+
+if [[ ! -L $_v2ray_sh ]]; then
+	rm -f $_v2ray_sh
+	ln -s /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
 fi
 
 if [ $v2ray_pid ]; then
@@ -2906,6 +2912,11 @@ menu() {
 			fi
 		done
 		echo
+		echo
+        echo -e "注意: 如果主机时间跟实际相差${yellow}超过90秒${none}，v2ray将无法正常通信。"
+		_load sys-info.sh
+		_sys_time
+		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
 		read -p "$(echo -e "请选择菜单 [${magenta}1-${#_lists[*]}$none]:")" choose
@@ -3049,7 +3060,10 @@ reload)
 	view_v2ray_config_info
 	;;
 time)
+	_load sys-info.sh
+	_sys_timezone
 	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
+	_sys_time
 	;;
 log)
 	view_v2ray_log
