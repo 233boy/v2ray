@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.08"
+_version="v3.09"
 
 cmd="apt-get"
 
@@ -77,10 +77,16 @@ _site="ddog.xyz"
 if [[ $v2ray_ver != v* ]]; then
 	v2ray_ver="v$v2ray_ver"
 fi
+
 if [[ ! -f $_v2ray_sh ]]; then
-	mv -f /usr/local/bin/v2ray $_v2ray_sh
-	chmod +x $_v2ray_sh
+	[[ -f /usr/local/bin/v2ray ]] && rm -f /usr/local/bin/v2ray
+	ln -s /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
 	echo -e "\n $yellow 警告: 请重新登录 SSH 以避免出现 v2ray 命令未找到的情况。$none  \n" && exit 1
+fi
+
+if [[ ! -L $_v2ray_sh ]]; then
+	rm -f $_v2ray_sh
+	ln -s /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
 fi
 
 if [ $v2ray_pid ]; then
@@ -226,35 +232,9 @@ view_shadowsocks_config_info() {
 }
 get_shadowsocks_config_qr_link() {
 	if [[ $shadowsocks ]]; then
-		echo
-		echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
-		echo
 		get_ip
-		local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#${_site}_ss_${ip}"
-		echo "${ss}" >/tmp/233blog_shadowsocks.txt
-		cat /tmp/233blog_shadowsocks.txt | qrencode -s 50 -o /tmp/233blog_shadowsocks.png
-
-		local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-		local link=$(curl -s --upload-file /tmp/233blog_shadowsocks.png "https://transfer.sh/${random}_v2ray6_shadowsocks.png")
-		if [[ $link ]]; then
-			echo
-			echo "---------- Shadowsocks 二维码链接 -------------"
-			echo
-			echo -e "$yellow 链接 = $cyan$link$none"
-			echo
-			echo -e " 温馨提示...$red Shadowsocks Win 4.0.6 $none客户端可能无法识别该二维码"
-			echo
-			echo "备注...链接将在 14 天后失效"
-			echo
-			echo "提醒...请不要把链接分享出去...除非你有特别的理由...."
-			echo
-		else
-			echo
-			echo -e "$red 哎呀呀呀...出错咯...请重试$none"
-			echo
-		fi
-		rm -rf /tmp/233blog_shadowsocks.png
-		rm -rf /tmp/233blog_shadowsocks.txt
+		_load qr.sh
+		_ss_qr
 	else
 		shadowsocks_config
 	fi
@@ -2474,32 +2454,8 @@ get_v2ray_config() {
 
 }
 get_v2ray_config_link() {
-	echo
-	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
-	echo
-	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-	local link=$(curl -s --upload-file $v2ray_client_config "https://transfer.sh/${random}_v2ray6_v2ray.json")
-	if [[ $link ]]; then
-		echo
-		echo "---------- V2Ray 客户端配置文件链接 -------------"
-		echo
-		echo -e "$yellow 链接 = $cyan$link$none"
-		echo
-		echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
-		echo
-		echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
-		echo
-		echo " V2Ray 客户端使用教程: https://${_site}/post/4/"
-		echo
-		echo "备注...链接将在 14 天后失效"
-		echo
-		echo "提醒...请不要把链接分享出去...除非你有特别的理由...."
-		echo
-	else
-		echo
-		echo -e "$red 哎呀呀呀...出错咯...请重试$none"
-		echo
-	fi
+	_load client_file.sh
+	_get_client_file
 }
 create_v2ray_config_text() {
 
@@ -2906,6 +2862,11 @@ menu() {
 			fi
 		done
 		echo
+		echo
+        echo -e "注意: 如果主机时间跟实际相差${yellow}超过90秒${none}，v2ray将无法正常通信。"
+		_load sys-info.sh
+		_sys_time
+		echo
 		echo -e "温馨提示...如果你不想执行选项...按$yellow Ctrl + C $none即可退出"
 		echo
 		read -p "$(echo -e "请选择菜单 [${magenta}1-${#_lists[*]}$none]:")" choose
@@ -3049,7 +3010,10 @@ reload)
 	view_v2ray_config_info
 	;;
 time)
-	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
+	_load sys-info.sh
+	_sys_timezone
+	date --utc -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
+	_sys_time
 	;;
 log)
 	view_v2ray_log

@@ -92,7 +92,7 @@ jq_printvmess() {
         local _HOST=\"\"
         local _PATH=\"\"
         local _TLS=\"\"
-        local _NET=$(echo $IN | jq '.streamSettings.network')
+        local _NET=$(echo $IN | jq '.streamSettings.network|"tcp"')
         local _PORT=$(echo $IN | jq '.port')
         local _NETTRIM=${_NET//\"/}
         echo
@@ -112,14 +112,19 @@ jq_printvmess() {
                 _TLS="tls"
                 ;;
             tcp)
-                _TYPE='if .streamSettings.tcpSettings.header.type then .streamSettings.tcpSettings.header.type else "none" end'
+                _TYPE='.streamSettings.tcpSettings.header.type|"none"'
+                ;;
+            quic)
+                _TYPE='.streamSettings.quicSettings.header.type|"none"'
+                _HOST='.streamSettings.quicSettings.security'
+                _PATH='.streamSettings.quicSettings.key'
                 ;;
         esac
         local CLTLEN=$(echo $IN | jq '.settings.clients|length - 1')
         for CLINTIDX in $( seq 0 $CLTLEN ); do
             local EMAIL=$(echo $IN | jq 'if .settings.clients['${CLINTIDX}'].email then .settings.clients['${CLINTIDX}'].email else "DEFAULT" end')
             local _ps="${_MAKPREFIX}${ADDRESS}/${_NETTRIM}"
-            local _VMESS=$(echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":.streamSettings.network,"type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0))
+            local _VMESS=$(echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":.streamSettings.network|"tcp","type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0))
             _green "VMESS链接（v2rayN/v2rayNG）: ${EMAIL//\"/}"
             echo ${_VMESS}
             _green "二维码链接【浏览器打开】（v2rayN/v2rayNG）"
