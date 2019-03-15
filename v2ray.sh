@@ -3012,7 +3012,7 @@ reload)
 time)
 	_load sys-info.sh
 	_sys_timezone
-	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
+	date --utc -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
 	_sys_time
 	;;
 log)
