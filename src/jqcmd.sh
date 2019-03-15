@@ -114,6 +114,11 @@ jq_printvmess() {
             tcp)
                 _TYPE='.streamSettings.tcpSettings.header.type|"none"'
                 ;;
+            quic)
+                _TYPE='.streamSettings.quicSettings.header.type|"none"'
+                _HOST='.streamSettings.quicSettings.security'
+                _PATH='.streamSettings.quicSettings.key'
+                ;;
         esac
         local CLTLEN=$(echo $IN | jq '.settings.clients|length - 1')
         for CLINTIDX in $( seq 0 $CLTLEN ); do
