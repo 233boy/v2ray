@@ -34,6 +34,7 @@ _download_v2ray_file() {
 _install_v2ray_service() {
 	if [[ $systemd ]]; then
 		install -m 644 "/usr/bin/v2ray/systemd/v2ray.service" "/lib/systemd/system/"
+		sed -i '/on-failure/a RestartSec=3' /lib/systemd/system/v2ray.service
 		sed -i "s/on-failure/always/" /lib/systemd/system/v2ray.service
 		systemctl enable v2ray
 	else
