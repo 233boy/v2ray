@@ -823,7 +823,7 @@ del_port() {
 
 config() {
 	cp -f /etc/v2ray/233boy/v2ray/config/backup.conf $backup
-	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
+	ln -s /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
 	chmod +x $_v2ray_sh
 
 	ban_bt=true
