@@ -3014,7 +3014,6 @@ restart)
 reload)
 	config
 	[[ $v2ray_transport == [45] && $caddy ]] && caddy_config
-	clear
 	if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
 		echo
 		_red "警告!!! V2Ray 加载失败!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
