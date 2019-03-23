@@ -7,6 +7,7 @@ magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
 
+author=233boy
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
@@ -2790,7 +2791,7 @@ do_service() {
 }
 _help() {
 	echo
-	echo "........... V2Ray 管理脚本帮助信息 by ${_site} .........."
+	echo "........... V2Ray 管理脚本帮助信息 by $author .........."
 	echo -e "
 	${green}v2ray menu $none管理 V2Ray (同等于直接输入 v2ray)
 
@@ -2847,7 +2848,7 @@ menu() {
 	clear
 	while :; do
 		echo
-		echo "........... V2Ray 管理脚本 $_version by ${_site} .........."
+		echo "........... V2Ray 管理脚本 $_version by $author .........."
 		echo
 		echo -e "## V2Ray 版本: $cyan$v2ray_ver$none  /  V2Ray 状态: $v2ray_status ##"
 		echo

@@ -12,6 +12,7 @@ _yellow()  { echo -e ${yellow}$*${none}; }
 _magenta() { echo -e ${magenta}$*${none}; }
 _cyan()    { echo -e ${cyan}$*${none}; }
 
+author=233boy
 # Root
 [[ $(id -u) != 0 ]] && echo -e "\n 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}\n" && exit 1
 
@@ -783,7 +784,7 @@ install_v2ray() {
 			echo
 			echo -e "$red 哎呀呀...安装失败了咯...$none"
 			echo
-			echo -e " 请确保你有完整的上传 $_site 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
+			echo -e " 请确保你有完整的上传 $author 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
 			echo
 			exit 1
 		fi
@@ -1004,7 +1005,7 @@ _uninstall() {
 		echo -e "
 		$red 大胸弟...你貌似毛有安装 V2Ray ....卸载个鸡鸡哦...$none
 
-		备注...仅支持卸载使用我 ($_site) 提供的 V2Ray 一键安装脚本
+		备注...仅支持卸载使用我 ($author) 提供的 V2Ray 一键安装脚本
 		" && exit 1
 	fi
 
@@ -1049,7 +1050,7 @@ esac
 clear
 while :; do
 	echo
-	echo "........... V2Ray 一键安装脚本 & 管理脚本 by $_site .........."
+	echo "........... V2Ray 一键安装脚本 & 管理脚本 by $author .........."
 	echo
 	echo "帮助说明: https://$_site/post/1/"
 	echo
