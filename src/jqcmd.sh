@@ -126,9 +126,12 @@ jq_printvmess() {
             local _ps="${_MAKPREFIX}${ADDRESS}/${_NETTRIM}"
             local _VMESS=$(echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":.streamSettings.network|"tcp","type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0))
             _green "VMESS链接（v2rayN/v2rayNG）: ${EMAIL//\"/}"
-            echo ${_VMESS}
+            echo
+            _cyan "${_VMESS}"
+            echo
             _green "二维码链接【浏览器打开】（v2rayN/v2rayNG）"
-            echo "https://233boy.github.io/tools/qr.html#${_VMESS}"
+            echo
+            _cyan "https://233boy.github.io/tools/qr.html#${_VMESS}"
             echo
         done
     done

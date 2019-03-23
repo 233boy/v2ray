@@ -2570,6 +2570,7 @@ get_v2ray_multi_vmess_URL_QR() {
 
 get_v2ray_vmess_URL_link() {
 
+	echo
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
 	get_ip
 	_load jqcmd.sh
