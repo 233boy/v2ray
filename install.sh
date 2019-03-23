@@ -138,6 +138,7 @@ _sys_time() {
     echo -e "\n主机时间：${yellow}"
     timedatectl status | sed -n '1p;4p'
 	echo -e "${none}"
+	$IS_OPENV && pause
 }
 
 v2ray_config() {
@@ -765,11 +766,16 @@ install_v2ray() {
 	echo
 	if [[ $cmd == "apt-get" ]]; then
 		$cmd update -y
-		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin patch diffutils jq
+		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap2-bin patch diffutils jq dbus
 	else
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
 		$cmd install -y socat lrzsz git zip unzip curl wget qrencode libcap patch diffutils
 	fi
+	_disableselinux
+	_sys_timezone
+	_sys_time
+	echo
+	echo
 	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
 
 	if [[ $local_install ]]; then
@@ -952,12 +958,6 @@ _install() {
 		echo
 		exit 1
 	fi
-	_disableselinux
-	_sys_timezone
-	_sys_time
-	echo
-	echo
-	pause
 	v2ray_config
 	blocked_hosts
 	shadowsocks_config
