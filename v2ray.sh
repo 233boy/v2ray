@@ -678,7 +678,7 @@ ssray_port_config() {
 			echo
 			echo " 不能和 Shadowsocks 端口一毛一样...."
 			error
-			;;		
+			;;
 		$v2ray_port)
 			echo
 			echo " 不能和 V2Ray 端口一毛一样...."
@@ -786,7 +786,7 @@ ssray_proto_config() {
 	echo
 	echo
 	if [[ $ssray_transport -gt 1 && $ssray_domain ]]; then
-		if [[  -f /root/.acme.sh/$ssray_domain/fullchain.cer && -f /root/.acme.sh/$ssray_domain/$ssray_domain.key ]]; then
+		if [[ -f /root/.acme.sh/$ssray_domain/fullchain.cer && -f /root/.acme.sh/$ssray_domain/$ssray_domain.key ]]; then
 			echo -e "$yellow 噫！好像已经有证书了！ 皮皮虾咋们走！ $none"
 		else
 			echo -e "$yellow 开始安装acme.sh $none"
@@ -802,7 +802,7 @@ ssray_proto_config() {
 			pkill nginx
 			sleep 3
 
-			if /root/.acme.sh/acme.sh --issue --standalone -d $ssray_domain ; then
+			if /root/.acme.sh/acme.sh --issue --standalone -d $ssray_domain; then
 				echo -e "$yellow 好了搞定了。$none"
 			else
 				echo -e "$yellow 不知道什么鬼，上面的出错提示截图找人问吧！$none"
@@ -817,7 +817,6 @@ change_ssray_config() {
 	_load download-ssray.sh
 
 	if [[ $ssray ]]; then
-
 
 		while :; do
 			echo
@@ -878,7 +877,7 @@ change_ssray_config() {
 }
 
 ssray_save_config() {
-	cat > $ssraybackup << EOF
+	cat >$ssraybackup <<EOF
 install_ssray=${install_ssray}
 ssray_ver="$ssray_latest_ver"
 ssray=${ssray}
@@ -980,18 +979,18 @@ change_v2ray_config() {
 	done
 }
 
-change_vmess_user () {
+change_vmess_user() {
 	echo
 	echo
 
 	local uuid=$(cat /proc/sys/kernel/random/uuid)
 	local randomemail=${3:-${uuid:30}@233.com}
 	while :; do
-		echo -e "请输入 "$yellow"新用户AlterId$none (0~65535 整数)" 
+		echo -e "请输入 "$yellow"新用户AlterId$none (0~65535 整数)"
 		read -p "[默认：64]" new_alterId
 		[[ -z $new_alterId ]] && new_alterId=64
 		if [[ $new_alterId =~ ^[0-9]+$ ]]; then
-			break;
+			break
 		else
 			_red "$new_alterId 是啥？？？"
 		fi
@@ -1001,22 +1000,22 @@ change_vmess_user () {
 	read -p "[默认：${randomemail}]" new_email
 	[[ -z $new_email ]] && new_email=$randomemail
 
-    echo
-    echo
+	echo
+	echo
 	_load jqcmd.sh
 	jq_gen_jsonpatch
 	jq_vmess_adduser $uuid $new_alterId $new_email
 	jq_printvmess $ip "[233]"
 	[[ $v6ip ]] && jq_printvmess $v6ip "[233]"
-	jq_patchback 
+	jq_patchback
 	jq_clear_tmp
-    echo
-    echo
+	echo
+	echo
 	_yellow " ----  搞定了。"
 	restart_v2ray
 	_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
 	_yellow " ----  翻查各个用户的流量，可用v2ray traffic查看（重启v2ray后会清空）。"
-    echo
+	echo
 
 }
 
@@ -2325,13 +2324,17 @@ start_v2ray() {
 
 		# systemctl start v2ray
 		service v2ray start >/dev/null 2>&1
-		if [[ $? -ne 0 ]]; then
+		echo
+		echo '正在启动....'
+		echo
+		sleep 3
+		if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
 			echo
-			echo -e "${red} V2Ray 启动失败！$none"
+			_red "警告!!! V2Ray 启动失败!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
 			echo
 		else
 			echo
-			echo -e "${green} V2Ray 已启动$none"
+			_green " V2Ray 启动成功!!!!"
 			echo
 		fi
 
@@ -2353,13 +2356,17 @@ stop_v2ray() {
 restart_v2ray() {
 	# systemctl restart v2ray
 	service v2ray restart >/dev/null 2>&1
-	if [[ $? -ne 0 ]]; then
+	echo
+	echo '正在重启....'
+	echo
+	sleep 3
+	if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
 		echo
-		echo -e "${red} V2Ray 重启失败！$none"
+		_red "警告!!! V2Ray 重启失败!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
 		echo
 	else
 		echo
-		echo -e "${green} V2Ray 重启完成 $none"
+		_green " V2Ray 重启成功!!!!"
 		echo
 	fi
 }
@@ -2592,7 +2599,7 @@ get_v2ray_vmess_URL_link() {
 		echo "IPv6:地址直链："
 		echo -e ${cyan}$vmessv6${none}
 	fi
-	rm -f /etc/v2ray/vmess_qr.json /etc/v2ray/vmess_qrv6.json 
+	rm -f /etc/v2ray/vmess_qr.json /etc/v2ray/vmess_qrv6.json
 }
 other() {
 	while :; do
@@ -2864,7 +2871,7 @@ menu() {
 		done
 		echo
 		echo
-        echo -e "注意: 如果主机时间跟实际相差${yellow}超过90秒${none}，v2ray将无法正常通信。"
+		echo -e "注意: 如果主机时间跟实际相差${yellow}超过90秒${none}，v2ray将无法正常通信。"
 		_load sys-info.sh
 		_sys_time
 		echo
@@ -2942,7 +2949,7 @@ menu)
 i | info)
 	view_v2ray_config_info
 	_yellow " ----  翻查多用户的vmess link请用v2ray murl查看。"
-    echo
+	echo
 	;;
 c | config)
 	change_v2ray_config
@@ -3008,7 +3015,15 @@ reload)
 	config
 	[[ $v2ray_transport == [45] && $caddy ]] && caddy_config
 	clear
-	view_v2ray_config_info
+	if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
+		echo
+		_red "警告!!! V2Ray 加载失败!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
+		echo
+	else
+		echo
+		_green " V2Ray 加载成功!!! 如需查看 V2Ray 配置请使用 v2ray info"
+		echo
+	fi
 	;;
 time)
 	_load sys-info.sh
