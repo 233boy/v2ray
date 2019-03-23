@@ -138,7 +138,7 @@ _sys_time() {
     echo -e "\n主机时间：${yellow}"
     timedatectl status | sed -n '1p;4p'
 	echo -e "${none}"
-	$IS_OPENV && pause
+	[[ $IS_OPENV ]] && pause
 }
 
 v2ray_config() {
