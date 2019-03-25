@@ -2318,34 +2318,30 @@ v2ray_service() {
 	done
 }
 start_v2ray() {
-	if [[ $v2ray_pid ]]; then
+	if [[ $v2ray_pid ]] || [[ $v2ray_transport == [45] && $caddy ]] && [[ $caddy_pid ]]; then
 		echo
 		echo -e "${green} V2Ray 正在运行...无需再启动$none"
 		echo
 	else
-
-		# systemctl start v2ray
-		service v2ray start >/dev/null 2>&1
+		systemctl start v2ray
+		if [[ $v2ray_transport == [45] && $caddy ]] && [[ ! $caddy_pid ]]; then
+			systemctl start caddy
+		fi
 		echo
 		echo '正在启动....'
 		echo
-		sleep 3
-		if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
-			echo
-			_red "警告!!! V2Ray 启动失败!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
-			echo
-		else
-			echo
-			_green " V2Ray 启动成功!!!!"
-			echo
-		fi
+		_load status.sh
+		_check_status
+		echo
+		_green " V2Ray 启动成功!!!!"
+		echo
 
 	fi
+
 }
 stop_v2ray() {
 	if [[ $v2ray_pid ]]; then
-		# systemctl stop v2ray
-		service v2ray stop >/dev/null 2>&1
+		systemctl stop v2ray
 		echo
 		echo -e "${green} V2Ray 已停止$none"
 		echo
@@ -2356,21 +2352,17 @@ stop_v2ray() {
 	fi
 }
 restart_v2ray() {
-	# systemctl restart v2ray
-	service v2ray restart >/dev/null 2>&1
+	systemctl restart v2ray
+	[[ $v2ray_transport == [45] && $caddy ]] && systemctl restart caddy
 	echo
 	echo '正在重启....'
 	echo
-	sleep 3
-	if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
-		echo
-		_red "警告!!! V2Ray 重启失败!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
-		echo
-	else
-		echo
-		_green " V2Ray 重启成功!!!!"
-		echo
-	fi
+	_load status.sh
+	_check_status
+	echo
+	_green " V2Ray 重启成功!!!!"
+	echo
+
 }
 view_v2ray_log() {
 	echo
@@ -2639,30 +2631,14 @@ other() {
 install_bbr() {
 	local test1=$(sed -n '/net.ipv4.tcp_congestion_control/p' /etc/sysctl.conf)
 	local test2=$(sed -n '/net.core.default_qdisc/p' /etc/sysctl.conf)
-	if [[ $(uname -r | cut -b 1) -eq 4 ]]; then
-		case $(uname -r | cut -b 3-4) in
-		9. | [1-9][0-9])
-			if [[ $test1 == "net.ipv4.tcp_congestion_control = bbr" && $test2 == "net.core.default_qdisc = fq" ]]; then
-				local is_bbr=true
-			else
-				local try_enable_bbr=true
-			fi
-			;;
-		esac
-	fi
-	if [[ $is_bbr ]]; then
+	if [[ $test1 == "net.ipv4.tcp_congestion_control = bbr" && $test2 == "net.core.default_qdisc = fq" ]]; then
 		echo
 		echo -e "$green BBR 已经启用啦...无需再安装$none"
 		echo
-	elif [[ $try_enable_bbr ]]; then
-		_load bbr.sh
-		_open_bbr
-		echo
-		echo -e "$green ..由于你的 VPS 内核支持开启 BBR ...已经为你启用 BBR 优化....$none"
-		echo
 	else
-		# https://teddysun.com/489.html
-		bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
+		_load bbr.sh
+		_try_enable_bbr
+		[[ ! $enable_bbr ]] && bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
 	fi
 }
 install_lotserver() {
@@ -2775,7 +2751,11 @@ config() {
 			[[ $(command -v apache2) ]] && apt-get remove apache2* -y >/dev/null 2>&1
 		fi
 	fi
-	do_service restart v2ray
+	systemctl restart v2ray
+
+	## check status
+	_load status.sh
+	_check_status
 }
 backup_config() {
 	_load backup.sh
@@ -3010,21 +2990,15 @@ stop)
 	stop_v2ray
 	;;
 restart)
-	[[ $v2ray_transport == [45] && $caddy ]] && do_service restart caddy
 	restart_v2ray
 	;;
 reload)
-	config
 	[[ $v2ray_transport == [45] && $caddy ]] && caddy_config
-	if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
-		echo
-		_red "警告!!! V2Ray 加载失败!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
-		echo
-	else
-		echo
-		_green " V2Ray 加载成功!!! 如需查看 V2Ray 配置请使用 v2ray info"
-		echo
-	fi
+	config
+	echo
+	_green " V2Ray 加载成功!!! 如需查看 V2Ray 配置请使用 v2ray info"
+	echo
+
 	;;
 time)
 	_load sys-info.sh

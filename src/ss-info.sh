@@ -1,3 +1,7 @@
+if [[ ! $v2ray_pid ]]; then
+	_load status.sh
+	_err_msg
+fi
 [[ -z $ip ]] && get_ip
 if [[ $shadowsocks ]]; then
 	#local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#${_site}_ss_${ip}"
@@ -40,6 +44,6 @@ if [[ $shadowsocks ]]; then
 		echo -e "$yellow SS + V2ray - Plugin 链接 = ${cyan}${ssplugin}$none"
 		echo
 	fi
-	echo -e "提示: 输入$cyan v2ray ssqr $none可生成 Shadowsocks 二维码链接"	
+	echo -e "提示: 输入$cyan v2ray ssqr $none可生成 Shadowsocks 二维码链接"
 	echo
 fi

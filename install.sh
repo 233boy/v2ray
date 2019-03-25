@@ -872,6 +872,9 @@ config() {
 	systemctl restart v2ray
 	backup_config
 
+	## check status
+	_load status.sh
+	_check_status
 }
 
 backup_config() {
@@ -955,8 +958,6 @@ show_config_info() {
 	_v2_args
 	_v2_info
 	_load ss-info.sh
-	_load status.sh
-	_check_status
 }
 
 _install() {
@@ -991,13 +992,13 @@ _install() {
 		fi
 	fi
 	[[ $caddy ]] && install_caddy
-	get_ip
-	config
 
 	## bbr
 	_load bbr.sh
-	_open_bbr
+	_try_enable_bbr
 
+	get_ip
+	config
 	show_config_info
 }
 

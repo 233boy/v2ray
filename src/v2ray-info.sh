@@ -71,6 +71,13 @@ _v2_args() {
 }
 
 _v2_info() {
+	if [[ ! $v2ray_pid ]]; then
+		_load status.sh
+		_err_msg
+	elif [[ $v2ray_transport == [45] && $caddy ]] && [[ ! $caddy_pid ]]; then
+		_load status.sh
+		_err_msg "Caddy"
+	fi
 	[[ -z $ip ]] && get_ip
 	echo
 	echo
@@ -132,7 +139,6 @@ _v2_info() {
 		echo " 备注: 广告拦截已开启.."
 		echo
 	fi
-
 	echo "---------- END -------------"
 	echo
 	echo "V2Ray 客户端使用教程: https://${_site}/post/4/"
