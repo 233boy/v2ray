@@ -7,30 +7,39 @@ if [[ $sys_bit == "x86_64" ]]; then
     _jqArch="linux64"
 fi
 
-if ! ( command -v jq 2>&1>/dev/null ) ; then
+if [[ ! $(command -v jq) ]]; then
+    echo
     _green "检测到没有 jq 命令，正在自动安装..."
+    echo
 
-    if command -v apt-get 2>&1>/dev/null; then
-        apt-get install -y jq
-    elif command -v dnf 2>&1>/dev/null; then
-        dnf install -y jq
+    if [[ $cmd == "apt-get" ]]; then
+        $cmd install -y jq
     else
         pushd /tmp
-        if curl -L -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-${_jqArch}; then
+        if curl -sL -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-${_jqArch}; then
             install -m 755 jq /usr/local/bin/
             rm -f jq
+        else
+            echo
+            _red "安装 jq 失败..."
+            echo
+            exit 1
         fi
         popd
     fi
 fi
 
-if ! ( command -v patch 2>&1>/dev/null  && command -v diff 2>&1>/dev/null) ; then
+if [[ ! $(command -v patch) && $(command -v diff) ]]; then
+    echo
     _green "检测到没有patch命令，正在自动安装..."
-    $cmd install -y patch diff
+    echo
+    $cmd install -y patch diffutils
 fi
 
-if ! ( command -v patch 2>&1>/dev/null  && command -v diff 2>&1>/dev/null) ; then
+if [[ ! $(command -v patch) && $(command -v diff) ]]; then
+    echo
     _red "diff/patch not found"
+    echo
     exit 1
 fi
 
@@ -39,19 +48,19 @@ TMP_UPDT_JSON=$(mktemp --suffix=.json)
 CMPATCH=$(mktemp --suffix=.patch)
 
 jq_gen_json() {
-    sed '/ *\/\//d' $v2ray_server_config > $TMP_ORIG_JSON
+    sed '/ *\/\//d' $v2ray_server_config >$TMP_ORIG_JSON
 }
 
 jq_gen_jsonpatch() {
     jq_gen_json
-    diff -u $TMP_ORIG_JSON $v2ray_server_config > $CMPATCH
+    diff -u $TMP_ORIG_JSON $v2ray_server_config >$CMPATCH
 }
 
 jq_clear_tmp() {
     rm -f $TMP_ORIG_JSON $TMP_UPDT_JSON $CMPATCH
 }
 
-jq_vmess_adduser () {
+jq_vmess_adduser() {
     local uuid=$1
     local alterId=${2:-64}
     local email=${3:-${uuid:30}@233}
@@ -59,7 +68,7 @@ jq_vmess_adduser () {
     local client='{"id":"'${uuid}'","level":'${level}',"alterId":'${alterId}',"email":"'${email}'"}'
     local len_inbounds=$(jq '(.inbounds|length) - 1' $TMP_ORIG_JSON)
     local _IDX
-    for  _IDX in $(seq 0 ${len_inbounds}); do
+    for _IDX in $(seq 0 ${len_inbounds}); do
         if [[ $(jq ".inbounds[${_IDX}].protocol" $TMP_ORIG_JSON) == '"vmess"' ]]; then
             break
         fi
@@ -70,11 +79,11 @@ jq_vmess_adduser () {
         return 1
     fi
 
-    jq --tab ".inbounds[${_IDX}].settings.clients += [${client}]" $TMP_ORIG_JSON > $TMP_UPDT_JSON
+    jq --tab ".inbounds[${_IDX}].settings.clients += [${client}]" $TMP_ORIG_JSON >$TMP_UPDT_JSON
 }
 
-jq_patchback () {
-    if patch --ignore-whitespace $TMP_UPDT_JSON < $CMPATCH; then
+jq_patchback() {
+    if patch --ignore-whitespace $TMP_UPDT_JSON <$CMPATCH; then
         mv $v2ray_server_config "${v2ray_server_config}.bak.${RANDOM}"
         install -m 644 $TMP_UPDT_JSON $v2ray_server_config
     fi
@@ -99,29 +108,29 @@ jq_printvmess() {
         echo "--------------------------  Server: ${ADDRESS}:${_PORT}/${_NETTRIM}   --------------------------"
         echo
         case $_NETTRIM in
-            kcp)
-                _TYPE='.streamSettings.kcpSettings.header.type'
-                ;;
-            ws)
-                _HOST='.streamSettings.wsSettings.headers.Host'
-                _PATH='.streamSettings.wsSettings.path'
-                ;;
-            h2|http)
-                _HOST='.streamSettings.httpSettings.host|join(,)'
-                _PATH='.streamSettings.httpSettings.path'
-                _TLS="tls"
-                ;;
-            tcp)
-                _TYPE='.streamSettings.tcpSettings.header.type|"none"'
-                ;;
-            quic)
-                _TYPE='.streamSettings.quicSettings.header.type|"none"'
-                _HOST='.streamSettings.quicSettings.security'
-                _PATH='.streamSettings.quicSettings.key'
-                ;;
+        kcp)
+            _TYPE='.streamSettings.kcpSettings.header.type'
+            ;;
+        ws)
+            _HOST='.streamSettings.wsSettings.headers.Host'
+            _PATH='.streamSettings.wsSettings.path'
+            ;;
+        h2 | http)
+            _HOST='.streamSettings.httpSettings.host|join(,)'
+            _PATH='.streamSettings.httpSettings.path'
+            _TLS="tls"
+            ;;
+        tcp)
+            _TYPE='.streamSettings.tcpSettings.header.type|"none"'
+            ;;
+        quic)
+            _TYPE='.streamSettings.quicSettings.header.type|"none"'
+            _HOST='.streamSettings.quicSettings.security'
+            _PATH='.streamSettings.quicSettings.key'
+            ;;
         esac
         local CLTLEN=$(echo $IN | jq '.settings.clients|length - 1')
-        for CLINTIDX in $( seq 0 $CLTLEN ); do
+        for CLINTIDX in $(seq 0 $CLTLEN); do
             local EMAIL=$(echo $IN | jq 'if .settings.clients['${CLINTIDX}'].email then .settings.clients['${CLINTIDX}'].email else "DEFAULT" end')
             local _ps="${_MAKPREFIX}${ADDRESS}/${_NETTRIM}"
             local _VMESS=$(echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":.streamSettings.network|"tcp","type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0))
