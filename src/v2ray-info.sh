@@ -132,19 +132,12 @@ _v2_info() {
 		echo " 备注: 广告拦截已开启.."
 		echo
 	fi
-	if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
-		echo
-		_red "警告!!! V2Ray 运行出错!!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
-		_red "警告!!! V2Ray 运行出错!!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
-		_red "警告!!! V2Ray 运行出错!!!! 请检查端口是否冲突!!! 配置是否正确!!!!"
-		echo
-	else
-		echo "---------- END -------------"
-		echo
-		echo "V2Ray 客户端使用教程: https://${_site}/post/4/"
-		echo
-		echo -e "提示: 输入$cyan v2ray url $none可生成 vmess URL 链接 / 输入$cyan v2ray qr $none可生成二维码链接"
-		echo
-	fi
+
+	echo "---------- END -------------"
+	echo
+	echo "V2Ray 客户端使用教程: https://${_site}/post/4/"
+	echo
+	echo -e "提示: 输入$cyan v2ray url $none可生成 vmess URL 链接 / 输入$cyan v2ray qr $none可生成二维码链接"
+	echo
 
 }
