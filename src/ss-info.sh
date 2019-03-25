@@ -1,7 +1,5 @@
-if [[ ! $v2ray_pid ]]; then
-	_load status.sh
-	_err_msg
-fi
+_load status.sh
+_get_status
 [[ -z $ip ]] && get_ip
 if [[ $shadowsocks ]]; then
 	#local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#${_site}_ss_${ip}"

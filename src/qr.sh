@@ -1,3 +1,5 @@
+_load status.sh
+_get_status
 _qr_create() {
 	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
 	local link="https://233boy.github.io/tools/qr.html#${vmess}"

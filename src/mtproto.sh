@@ -6,10 +6,8 @@ _view_mtproto_info() {
 	fi
 }
 _mtproto_info() {
-	if [[ ! $v2ray_pid ]]; then
-		_load status.sh
-		_err_msg
-	fi
+	_load status.sh
+	_get_status
 	[[ -z $ip ]] && get_ip
 	echo
 	echo "---------- Telegram MTProto 配置信息 -------------"

@@ -71,13 +71,8 @@ _v2_args() {
 }
 
 _v2_info() {
-	if [[ ! $v2ray_pid ]]; then
-		_load status.sh
-		_err_msg
-	elif [[ $v2ray_transport == [45] && $caddy ]] && [[ ! $caddy_pid ]]; then
-		_load status.sh
-		_err_msg "Caddy"
-	fi
+	_load status.sh
+	_get_status
 	[[ -z $ip ]] && get_ip
 	echo
 	echo
