@@ -3,7 +3,7 @@ _check_status() {
     if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
         _err_msg
     fi
-    if [[ $v2ray_transport == [45] && $caddy ]] && [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
+    if [[ $v2ray_transport == [45] && $caddy ]] && [[ ! $(pgrep -f /usr/local/bin/caddy) ]]; then
         _err_msg "Caddy"
     fi
 }
