@@ -1,5 +1,5 @@
 _load status.sh
-_get_status
+_get_status 1
 [[ -z $ip ]] && get_ip
 if [[ $shadowsocks ]]; then
 	#local ss="ss://$(echo -n "${ssciphers}:${sspass}@${ip}:${ssport}" | base64 -w 0)#${_site}_ss_${ip}"

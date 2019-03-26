@@ -1,5 +1,5 @@
 _check_status() {
-    sleep 2
+    sleep 1.5
     unset v2ray_pid
     if [[ ! $(pgrep -f /usr/bin/v2ray/v2ray) ]]; then
         _err_msg
@@ -16,7 +16,8 @@ _check_status() {
 _get_status() {
     if [[ ! $v2ray_pid ]]; then
         _err_msg
-    elif [[ $v2ray_transport == [45] && $caddy ]] && [[ ! $caddy_pid ]]; then
+    fi
+    if [[ $v2ray_transport == [45] && $caddy ]] && [[ $1 && ! $caddy_pid ]]; then
         _err_msg "Caddy"
     fi
 }
