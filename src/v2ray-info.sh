@@ -72,7 +72,7 @@ _v2_args() {
 
 _v2_info() {
 	_load status.sh
-	_get_status
+	_get_status 1
 	[[ -z $ip ]] && get_ip
 	echo
 	echo

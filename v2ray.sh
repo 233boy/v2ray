@@ -2561,7 +2561,7 @@ get_v2ray_config_qr_link() {
 get_v2ray_multi_vmess_URL_QR() {
 
 	_load status.sh
-	_get_status
+	_get_status 1
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
 	get_ip
 	_load jqcmd.sh
@@ -2575,7 +2575,7 @@ get_v2ray_multi_vmess_URL_QR() {
 get_v2ray_vmess_URL_link() {
 
 	_load status.sh
-	_get_status
+	_get_status 1
 	echo
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
 	get_ip
