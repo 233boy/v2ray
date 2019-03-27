@@ -63,7 +63,7 @@ systemd=true
 # _test=true
 
 # site
-_site="ddog.xyz"
+_site="dduck.xyz"
 
 transport=(
 	TCP

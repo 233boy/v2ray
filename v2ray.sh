@@ -74,7 +74,7 @@ systemd=true
 # _test=true
 
 # site
-_site="ddog.xyz"
+_site="dduck.xyz"
 
 if [[ $v2ray_ver != v* ]]; then
 	v2ray_ver="v$v2ray_ver"
