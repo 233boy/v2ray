@@ -101,7 +101,7 @@ jq_printvmess() {
         local _HOST=\"\"
         local _PATH=\"\"
         local _TLS=\"\"
-        local _NET=$(echo $IN | jq '.streamSettings.network|"tcp"')
+        local _NET=$(echo $IN | jq 'if (.streamSettings.network | length) > 0 then .streamSettings.network else "tcp" end')
         local _PORT=$(echo $IN | jq '.port')
         local _NETTRIM=${_NET//\"/}
         echo
@@ -133,7 +133,7 @@ jq_printvmess() {
         for CLINTIDX in $(seq 0 $CLTLEN); do
             local EMAIL=$(echo $IN | jq 'if .settings.clients['${CLINTIDX}'].email then .settings.clients['${CLINTIDX}'].email else "DEFAULT" end')
             local _ps="${_MAKPREFIX}${ADDRESS}/${_NETTRIM}"
-            local _VMESS=$(echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":.streamSettings.network|"tcp","type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0))
+            local _VMESS=$(echo "vmess://"$(echo $IN | jq -c '{"v":"2","ps":"'${_ps}'","add":"'${ADDRESS}'","port":.port,"id":.settings.clients['${CLINTIDX}'].id,"aid":.settings.clients['${CLINTIDX}'].alterId,"net":'${_NET}',"type":'${_TYPE}',"host":'${_HOST}',"path":'${_PATH}',"tls":'${_TLS}'}' | base64 -w0))
             _green "VMESS链接（v2rayN/v2rayNG）: ${EMAIL//\"/}"
             echo
             _cyan "${_VMESS}"
