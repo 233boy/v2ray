@@ -6,7 +6,7 @@ _get_client_file() {
     echo
     echo -e ${cyan}$link${none}
     echo
-    echo " V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
+    echo " V2Ray 客户端使用教程: https://233v2.com/post/4/"
     echo
     echo
 }
