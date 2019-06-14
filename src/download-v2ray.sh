@@ -29,6 +29,7 @@ _download_v2ray_file() {
 	unzip -o $v2ray_tmp_file -d "/usr/bin/v2ray/"
 	chmod +x /usr/bin/v2ray/v2ray /usr/bin/v2ray/v2ctl
 	setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/v2ray/v2ray
+	echo "alias v2ray=$_v2ray_sh" >>/root/.bashrc
 }
 
 _install_v2ray_service() {
