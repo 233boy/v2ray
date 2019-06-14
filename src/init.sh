@@ -1,3 +1,9 @@
+_red() { echo -e ${red}$*${none}; }
+_green() { echo -e ${green}$*${none}; }
+_yellow() { echo -e ${yellow}$*${none}; }
+_magenta() { echo -e ${magenta}$*${none}; }
+_cyan() { echo -e ${cyan}$*${none}; }
+
 _rm() {
 	rm -rf "$@"
 }

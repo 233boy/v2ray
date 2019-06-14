@@ -6,6 +6,11 @@ yellow='\e[93m'
 magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
+_red() { echo -e ${red}$*${none}; }
+_green() { echo -e ${green}$*${none}; }
+_yellow() { echo -e ${yellow}$*${none}; }
+_magenta() { echo -e ${magenta}$*${none}; }
+_cyan() { echo -e ${cyan}$*${none}; }
 
 # Root
 [[ $(id -u) != 0 ]] && echo -e "\n 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}\n" && exit 1
@@ -907,20 +912,6 @@ backup_config() {
 	fi
 }
 
-try_enable_bbr() {
-	if [[ $(uname -r | cut -b 1) -eq 4 ]]; then
-		case $(uname -r | cut -b 3-4) in
-		9. | [1-9][0-9])
-			sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-			sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
-			echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
-			echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
-			sysctl -p >/dev/null 2>&1
-			;;
-		esac
-	fi
-}
-
 get_ip() {
 	ip=$(curl -s https://ipinfo.io/ip)
 	[[ -z $ip ]] && ip=$(curl -s https://api.ip.sb/ip)
@@ -980,7 +971,6 @@ install() {
 	blocked_hosts
 	shadowsocks_config
 	install_info
-	try_enable_bbr
 	# [[ $caddy ]] && domain_check
 	install_v2ray
 	if [[ $caddy || $v2ray_port == "80" ]]; then
@@ -993,6 +983,11 @@ install() {
 		fi
 	fi
 	[[ $caddy ]] && install_caddy
+
+	## bbr
+	_load bbr.sh
+	_try_enable_bbr
+	
 	get_ip
 	config
 	show_config_info
