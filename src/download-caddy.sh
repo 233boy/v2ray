@@ -27,6 +27,7 @@ _install_caddy_service() {
 	if [[ $systemd ]]; then
 		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
 		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
+		sed -i "/on-abnormal/a RestartSec=3" /lib/systemd/system/caddy.service
 		sed -i "s/on-abnormal/always/" /lib/systemd/system/caddy.service
 		systemctl enable caddy
 	else
@@ -44,4 +45,7 @@ _install_caddy_service() {
 	chown -R www-data.www-data /etc/ssl/caddy
 
 	mkdir -p /etc/caddy/
+
+	## create sites dir
+	mkdir -p /etc/caddy/sites
 }
