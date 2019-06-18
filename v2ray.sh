@@ -110,7 +110,7 @@ create_vmess_URL_config() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "233v2.com_${domain}",
+			"ps": "v2ray6.com_${domain}",
 			"add": "${domain}",
 			"port": "443",
 			"id": "${v2ray_id}",
@@ -127,7 +127,7 @@ create_vmess_URL_config() {
 		cat >/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
-			"ps": "233v2.com_${ip}",
+			"ps": "v2ray6.com_${ip}",
 			"add": "${ip}",
 			"port": "${v2ray_port}",
 			"id": "${v2ray_id}",
@@ -2133,7 +2133,7 @@ get_v2ray_config() {
 				echo
 				echo -e "${yellow} HTTP 监听端口 = ${cyan}6666$none"
 				echo
-				echo "V2Ray 客户端使用教程: https://233v2.com/post/4/"
+				echo "V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
 				echo
 				break
 			else
@@ -2158,7 +2158,7 @@ create_v2ray_config_text() {
 	if [[ $v2ray_transport == [45] ]]; then
 		if [[ ! $caddy ]]; then
 			echo
-			echo " 警告！请自行配置 TLS...教程: https://233v2.com/post/3/"
+			echo " 警告！请自行配置 TLS...教程: https://v2ray6.com/post/3/"
 		fi
 		echo
 		echo "地址 (Address) = ${domain}"
@@ -2211,7 +2211,7 @@ create_v2ray_config_text() {
 	fi
 	echo "---------- END -------------"
 	echo
-	echo "V2Ray 客户端使用教程: https://233v2.com/post/4/"
+	echo "V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
 	echo
 }
 get_v2ray_config_info_link() {
@@ -2220,14 +2220,14 @@ get_v2ray_config_info_link() {
 	echo
 	create_v2ray_config_text >/tmp/233blog_v2ray.txt
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-	local link=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random}_233v2_v2ray.txt")
+	local link=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random}_v2ray6_v2ray.txt")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 配置信息链接-------------"
 		echo
 		echo -e "$yellow 链接 = $cyan$link$none"
 		echo
-		echo -e " V2Ray 客户端使用教程: https://233v2.com/post/4/"
+		echo -e " V2Ray 客户端使用教程: https://v2ray6.com/post/4/"
 		echo
 		echo "备注...链接将在 14 天后失效..."
 		echo
@@ -2293,14 +2293,33 @@ other() {
 install_bbr() {
 	local test1=$(sed -n '/net.ipv4.tcp_congestion_control/p' /etc/sysctl.conf)
 	local test2=$(sed -n '/net.core.default_qdisc/p' /etc/sysctl.conf)
-	if [[ $test1 == "net.ipv4.tcp_congestion_control = bbr" && $test2 == "net.core.default_qdisc = fq" ]]; then
+	if [[ $(uname -r | cut -b 1) -eq 4 ]]; then
+		case $(uname -r | cut -b 3-4) in
+		9. | [1-9][0-9])
+			if [[ $test1 == "net.ipv4.tcp_congestion_control = bbr" && $test2 == "net.core.default_qdisc = fq" ]]; then
+				local is_bbr=true
+			else
+				local try_enable_bbr=true
+			fi
+			;;
+		esac
+	fi
+	if [[ $is_bbr ]]; then
 		echo
 		echo -e "$green BBR 已经启用啦...无需再安装$none"
 		echo
+	elif [[ $try_enable_bbr ]]; then
+		sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
+		sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
+		echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
+		echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
+		sysctl -p >/dev/null 2>&1
+		echo
+		echo -e "$green ..由于你的 VPS 内核支持开启 BBR ...已经为你启用 BBR 优化....$none"
+		echo
 	else
-		_load bbr.sh
-		_try_enable_bbr
-		[[ ! $enable_bbr ]] && bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
+		# https://teddysun.com/489.html
+		bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
 	fi
 }
 install_lotserver() {
@@ -2604,7 +2623,7 @@ do_service() {
 }
 _help() {
 	echo
-	echo "........... V2Ray 管理脚本帮助信息 by 233v2.com .........."
+	echo "........... V2Ray 管理脚本帮助信息 by v2ray6.com .........."
 	echo -e "
 	${green}v2ray menu $none管理 V2Ray (同等于直接输入 v2ray)
 
@@ -2645,17 +2664,17 @@ menu() {
 	clear
 	while :; do
 		echo
-		echo "........... V2Ray 管理脚本 $_version by 233v2.com .........."
+		echo "........... V2Ray 管理脚本 $_version by v2ray6.com .........."
 		echo
 		echo -e "## V2Ray 版本: $cyan$v2ray_ver$none  /  V2Ray 状态: $v2ray_status ##"
 		echo
-		echo "帮助说明: https://233v2.com/post/1/"
+		echo "帮助说明: https://v2ray6.com/post/1/"
 		echo
 		echo "反馈问题: https://github.com/233boy/v2ray/issues"
 		echo
 		echo "TG 群组: https://t.me/blog233"
 		echo
-		echo "捐赠脚本作者: https://233v2.com/donate/"
+		echo "捐赠脚本作者: https://v2ray6.com/donate/"
 		echo
 		echo "捐助 V2Ray: https://www.v2ray.com/chapter_00/02_donate.html"
 		echo
