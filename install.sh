@@ -19,22 +19,40 @@ cmd="apt-get"
 
 sys_bit=$(uname -m)
 
-if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
+case $sys_bit in
+i[36]86)
 	v2ray_bit="32"
-elif [[ $sys_bit == "x86_64" ]]; then
+	caddy_arch="386"
+	;;
+x86_64)
 	v2ray_bit="64"
-else
+	caddy_arch="amd64"
+	;;
+*armv6*)
+	v2ray_bit="arm"
+	caddy_arch="arm6"
+	;;
+*armv7*)
+	v2ray_bit="arm"
+	caddy_arch="arm7"
+	;;
+*aarch64* | *armv8*)
+	v2ray_bit="arm64"
+	caddy_arch="arm64"
+	;;
+*)
 	echo -e " 
 	哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}
 
 	备注: 仅支持 Ubuntu 16+ / Debian 8+ / CentOS 7+ 系统
 	" && exit 1
-fi
+	;;
+esac
 
 # 笨笨的检测方法
-if [[ -f /usr/bin/apt-get || -f /usr/bin/yum ]] && [[ -f /bin/systemctl ]]; then
+if [[ $(command -v apt-get) || $(command -v yum) ]] && [[ $(command -v systemctl) ]]; then
 
-	if [[ -f /usr/bin/yum ]]; then
+	if [[ $(command -v yum) ]]; then
 
 		cmd="yum"
 
@@ -863,10 +881,10 @@ config() {
 
 	if [[ $cmd == "apt-get" ]]; then
 		cat >/etc/network/if-pre-up.d/iptables <<-EOF
-#!/bin/sh
-/sbin/iptables-restore < /etc/iptables.rules.v4
-/sbin/ip6tables-restore < /etc/iptables.rules.v6
-	EOF
+			#!/bin/sh
+			/sbin/iptables-restore < /etc/iptables.rules.v4
+			/sbin/ip6tables-restore < /etc/iptables.rules.v6
+		EOF
 		chmod +x /etc/network/if-pre-up.d/iptables
 		# else
 		# 	[ $(pgrep "firewall") ] && systemctl stop firewalld
@@ -987,7 +1005,7 @@ install() {
 	## bbr
 	_load bbr.sh
 	_try_enable_bbr
-	
+
 	get_ip
 	config
 	show_config_info
