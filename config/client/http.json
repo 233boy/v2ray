@@ -67,6 +67,11 @@
             "tag": "direct"
         },
         {
+			"protocol": "blackhole",
+			"settings": {},
+			"tag": "blocked"
+        },
+        {
             "protocol": "dns",
             "tag": "dns-out"
         }
@@ -136,9 +141,15 @@
                 "outboundTag": "dns-out"
             },
             {
+				"type": "field",
+				"ip": [
+					"geoip:private"
+				],
+				"outboundTag": "blocked"
+			},
+            {
                 "type": "field",
                 "ip": [
-                    "geoip:private",
                     "geoip:cn"
                 ],
                 "outboundTag": "direct"
