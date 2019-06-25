@@ -25,6 +25,10 @@
             "protocol": "freedom",
             "settings": {},
             "tag": "direct"
+        },
+        {
+            "protocol": "dns",
+            "tag": "dns-out"
         }
     ],
     "inbounds": [
@@ -38,23 +42,30 @@
             }
         },
         {
+            "port": 2133,
+            "tag": "dns-in",
+            "protocol": "dokodemo-door",
+            "settings": {
+                "address": "127.0.0.1",
+                "port": 80,
+                "timeout": 0,
+                "network": "tcp,udp"
+            }
+        },
+        {
             "port": 2333,
-            "listen": "127.0.0.1",
             "protocol": "socks",
             "settings": {
                 "auth": "noauth",
-                "udp": true,
-                "ip": "127.0.0.1"
+                "udp": true
             }
         },
         {
             "port": 6666,
-            "listen": "127.0.0.1",
             "protocol": "http",
             "settings": {
                 "auth": "noauth",
-                "udp": true,
-                "ip": "127.0.0.1"
+                "udp": true
             }
         }
     ],
@@ -62,6 +73,13 @@
         "servers": [
             "1.1.1.1",
             "1.0.0.1",
+            {
+                "address": "119.29.29.29",
+                "port": 53,
+                "domains": [
+                    "geosite:cn"
+                ]
+            },
             "8.8.8.8",
             "8.8.4.4",
             "localhost"
@@ -70,6 +88,13 @@
     "routing": {
         "domainStrategy": "IPOnDemand",	
         "rules": [
+            {
+                "type": "field",
+                "inboundTag": [
+                    "dns-in"
+                ],
+                "outboundTag": "dns-out"
+            },
             {
                 "type": "field",
                 "ip": [
