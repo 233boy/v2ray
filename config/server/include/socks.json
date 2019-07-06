@@ -1,0 +1,16 @@
+        {
+            "protocol": "socks",
+            "port": 6666,
+            "settings": {
+                "auth": "password",
+                "accounts": [
+                    {
+                        "user": "233v2.com",
+                        "pass": "233blog.com"
+                    }
+                ],
+                "udp": true,
+                "timeout": 0,
+                "userLevel": 1
+            }
+        }

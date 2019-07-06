@@ -1,96 +1,148 @@
 {
-    "log": {
-        "access": "/var/log/v2ray/access.log",
-        "error": "/var/log/v2ray/error.log",
-        "loglevel": "warning"
-    },
-    "inbound": {
-        "port": 2333,
-        "protocol": "vmess",
-        "settings": {
-            "udp": true,
-            "clients": [
-                {
-                    "id": "23332333-2333-2333-2333-233boy233boy",
-                    "level": 1,
-                    "alterId": 233
-                }
-            ]
+	"log": {
+		"access": "/var/log/v2ray/access.log",
+		"error": "/var/log/v2ray/error.log",
+		"loglevel": "warning"
+	},
+	"inbounds": [
+		{
+			"port": 2333,
+			"protocol": "vmess",
+			"settings": {
+				"clients": [
+					{
+						"id": "e55c8d17-2cf3-b21a-bcf1-eeacb011ed79",
+						"level": 1,
+						"alterId": 233
+					}
+				]
+			},
+			"streamSettings": {
+				"network": "tcp",
+				"tcpSettings": {
+					"header": {
+						"type": "http",
+						"response": {
+							"version": "1.1",
+							"status": "200",
+							"reason": "OK",
+							"headers": {
+								"Content-encoding": [
+									"gzip"
+								],
+								"Content-Type": [
+									"text/html; charset=utf-8"
+								],
+								"Cache-Control": [
+									"no-cache"
+								],
+								"Vary": [
+									"Accept-Encoding"
+								],
+								"X-Frame-Options": [
+									"deny"
+								],
+								"X-XSS-Protection": [
+									"1; mode=block"
+								],
+								"X-content-type-options": [
+									"nosniff"
+								]
+							}
+						}
+					}
+				}
+			},
+			"sniffing": {
+				"enabled": true,
+				"destOverride": [
+					"http",
+					"tls"
+				]
+			}
+		}
+		//include_ss
+		//include_socks
+		//include_mtproto
+		//include_in_config
+		//
+	],
+	"outbounds": [
+		{
+			"protocol": "freedom",
+			"settings": {}
+		},
+		{
+			"protocol": "blackhole",
+			"settings": {},
+			"tag": "blocked"
+		},
+		{
+			"protocol": "freedom",
+			"settings": {},
+			"tag": "direct"
+		},
+		{
+			"protocol": "mtproto",
+			"settings": {},
+			"tag": "tg-out"
+		}
+		//include_out_config
+		//
+	],
+	"dns": {
+		"server": [
+			"1.1.1.1",
+			"1.0.0.1",
+			"8.8.8.8",
+			"8.8.4.4",
+			"localhost"
+		]
+	},
+	"routing": {
+		"domainStrategy": "IPOnDemand",
+		"rules": [
+			{
+				"type": "field",
+				"ip": [
+					"0.0.0.0/8",
+					"10.0.0.0/8",
+					"100.64.0.0/10",
+					"127.0.0.0/8",
+					"169.254.0.0/16",
+					"172.16.0.0/12",
+					"192.0.0.0/24",
+					"192.0.2.0/24",
+					"192.168.0.0/16",
+					"198.18.0.0/15",
+					"198.51.100.0/24",
+					"203.0.113.0/24",
+					"::1/128",
+					"fc00::/7",
+					"fe80::/10"
+				],
+				"outboundTag": "blocked"
+			},
+			{
+				"type": "field",
+				"inboundTag": ["tg-in"],
+				"outboundTag": "tg-out"
+			}
+			//include_ban_xx
+			//include_ban_bt
+			//include_ban_ad
+			//include_rules
+			//
+		]
+	},
+	"transport": {
+		"kcpSettings": {
+            "uplinkCapacity": 100,
+            "downlinkCapacity": 100,
+            "congestion": true
         },
-        "streamSettings": {
-            "network": "tcp",
-            "tcpSettings": {
-                "header": {
-                    "type": "http",
-                    "response": {
-                        "version": "1.1",
-                        "status": "200",
-                        "reason": "OK",
-                        "headers": {
-                            "Content-encoding": [
-                                "gzip"
-                            ],
-                            "Content-Type": [
-                                "text/html; charset=utf-8"
-                            ],
-                            "Cache-Control": [
-                                "no-cache"
-                            ],
-                            "Vary": [
-                                "Accept-Encoding"
-                            ],
-                            "X-Frame-Options": [
-                                "deny"
-                            ],
-                            "X-XSS-Protection": [
-                                "1; mode=block"
-                            ],
-                            "X-content-type-options": [
-                                "nosniff"
-                            ]
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "outbound": {
-        "protocol": "freedom",
-        "settings": {}
-    },
-    "outboundDetour": [
-        {
-            "protocol": "blackhole",
-            "settings": {},
-            "tag": "blocked"
-        }
-    ],
-    "routing": {
-        "strategy": "rules",
-        "settings": {
-            "rules": [
-                {
-                    "type": "field",
-                    "ip": [
-                        "0.0.0.0/8",
-                        "10.0.0.0/8",
-                        "100.64.0.0/10",
-                        "127.0.0.0/8",
-                        "169.254.0.0/16",
-                        "172.16.0.0/12",
-                        "192.0.0.0/24",
-                        "192.0.2.0/24",
-                        "192.168.0.0/16",
-                        "198.18.0.0/15",
-                        "198.51.100.0/24",
-                        "203.0.113.0/24",
-                        "::1/128",
-                        "fc00::/7",
-                        "fe80::/10"
-                    ],
-                    "outboundTag": "blocked"
-                }
-            ]
-        }
-    }
+		"sockopt": {
+			"tcpFastOpen": true
+		}
+	}
 }

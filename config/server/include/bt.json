@@ -1,0 +1,7 @@
+                {
+                    "type": "field",
+                    "protocol": [
+                        "bittorrent"
+                    ],
+                    "outboundTag": "blocked"
+                }
