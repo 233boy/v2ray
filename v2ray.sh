@@ -10,21 +10,43 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.09"
+_version="v3.13"
 
 cmd="apt-get"
 
 sys_bit=$(uname -m)
 
-if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
+case $sys_bit in
+i[36]86)
 	v2ray_bit="32"
-elif [[ $sys_bit == "x86_64" ]]; then
+	caddy_arch="386"
+	;;
+x86_64)
 	v2ray_bit="64"
-else
-	echo -e " 哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}" && exit 1
-fi
+	caddy_arch="amd64"
+	;;
+*armv6*)
+	v2ray_bit="arm"
+	caddy_arch="arm6"
+	;;
+*armv7*)
+	v2ray_bit="arm"
+	caddy_arch="arm7"
+	;;
+*aarch64* | *armv8*)
+	v2ray_bit="arm64"
+	caddy_arch="arm64"
+	;;
+*)
+	echo -e " 
+	哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}
 
-if [[ -f /usr/bin/yum ]]; then
+	备注: 仅支持 Ubuntu 16+ / Debian 8+ / CentOS 7+ 系统
+	" && exit 1
+	;;
+esac
+
+if [[ $(command -v yum) ]]; then
 
 	cmd="yum"
 
@@ -2293,33 +2315,14 @@ other() {
 install_bbr() {
 	local test1=$(sed -n '/net.ipv4.tcp_congestion_control/p' /etc/sysctl.conf)
 	local test2=$(sed -n '/net.core.default_qdisc/p' /etc/sysctl.conf)
-	if [[ $(uname -r | cut -b 1) -eq 4 ]]; then
-		case $(uname -r | cut -b 3-4) in
-		9. | [1-9][0-9])
-			if [[ $test1 == "net.ipv4.tcp_congestion_control = bbr" && $test2 == "net.core.default_qdisc = fq" ]]; then
-				local is_bbr=true
-			else
-				local try_enable_bbr=true
-			fi
-			;;
-		esac
-	fi
-	if [[ $is_bbr ]]; then
+	if [[ $test1 == "net.ipv4.tcp_congestion_control = bbr" && $test2 == "net.core.default_qdisc = fq" ]]; then
 		echo
 		echo -e "$green BBR 已经启用啦...无需再安装$none"
 		echo
-	elif [[ $try_enable_bbr ]]; then
-		sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-		sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
-		echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
-		echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
-		sysctl -p >/dev/null 2>&1
-		echo
-		echo -e "$green ..由于你的 VPS 内核支持开启 BBR ...已经为你启用 BBR 优化....$none"
-		echo
 	else
-		# https://teddysun.com/489.html
-		bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
+		_load bbr.sh
+		_try_enable_bbr
+		[[ ! $enable_bbr ]] && bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
 	fi
 }
 install_lotserver() {

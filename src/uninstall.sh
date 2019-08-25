@@ -86,6 +86,7 @@ if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
 
 	rm -rf /usr/bin/v2ray
 	rm -rf $_v2ray_sh
+	sed -i '/alias v2ray=/d' /root/.bashrc
 	rm -rf /etc/v2ray
 	rm -rf /var/log/v2ray
 
@@ -148,6 +149,7 @@ elif [[ $is_uninstall_v2ray ]]; then
 
 	rm -rf /usr/bin/v2ray
 	rm -rf $_v2ray_sh
+	sed -i '/alias v2ray=/d' /root/.bashrc
 	rm -rf /etc/v2ray
 	rm -rf /var/log/v2ray
 	if [[ $systemd ]]; then

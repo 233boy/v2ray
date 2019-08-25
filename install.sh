@@ -6,6 +6,11 @@ yellow='\e[93m'
 magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
+_red() { echo -e ${red}$*${none}; }
+_green() { echo -e ${green}$*${none}; }
+_yellow() { echo -e ${yellow}$*${none}; }
+_magenta() { echo -e ${magenta}$*${none}; }
+_cyan() { echo -e ${cyan}$*${none}; }
 
 # Root
 [[ $(id -u) != 0 ]] && echo -e "\n 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}\n" && exit 1
@@ -14,22 +19,40 @@ cmd="apt-get"
 
 sys_bit=$(uname -m)
 
-if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
+case $sys_bit in
+i[36]86)
 	v2ray_bit="32"
-elif [[ $sys_bit == "x86_64" ]]; then
+	caddy_arch="386"
+	;;
+x86_64)
 	v2ray_bit="64"
-else
+	caddy_arch="amd64"
+	;;
+*armv6*)
+	v2ray_bit="arm"
+	caddy_arch="arm6"
+	;;
+*armv7*)
+	v2ray_bit="arm"
+	caddy_arch="arm7"
+	;;
+*aarch64* | *armv8*)
+	v2ray_bit="arm64"
+	caddy_arch="arm64"
+	;;
+*)
 	echo -e " 
 	哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}
 
 	备注: 仅支持 Ubuntu 16+ / Debian 8+ / CentOS 7+ 系统
 	" && exit 1
-fi
+	;;
+esac
 
 # 笨笨的检测方法
-if [[ -f /usr/bin/apt-get || -f /usr/bin/yum ]] && [[ -f /bin/systemctl ]]; then
+if [[ $(command -v apt-get) || $(command -v yum) ]] && [[ $(command -v systemctl) ]]; then
 
-	if [[ -f /usr/bin/yum ]]; then
+	if [[ $(command -v yum) ]]; then
 
 		cmd="yum"
 
@@ -103,7 +126,32 @@ _load() {
 	local _dir="/etc/v2ray/233boy/v2ray/src/"
 	. "${_dir}$@"
 }
+_sys_timezone() {
+	IS_OPENVZ=
+	if hostnamectl status | grep -q openvz; then
+		IS_OPENVZ=1
+	fi
 
+	echo
+	timedatectl set-timezone Asia/Shanghai
+	timedatectl set-ntp true
+	echo "已将你的主机设置为Asia/Shanghai时区并通过systemd-timesyncd自动同步时间。"
+	echo
+
+	if [[ $IS_OPENVZ ]]; then
+		echo
+		echo -e "你的主机环境为 ${yellow}Openvz${none} ，建议使用${yellow}v2ray mkcp${none}系列协议。"
+		echo -e "注意：${yellow}Openvz${none} 系统时间无法由虚拟机内程序控制同步。"
+		echo -e "如果主机时间跟实际相差${yellow}超过90秒${none}，v2ray将无法正常通信，请发ticket联系vps主机商调整。"
+	fi
+}
+
+_sys_time() {
+	echo -e "\n主机时间：${yellow}"
+	timedatectl status | sed -n '1p;4p'
+	echo -e "${none}"
+	[[ $IS_OPENV ]] && pause
+}
 v2ray_config() {
 	# clear
 	echo
@@ -731,14 +779,16 @@ caddy_config() {
 install_v2ray() {
 	$cmd update -y
 	if [[ $cmd == "apt-get" ]]; then
-		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap2-bin
+		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap2-bin dbus
 	else
 		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
 		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
-	date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
+	# date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
+	_sys_timezone
+	_sys_time
 
 	if [[ $local_install ]]; then
 		if [[ ! -d $(pwd)/config ]]; then
@@ -858,10 +908,10 @@ config() {
 
 	if [[ $cmd == "apt-get" ]]; then
 		cat >/etc/network/if-pre-up.d/iptables <<-EOF
-#!/bin/sh
-/sbin/iptables-restore < /etc/iptables.rules.v4
-/sbin/ip6tables-restore < /etc/iptables.rules.v6
-	EOF
+			#!/bin/sh
+			/sbin/iptables-restore < /etc/iptables.rules.v4
+			/sbin/ip6tables-restore < /etc/iptables.rules.v6
+		EOF
 		chmod +x /etc/network/if-pre-up.d/iptables
 		# else
 		# 	[ $(pgrep "firewall") ] && systemctl stop firewalld
@@ -904,20 +954,6 @@ backup_config() {
 	if [[ $is_path ]]; then
 		sed -i "57s/=/=true/; 60s/=233blog/=$path/" $backup
 		sed -i "63s#=https://liyafly.com#=$proxy_site#" $backup
-	fi
-}
-
-try_enable_bbr() {
-	if [[ $(uname -r | cut -b 1) -eq 4 ]]; then
-		case $(uname -r | cut -b 3-4) in
-		9. | [1-9][0-9])
-			sed -i '/net.ipv4.tcp_congestion_control/d' /etc/sysctl.conf
-			sed -i '/net.core.default_qdisc/d' /etc/sysctl.conf
-			echo "net.ipv4.tcp_congestion_control = bbr" >>/etc/sysctl.conf
-			echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
-			sysctl -p >/dev/null 2>&1
-			;;
-		esac
 	fi
 }
 
@@ -980,7 +1016,6 @@ install() {
 	blocked_hosts
 	shadowsocks_config
 	install_info
-	try_enable_bbr
 	# [[ $caddy ]] && domain_check
 	install_v2ray
 	if [[ $caddy || $v2ray_port == "80" ]]; then
@@ -993,6 +1028,11 @@ install() {
 		fi
 	fi
 	[[ $caddy ]] && install_caddy
+
+	## bbr
+	_load bbr.sh
+	_try_enable_bbr
+
 	get_ip
 	config
 	show_config_info

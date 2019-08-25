@@ -1,3 +1,5 @@
+# vmess
+_load vmess-config.sh
 _get_client_file() {
     local _link="$(cat $v2ray_client_config | tr -d [:space:] | base64 -w0)"
     local link="https://233boy.github.io/tools/json.html#${_link}"

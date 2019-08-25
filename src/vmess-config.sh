@@ -98,14 +98,14 @@ esac
 ## change client config file
 [[ -z $ip ]] && get_ip
 if [[ $v2ray_transport == [45] ]]; then
-	sed -i "s/233blog.com/$domain/; 13s/2333/443/; 16s/$old_id/$v2ray_id/; 17s/233/$alterId/" $v2ray_client_config
+	sed -i "s/233blog.com/$domain/; 9s/2333/443/; 12s/$old_id/$v2ray_id/; 13s/233/$alterId/" $v2ray_client_config
 	if [[ $is_path ]]; then
-		sed -i "31s/233blog/$path/" $v2ray_client_config
+		sed -i "27s/233blog/$path/" $v2ray_client_config
 	else
-		sed -i "31s/233blog//" $v2ray_client_config
+		sed -i "27s/233blog//" $v2ray_client_config
 	fi
 else
-	sed -i "s/233blog.com/$ip/; 13s/2333/$v2ray_port/; 16s/$old_id/$v2ray_id/; 17s/233/$alterId/" $v2ray_client_config
+	sed -i "s/233blog.com/$ip/; 9s/2333/$v2ray_port/; 12s/$old_id/$v2ray_id/; 13s/233/$alterId/" $v2ray_client_config
 fi
 
 # zip -q -r -j --password "233blog.com" /etc/v2ray/233blog_v2ray.zip $v2ray_client_config
