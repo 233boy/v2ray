@@ -1,0 +1,156 @@
+{
+  "policy": {
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true
+    }
+  },
+  "log": {
+    "access": "",
+    "error": "",
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "tag": "proxy",
+      "port": 2333,
+      "listen": "0.0.0.0",
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "settings": {
+        "auth": "noauth",
+        "udp": true,
+        "ip": null,
+        "address": null,
+        "clients": null
+      },
+      "streamSettings": null
+    },
+    {
+      "tag": "api",
+      "port": 10805,
+      "listen": "127.0.0.1",
+      "protocol": "dokodemo-door",
+      "sniffing": null,
+      "settings": {
+        "auth": null,
+        "udp": false,
+        "ip": null,
+        "address": "127.0.0.1",
+        "clients": null
+      },
+      "streamSettings": null
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "167.179.77.98",
+            "port": 446,
+            "users": [
+              {
+                "id": "f3738c35-5560-4977-a2cc-5281952c20a3",
+                "alterId": 233,
+                "email": "t@t.tt",
+                "security": "auto"
+              }
+            ]
+          }
+        ],
+        "servers": null,
+        "response": null
+      },
+      "streamSettings": {
+        "network": "kcp",
+        "security": null,
+        "tlsSettings": null,
+        "tcpSettings": null,
+        "kcpSettings": {
+          "mtu": 1350,
+          "tti": 50,
+          "uplinkCapacity": 12,
+          "downlinkCapacity": 100,
+          "congestion": false,
+          "readBufferSize": 2,
+          "writeBufferSize": 2,
+          "header": {
+            "type": "srtp",
+            "request": null,
+            "response": null
+          }
+        },
+        "wsSettings": null,
+        "httpSettings": null,
+        "quicSettings": null
+      },
+      "mux": {
+        "enabled": true
+      }
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "vnext": null,
+        "servers": null,
+        "response": null
+      },
+      "streamSettings": null,
+      "mux": null
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole",
+      "settings": {
+        "vnext": null,
+        "servers": null,
+        "response": {
+          "type": "http"
+        }
+      },
+      "streamSettings": null,
+      "mux": null
+    }
+  ],
+  "stats": {},
+  "api": {
+    "tag": "api",
+    "services": [
+      "StatsService"
+    ]
+  },
+  "dns": null,
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "port": null,
+        "inboundTag": "api",
+        "outboundTag": "api",
+        "ip": null,
+        "domain": null
+      },
+      {
+        "type": "field",
+        "port": null,
+        "inboundTag": null,
+        "outboundTag": "direct",
+        "ip": [
+          "geoip:private"
+        ],
+        "domain": null
+      }
+    ]
+  }
+}
