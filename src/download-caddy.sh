@@ -2,7 +2,7 @@ _download_caddy_file() {
 	caddy_tmp="/tmp/install_caddy/"
 	caddy_tmp_file="/tmp/install_caddy/caddy.tar.gz"
 	[[ -d $caddy_tmp ]] && rm -rf $caddy_tmp
-	local caddy_download_link="https://caddyserver.com/download/linux/${caddy_arch}?license=personal"
+	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v1.0.3/caddy_v1.0.3_linux_amd64.tar.gz"
 
 	mkdir -p $caddy_tmp
 
