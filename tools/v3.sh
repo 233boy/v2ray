@@ -1,3 +1,27 @@
+#!/bin/bash
+case $v2ray_transport in
+[5-8])
+	_transport=$(($v2ray_transport + 1))
+	;;
+9 | 1[0-5])
+	_transport=$(($v2ray_transport + 9))
+	;;
+16)
+	_transport=5
+	;;
+17)
+	_transport=1
+	;;
+*)
+	_transport=$v2ray_transport
+	;;
+esac
+
+if [[ $v2ray_transport == 17 ]]; then
+	v2ray_id=$(cat /proc/sys/kernel/random/uuid)
+fi
+
+cat >$backup <<-EOF
 # -----------------------------------
 # 警告...请不要修改或删除这个文件...谢谢
 # 警告...请不要修改或删除这个文件...谢谢
@@ -15,52 +39,52 @@ mark=v3
 #
 
 # ---- V2Ray 传输协议 -----
-v2ray_transport=1
+v2ray_transport=$_transport
 
 #---- V2Ray 端口 -----
-v2ray_port=2333
+v2ray_port=$v2ray_port
 
 #---- UUID -----
-v2ray_id=e55c8d17-2cf3-b21a-bcf1-eeacb011ed79
+v2ray_id=$v2ray_id
 
 #---- alterId -----
-alterId=233
+alterId=$alterId
 
 #---- V2Ray 动态端口开始 -----
-v2ray_dynamicPort_start=10000
+v2ray_dynamicPort_start=$v2ray_dynamicPort_start
 
 #---- V2Ray 动态端口结束 -----
-v2ray_dynamicPort_end=20000
+v2ray_dynamicPort_end=$v2ray_dynamicPort_end
 
 #---- 域名 -----
-domain=233blog.com
+domain=$domain
 
 #---- caddy -----
-caddy=
+caddy=$caddy_status
 
 #---- Shadowsocks -----
-shadowsocks=
+shadowsocks=$shadowsocks_status
 
 #---- Shadowsocks 端口 -----
-ssport=6666
+ssport=$ssport
 
 #---- Shadowsocks 密码 -----
-sspass=233blog.com
+sspass=$sspass
 
 #---- Shadowsocks 加密协议 -----
-ssciphers=chacha20-ietf
+ssciphers=$ssciphers
 
 #---- 屏蔽广告 -----
-ban_ad=
+ban_ad=$blocked_ad_status
 
 #---- 网站伪装 -----
-path_status=
+path_status=$path_status
 
 #---- 伪装的路径 -----
-path=233blog
+path=$path
 
 #---- 伪装的网址 -----
-proxy_site=https://liyafly.com
+proxy_site=$proxy_site
 
 #---- Socks -----
 socks=
@@ -85,3 +109,6 @@ mtproto_secret=lalala
 
 #---- 屏蔽 BT -----
 ban_bt=true
+EOF
+
+. $backup

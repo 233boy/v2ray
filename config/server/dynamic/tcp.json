@@ -15,7 +15,10 @@
 						"level": 1,
 						"alterId": 233
 					}
-				]
+				],
+				"detour": {
+					"to": "dynamic"
+				}
 			},
 			"streamSettings": {
 				"network": "tcp"
@@ -27,7 +30,23 @@
 					"tls"
 				]
 			}
-		}
+		},
+        {
+            "protocol": "vmess",
+            "port": "10000-20000",
+            "tag": "dynamic",
+            "settings": {
+                "default": {
+                    "level": 1,
+                    "alterId": 32
+                }
+            },
+            "allocate": {
+                "strategy": "random",
+                "concurrency": 2,
+                "refresh": 5
+            }
+        }
 		//include_ss
 		//include_socks
 		//include_mtproto
@@ -67,7 +86,7 @@
 		]
 	},
 	"routing": {
-		"domainStrategy": "IPOnDemand",	
+		"domainStrategy": "IPOnDemand",
 		"rules": [
 			{
 				"type": "field",
