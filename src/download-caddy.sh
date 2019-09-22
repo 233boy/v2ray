@@ -2,6 +2,9 @@ _download_caddy_file() {
 	caddy_tmp="/tmp/install_caddy/"
 	caddy_tmp_file="/tmp/install_caddy/caddy.tar.gz"
 	[[ -d $caddy_tmp ]] && rm -rf $caddy_tmp
+	if [[ ! ${caddy_arch} ]]; then
+		echo -e "$red 获取 Caddy 下载参数失败！$none" && exit 1
+	fi
 	local caddy_download_link="https://caddyserver.com/download/linux/${caddy_arch}?license=personal"
 
 	mkdir -p $caddy_tmp
@@ -33,14 +36,18 @@ _install_caddy_service() {
 		update-rc.d -f caddy defaults
 	fi
 
-	mkdir -p /etc/ssl/caddy
-
 	if [ -z "$(grep www-data /etc/passwd)" ]; then
 		useradd -M -s /usr/sbin/nologin www-data
 	fi
-	chown -R www-data.www-data /etc/ssl/caddy
+	# chown -R www-data.www-data /etc/ssl/caddy
 
-	mkdir -p /etc/caddy/
+	# ref https://github.com/caddyserver/caddy/tree/master/dist/init/linux-systemd
+
+	mkdir -p /etc/caddy
+	chown -R root:root /etc/caddy
+	mkdir -p /etc/ssl/caddy
+	chown -R root:www-data /etc/ssl/caddy
+	chmod 0770 /etc/ssl/caddy
 
 	## create sites dir
 	mkdir -p /etc/caddy/sites
