@@ -19,7 +19,7 @@ _download_caddy_file() {
 	wget -qO- https://getcaddy.com | bash -s personal
 
 	if [[ ! -f /usr/local/bin/caddy ]]; then
-		echo -e "$red 安装 Caddy 出错！" && exit 1
+		echo -e "$red 安装 Caddy 出错！$none" && exit 1
 	fi
 }
 _install_caddy_service() {
