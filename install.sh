@@ -50,9 +50,9 @@ x86_64)
 esac
 
 # 笨笨的检测方法
-if [[ $(command -v apt-get) || $(command -v yum) ]] && [[ $(command -v systemctl) ]]; then
+if command -v apt-get || command -v yum ; then
 
-	if [[ $(command -v yum) ]]; then
+	if command -v yum ; then
 
 		cmd="yum"
 
