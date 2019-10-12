@@ -26,7 +26,10 @@ _install_caddy_service() {
 	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
 
 	if [[ $systemd ]]; then
-		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
+		# cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
+		if ! wget https://raw.githubusercontent.com/caddyserver/caddy/master/dist/init/linux-systemd/caddy.service -O /lib/systemd/system/caddy.service; then
+			echo -e "$red 下载 caddy.service 失败！$none" && exit 1
+		fi
 		# # sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
 		# sed -i "/on-abnormal/a RestartSec=3" /lib/systemd/system/caddy.service
 		# sed -i "s/on-abnormal/always/" /lib/systemd/system/caddy.service
@@ -40,7 +43,7 @@ _install_caddy_service() {
 		# 	Documentation=https://caddyserver.com/docs
 		# 	After=network.target
 		# 	Wants=network.target
-			
+
 		# 	[Service]
 		# 	Restart=always
 		# 	RestartSec=3
@@ -52,7 +55,7 @@ _install_caddy_service() {
 		# 	TimeoutStopSec=5s
 		# 	LimitNOFILE=1048576
 		# 	LimitNPROC=512
-			
+
 		# 	[Install]
 		# 	WantedBy=multi-user.target
 		# EOF
