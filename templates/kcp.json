@@ -1,0 +1,28 @@
+{
+	"port": 2333, // v2ray port
+	"protocol": "vmess",
+	"settings": {
+		"clients": [
+			{
+				"id": "e55c8d17-2cf3-b21a-bcf1-eeacb011ed79", // uuid
+				"level": 1,
+				"alterId": 233 // alaterid
+			}
+		]
+	},
+	"streamSettings": {
+		"network": "kcp",
+		"kcpSettings": {
+			"header": {
+				"type": "none" // options > [none, srtp, utp, wechat-video, dtls, wireguard]
+			}
+		}
+	},
+	"sniffing": {
+		"enabled": true,
+		"destOverride": [
+			"http",
+			"tls"
+		]
+	}
+}
