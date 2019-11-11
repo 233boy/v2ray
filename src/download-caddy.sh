@@ -27,10 +27,13 @@ _install_caddy_service() {
 
 	if [[ $systemd ]]; then
 		# cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
-		if ! wget https://raw.githubusercontent.com/caddyserver/caddy/master/dist/init/linux-systemd/caddy.service -O /lib/systemd/system/caddy.service; then
-			echo -e "$red 下载 caddy.service 失败！$none" && exit 1
+		# if ! wget https://raw.githubusercontent.com/caddyserver/caddy/master/dist/init/linux-systemd/caddy.service -O /lib/systemd/system/caddy.service; then
+		# 	echo -e "$red 下载 caddy.service 失败！$none" && exit 1
+		# fi
+		# sed -i "s/-log-timestamps=false//g" /lib/systemd/system/caddy.service
+		if [[ ! $(grep "ReadWriteDirectories" /lib/systemd/system/caddy.service) ]]; then
+			sed -i "/ReadWritePaths/a ReadWriteDirectories=/etc/ssl/caddy" /lib/systemd/system/caddy.service
 		fi
-		sed -i "s/-log-timestamps=false//g" /lib/systemd/system/caddy.service
 		# # sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
 		# sed -i "/on-abnormal/a RestartSec=3" /lib/systemd/system/caddy.service
 		# sed -i "s/on-abnormal/always/" /lib/systemd/system/caddy.service
