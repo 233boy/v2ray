@@ -57,6 +57,10 @@
               "network": "tcp,udp",
               "timeout": 0,
               "followRedirect": true
+            },
+            "sniffing": {
+              "enabled": true,
+              "destOverride": ["http", "tls"]
             }
         },
         {

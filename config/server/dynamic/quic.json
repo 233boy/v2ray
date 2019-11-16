@@ -23,7 +23,6 @@
 			"streamSettings": {
 				"network": "quic",
 				"quicSettings": {
-					"security": "aes-128-gcm",
 					"key": "",
 					"header": {
 						"type": "none"
@@ -56,7 +55,6 @@
             "streamSettings": {
 				"network": "quic",
 				"quicSettings": {
-					"security": "aes-128-gcm",
 					"key": "",
 					"header": {
 						"type": "none"
