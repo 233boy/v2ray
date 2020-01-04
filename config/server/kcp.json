@@ -111,9 +111,6 @@
             "uplinkCapacity": 100,
             "downlinkCapacity": 100,
             "congestion": true
-        },
-		"sockopt": {
-			"tcpFastOpen": true
-		}
+        }
 	}
 }
