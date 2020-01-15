@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.29"
+_version="v3.30"
 
 cmd="apt-get"
 
@@ -2278,6 +2278,8 @@ get_v2ray_vmess_URL_link() {
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
 	echo
 	echo -e ${cyan}$vmess${none}
+	echo
+	echo -e "${yellow}免被墙..推荐使用JMS: ${cyan}https://getjms.com${none}"
 	echo
 	rm -rf /etc/v2ray/vmess_qr.json
 }
