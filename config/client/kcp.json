@@ -55,6 +55,10 @@
               "network": "tcp,udp",
               "timeout": 0,
               "followRedirect": true
+            },
+            "sniffing": {
+              "enabled": true,
+              "destOverride": ["http", "tls"]
             }
         },
         {
@@ -87,17 +91,24 @@
     ],
     "dns": {
         "servers": [
-            "1.1.1.1",
-            "1.0.0.1",
             {
                 "address": "119.29.29.29",
                 "port": 53,
                 "domains": [
-                    "geosite:cn"
+                  "geosite:cn"
+                ],
+                "expectIPs": [
+                  "geoip:cn"
+                ]
+              },
+              {
+                "address": "1.1.1.1",
+                "port": 53,
+                "domains": [
+                  "geosite:geolocation-!cn"
                 ]
             },
             "8.8.8.8",
-            "8.8.4.4",
             "localhost"
         ]
     },
