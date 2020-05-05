@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.29"
+_version="v3.32"
 
 cmd="apt-get"
 
@@ -2279,6 +2279,8 @@ get_v2ray_vmess_URL_link() {
 	echo
 	echo -e ${cyan}$vmess${none}
 	echo
+	echo -e "${yellow}免被墙..推荐使用JMS: ${cyan}https://getjms.com${none}"
+	echo
 	rm -rf /etc/v2ray/vmess_qr.json
 }
 other() {
@@ -2677,7 +2679,7 @@ menu() {
 		echo
 		echo "反馈问题: https://github.com/233boy/v2ray/issues"
 		echo
-		echo "TG 群组: https://t.me/blog233"
+		echo "TG 频道: https://t.me/tg2333"
 		echo
 		echo "捐赠脚本作者: https://233v2.com/donate/"
 		echo

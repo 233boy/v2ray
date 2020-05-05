@@ -1,5 +1,6 @@
 _get_latest_version() {
-	v2ray_latest_ver="$(curl -H 'Cache-Control: no-cache' -s https://api.github.com/repos/v2ray/v2ray-core/releases/latest | grep 'tag_name' | cut -d\" -f4)"
+	v2ray_repos_url="https://api.github.com/repos/v2ray/v2ray-core/releases/latest?v=$RANDOM"
+	v2ray_latest_ver="$(curl -s $v2ray_repos_url | grep 'tag_name' | cut -d\" -f4)"
 
 	if [[ ! $v2ray_latest_ver ]]; then
 		echo
@@ -14,7 +15,7 @@ _get_latest_version() {
 }
 
 _download_v2ray_file() {
-	_get_latest_version
+	[[ ! $v2ray_latest_ver ]] && _get_latest_version
 	v2ray_tmp_file="/tmp/v2ray.zip"
 	v2ray_download_link="https://github.com/v2ray/v2ray-core/releases/download/$v2ray_latest_ver/v2ray-linux-${v2ray_bit}.zip"
 
@@ -26,7 +27,9 @@ _download_v2ray_file() {
 
 	unzip -o $v2ray_tmp_file -d "/usr/bin/v2ray/"
 	chmod +x /usr/bin/v2ray/{v2ray,v2ctl}
-	echo "alias v2ray=$_v2ray_sh" >>/root/.bashrc
+	if [[ ! $(cat /root/.bashrc | grep v2ray) ]]; then
+		echo "alias v2ray=$_v2ray_sh" >>/root/.bashrc
+	fi
 }
 
 _install_v2ray_service() {
