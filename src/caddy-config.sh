@@ -15,7 +15,7 @@ $domain {
         websocket
     }
 }
-import sites/*
+import .sites/*
 		EOF
 	else
 		cat >/etc/caddy/Caddyfile <<-EOF
@@ -25,7 +25,7 @@ $domain {
 		websocket
 	}
 }
-import sites/*
+import .sites/*
 		EOF
 	fi
 	;;
@@ -44,7 +44,7 @@ $domain {
 		insecure_skip_verify
     }
 }
-import sites/*
+import .sites/*
 		EOF
 	else
 		cat >/etc/caddy/Caddyfile <<-EOF
@@ -56,7 +56,7 @@ $domain {
 		insecure_skip_verify
 	}
 }
-import sites/*
+import .sites/*
 		EOF
 	fi
 	;;
