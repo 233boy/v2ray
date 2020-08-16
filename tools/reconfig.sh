@@ -1,6 +1,6 @@
 #!/bin/bash
 uuid=$(cat /proc/sys/kernel/random/uuid)
-cat >/etc/v2ray/233blog_v2ray_backup.conf.tmp <<-EOF
+cat >/usr/local/etc/v2ray/sagasw_v2ray_backup.conf.tmp <<-EOF
 # -----------------------------------
 # 警告...请不要修改或删除这个文件...谢谢
 # 警告...请不要修改或删除这个文件...谢谢
@@ -66,7 +66,7 @@ ws_path=$ws_path
 proxy_site=$proxy_site
 		EOF
 rm -rf $backup
-mv -f /etc/v2ray/233blog_v2ray_backup.conf.tmp /etc/v2ray/233blog_v2ray_backup.conf
+mv -f /usr/local/etc/v2ray/sagasw_v2ray_backup.conf.tmp /usr/local/etc/v2ray/sagasw_v2ray_backup.conf
 echo
 echo -e " .... 哇哦.. .."
 echo

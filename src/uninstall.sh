@@ -87,7 +87,7 @@ if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
 	rm -rf /usr/bin/v2ray
 	rm -rf $_v2ray_sh
 	sed -i '/alias v2ray=/d' /root/.bashrc
-	rm -rf /etc/v2ray
+	rm -rf /usr/local/etc/v2ray
 	rm -rf /var/log/v2ray
 
 	# [ $caddy_pid ] && systemctl stop caddy
@@ -114,7 +114,7 @@ if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
 	echo
 	echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 	echo
-	echo "反馈问题: https://github.com/233boy/v2ray/issues"
+	echo "反馈问题: https://github.com/sagasw/v2ray/issues"
 	echo
 
 elif [[ $is_uninstall_v2ray ]]; then
@@ -150,7 +150,7 @@ elif [[ $is_uninstall_v2ray ]]; then
 	rm -rf /usr/bin/v2ray
 	rm -rf $_v2ray_sh
 	sed -i '/alias v2ray=/d' /root/.bashrc
-	rm -rf /etc/v2ray
+	rm -rf /usr/local/etc/v2ray
 	rm -rf /var/log/v2ray
 	if [[ $systemd ]]; then
 		systemctl disable v2ray >/dev/null 2>&1
@@ -165,6 +165,6 @@ elif [[ $is_uninstall_v2ray ]]; then
 	echo
 	echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 	echo
-	echo "反馈问题: https://github.com/233boy/v2ray/issues"
+	echo "反馈问题: https://github.com/sagasw/v2ray/issues"
 	echo
 fi

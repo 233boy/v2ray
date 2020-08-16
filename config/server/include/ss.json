@@ -3,7 +3,7 @@
             "port": 6666,
             "settings": {
                 "method": "chacha20-ietf",
-                "password": "233blog.com",
+                "password": "sagasw.com",
                 "network": "tcp,udp",
                 "level": 1,
                 "ota": false

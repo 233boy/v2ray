@@ -70,10 +70,10 @@ fi
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
 old_id="e55c8d17-2cf3-b21a-bcf1-eeacb011ed79"
-v2ray_server_config="/etc/v2ray/config.json"
-v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
-backup="/etc/v2ray/233blog_v2ray_backup.conf"
-_v2ray_sh="/usr/local/sbin/v2ray"
+v2ray_server_config="/usr/local/etc/v2ray/config.json"
+v2ray_client_config="/usr/local/etc/v2ray/sagasw_v2ray_config.json"
+backup="/usr/local/etc/v2ray/sagasw_v2ray_backup.conf"
+_v2ray_sh="/usr/local/bin/v2ray"
 systemd=true
 # _test=true
 
@@ -123,7 +123,7 @@ ciphers=(
 )
 
 _load() {
-	local _dir="/etc/v2ray/233boy/v2ray/src/"
+	local _dir="/usr/local/etc/v2ray/sagasw/v2ray/src/"
 	. "${_dir}$@"
 }
 _sys_timezone() {
@@ -332,7 +332,7 @@ tls_config() {
 	while :; do
 		echo
 		echo -e "请输入一个 $magenta正确的域名$none，一定一定一定要正确，不！能！出！错！"
-		read -p "(例如：233blog.com): " domain
+		read -p "(例如：sagasw.com): " domain
 		[ -z "$domain" ] && error && continue
 		echo
 		echo
@@ -456,9 +456,9 @@ path_config_ask() {
 path_config() {
 	echo
 	while :; do
-		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
-		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" path
-		[[ -z $path ]] && path="233blog"
+		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /sagasw , 那么只需要输入 sagasw 即可"
+		read -p "$(echo -e "(默认: [${cyan}sagasw$none]):")" path
+		[[ -z $path ]] && path="sagasw"
 
 		case $path in
 		*[/$]*)
@@ -620,8 +620,8 @@ shadowsocks_password_config() {
 
 	while :; do
 		echo -e "请输入 "$yellow"Shadowsocks"$none" 密码"
-		read -p "$(echo -e "(默认密码: ${cyan}233blog.com$none)"): " sspass
-		[ -z "$sspass" ] && sspass="233blog.com"
+		read -p "$(echo -e "(默认密码: ${cyan}sagasw.com$none)"): " sspass
+		[ -z "$sspass" ] && sspass="sagasw.com"
 		case $sspass in
 		*[/$]*)
 			echo
@@ -787,7 +787,7 @@ install_v2ray() {
 		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
 	fi
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
+	[ -d /usr/local/etc/v2ray ] && rm -rf /usr/local/etc/v2ray
 	# date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
 	_sys_timezone
 	_sys_time
@@ -801,16 +801,16 @@ install_v2ray() {
 			echo
 			exit 1
 		fi
-		mkdir -p /etc/v2ray/233boy/v2ray
-		cp -rf $(pwd)/* /etc/v2ray/233boy/v2ray
+		mkdir -p /usr/local/etc/v2ray/sagasw/v2ray
+		cp -rf $(pwd)/* /usr/local/etc/v2ray/sagasw/v2ray
 	else
 		pushd /tmp
-		git clone https://github.com/233boy/v2ray -b "$_gitbranch" /etc/v2ray/233boy/v2ray --depth=1
+		git clone https://github.com/saga/v2ray -b "$_gitbranch" /usr/local/etc/v2ray/sagasw/v2ray --depth=1
 		popd
 
 	fi
 
-	if [[ ! -d /etc/v2ray/233boy/v2ray ]]; then
+	if [[ ! -d /usr/local/etc/v2ray/sagasw/v2ray ]]; then
 		echo
 		echo -e "$red 哎呀呀...克隆脚本仓库出错了...$none"
 		echo
@@ -895,8 +895,8 @@ del_port() {
 }
 
 config() {
-	cp -f /etc/v2ray/233boy/v2ray/config/backup.conf $backup
-	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
+	cp -f /usr/local/etc/v2ray/sagasw/v2ray/config/backup.conf $backup
+	cp -f /usr/local/etc/v2ray/sagasw/v2ray/v2ray.sh $_v2ray_sh
 	chmod +x $_v2ray_sh
 
 	v2ray_id=$uuid
@@ -948,13 +948,13 @@ backup_config() {
 		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
 	fi
 	if [[ $shadowsocks ]]; then
-		sed -i "42s/=/=true/; 45s/=6666/=$ssport/; 48s/=233blog.com/=$sspass/; 51s/=chacha20-ietf/=$ssciphers/" $backup
+		sed -i "42s/=/=true/; 45s/=6666/=$ssport/; 48s/=sagasw.com/=$sspass/; 51s/=chacha20-ietf/=$ssciphers/" $backup
 	fi
-	[[ $v2ray_transport == [45] ]] && sed -i "36s/=233blog.com/=$domain/" $backup
+	[[ $v2ray_transport == [45] ]] && sed -i "36s/=sagasw.com/=$domain/" $backup
 	[[ $caddy ]] && sed -i "39s/=/=true/" $backup
 	[[ $ban_ad ]] && sed -i "54s/=/=true/" $backup
 	if [[ $is_path ]]; then
-		sed -i "57s/=/=true/; 60s/=233blog/=$path/" $backup
+		sed -i "57s/=/=true/; 60s/=sagasw/=$path/" $backup
 		sed -i "63s#=https://liyafly.com#=$proxy_site#" $backup
 	fi
 }
@@ -999,14 +999,14 @@ show_config_info() {
 }
 
 install() {
-	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
+	if [[ -f /usr/local/bin/v2ray && -f /usr/local/etc/v2ray/config.json ]] && [[ -f $backup && -d /usr/local/etc/v2ray/sagasw/v2ray ]]; then
 		echo
 		echo " 大佬...你已经安装 V2Ray 啦...无需重新安装"
 		echo
 		echo -e " $yellow输入 ${cyan}v2ray${none} $yellow即可管理 V2Ray${none}"
 		echo
 		exit 1
-	elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
+	elif [[ -f /usr/local/bin/v2ray && -f /usr/local/etc/v2ray/config.json ]] && [[ -f /usr/local/etc/v2ray/sagasw_v2ray_backup.txt && -d /usr/local/etc/v2ray/sagasw/v2ray ]]; then
 		echo
 		echo "  如果你需要继续安装.. 请先卸载旧版本"
 		echo
@@ -1041,7 +1041,7 @@ install() {
 }
 uninstall() {
 
-	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
+	if [[ -f /usr/local/bin/v2ray && -f /usr/local/etc/v2ray/config.json ]] && [[ -f $backup && -d /usr/local/etc/v2ray/sagasw/v2ray ]]; then
 		. $backup
 		if [[ $mark ]]; then
 			_load uninstall.sh
@@ -1051,7 +1051,7 @@ uninstall() {
 			echo
 		fi
 
-	elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
+	elif [[ -f /usr/local/bin/v2ray && -f /usr/local/etc/v2ray/config.json ]] && [[ -f /usr/local/etc/v2ray/sagasw_v2ray_backup.txt && -d /usr/local/etc/v2ray/sagasw/v2ray ]]; then
 		echo
 		echo -e " $yellow输入 ${cyan}v2ray uninstall${none} $yellow即可卸载${none}"
 		echo

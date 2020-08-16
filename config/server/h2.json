@@ -21,16 +21,16 @@
 				"network": "h2",
 				"httpSettings": {
 					"host": [
-						"233blog.com"
+						"sagasw.com"
 					],
-					"path": "/233blog"
+					"path": "/sagasw"
 				},
 				"security": "tls",
 				"tlsSettings": {
 					"certificates": [
 						{
-							"certificateFile": "/etc/v2ray/233boy/v2ray/config/233blog.com.cer",
-							"keyFile": "/etc/v2ray/233boy/v2ray/config/233blog.com.key"
+							"certificateFile": "/usr/local/etc/v2ray/sagasw/v2ray/config/sagasw.com.cer",
+							"keyFile": "/usr/local/etc/v2ray/sagasw/v2ray/config/sagasw.com.key"
 						}
 					]
 				}

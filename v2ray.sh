@@ -52,22 +52,22 @@ if [[ $(command -v yum) ]]; then
 
 fi
 
-backup="/etc/v2ray/233blog_v2ray_backup.conf"
+backup="/usr/local/etc/v2ray/sagasw_v2ray_backup.conf"
 
-if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
+if [[ -f /usr/local/bin/v2ray && -f /usr/local/etc/v2ray/config.json ]] && [[ -f $backup && -d /usr/local/etc/v2ray/sagasw/v2ray ]]; then
 
 	. $backup
 
-elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
+elif [[ -f /usr/local/bin/v2ray && -f /usr/local/etc/v2ray/config.json ]] && [[ -f /usr/local/etc/v2ray/sagasw_v2ray_backup.txt && -d /usr/local/etc/v2ray/sagasw/v2ray ]]; then
 
-	. /etc/v2ray/233boy/v2ray/tools/v1xx_to_v3xx.sh
+	. /usr/local/etc/v2ray/sagasw/v2ray/tools/v1xx_to_v3xx.sh
 
 else
 	echo -e " 哎呀哎呀…… ${red}出错咯...请重新安装V2Ray${none} ${yellow}~(^_^) ${none}" && exit 1
 fi
 
 if [[ $mark != "v3" ]]; then
-	. /etc/v2ray/233boy/v2ray/tools/v3.sh
+	. /usr/local/etc/v2ray/sagasw/v2ray/tools/v3.sh
 fi
 if [[ $v2ray_transport -ge 18 ]]; then
 	dynamicPort=true
@@ -79,13 +79,13 @@ fi
 
 uuid=$(cat /proc/sys/kernel/random/uuid)
 old_id="e55c8d17-2cf3-b21a-bcf1-eeacb011ed79"
-v2ray_server_config="/etc/v2ray/config.json"
-v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
-v2ray_pid=$(pgrep -f /usr/bin/v2ray/v2ray)
+v2ray_server_config="/usr/local/etc/v2ray/config.json"
+v2ray_client_config="/usr/local/etc/v2ray/sagasw_v2ray_config.json"
+v2ray_pid=$(pgrep -f /usr/local/bin/v2ray)
 caddy_pid=$(pgrep -f /usr/local/bin/caddy)
 _v2ray_sh="/usr/local/sbin/v2ray"
-v2ray_ver="$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
-. /etc/v2ray/233boy/v2ray/src/init.sh
+v2ray_ver="$(/usr/local/bin/v2ray -version | head -n 1 | cut -d " " -f2)"
+. /usr/local/etc/v2ray/sagasw/v2ray/src/init.sh
 systemd=true
 # _test=true
 
@@ -129,7 +129,7 @@ create_vmess_URL_config() {
 	[[ -z $net ]] && get_transport_args
 
 	if [[ $v2ray_transport == [45] ]]; then
-		cat >/etc/v2ray/vmess_qr.json <<-EOF
+		cat >/usr/local/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
 			"ps": "233v2.com_${domain}",
@@ -146,7 +146,7 @@ create_vmess_URL_config() {
 		EOF
 	else
 		[[ -z $ip ]] && get_ip
-		cat >/etc/v2ray/vmess_qr.json <<-EOF
+		cat >/usr/local/etc/v2ray/vmess_qr.json <<-EOF
 		{
 			"v": "2",
 			"ps": "233v2.com_${ip}",
@@ -384,8 +384,8 @@ shadowsocks_password_config() {
 
 	while :; do
 		echo -e "请输入 "$yellow"Shadowsocks"$none" 密码"
-		read -p "$(echo -e "(默认密码: ${cyan}233blog.com$none)"): " new_sspass
-		[ -z "$new_sspass" ] && new_sspass="233blog.com"
+		read -p "$(echo -e "(默认密码: ${cyan}sagasw.com$none)"): " new_sspass
+		[ -z "$new_sspass" ] && new_sspass="sagasw.com"
 		case $new_sspass in
 		*[/$]*)
 			echo
@@ -947,7 +947,7 @@ tls_config() {
 		echo
 		echo
 		echo -e "请输入一个 $magenta正确的域名$none，一定一定一定要正确，不！能！出！错！"
-		read -p "(例如：233blog.com): " new_domain
+		read -p "(例如：sagasw.com): " new_domain
 		[ -z "$new_domain" ] && error && continue
 		echo
 		echo
@@ -1158,9 +1158,9 @@ path_config_ask() {
 path_config() {
 	echo
 	while :; do
-		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
-		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" new_path
-		[[ -z $new_path ]] && new_path="233blog"
+		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /sagasw , 那么只需要输入 sagasw 即可"
+		read -p "$(echo -e "(默认: [${cyan}sagasw$none]):")" new_path
+		[[ -z $new_path ]] && new_path="sagasw"
 
 		case $new_path in
 		*[/$]*)
@@ -1612,7 +1612,7 @@ change_path_config() {
 	if [[ $v2ray_transport == [45] ]] && [[ $caddy && $is_path ]]; then
 		echo
 		while :; do
-			echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
+			echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /sagasw , 那么只需要输入 sagasw 即可"
 			read -p "$(echo -e "(当前分流的路径: [${cyan}/${path}$none]):")" new_path
 			[[ -z $new_path ]] && error && continue
 
@@ -1850,7 +1850,7 @@ blocked_hosts() {
 		echo
 		echo "备注: 广告拦截是基于 域名 拦截的..所以也许会造成浏览网页的时候出现部分元素留白..或者其他问题"
 		echo
-		echo "反馈问题或请求拦截更多域名: https://github.com/233boy/v2ray/issues"
+		echo "反馈问题或请求拦截更多域名: https://github.com/sagasw/v2ray/issues"
 		echo
 		echo -e "当前广告拦截状态: $_info"
 		echo
@@ -2143,15 +2143,15 @@ get_v2ray_config() {
 				echo
 				echo "开始下载....请选择 V2Ray 客户端配置文件保存位置"
 				echo
-				# sz /etc/v2ray/233blog_v2ray.zip
-				local tmpfile="/tmp/233blog_v2ray_config_$RANDOM.json"
+				# sz /usr/local/etc/v2ray/sagasw_v2ray.zip
+				local tmpfile="/tmp/sagasw_v2ray_config_$RANDOM.json"
 				cp -f $v2ray_client_config $tmpfile
 				sz $tmpfile
 				echo
 				echo
 				echo -e "$green 下载完成咯...$none"
 				echo
-				# echo -e "$yellow 解压密码 = ${cyan}233blog.com$none"
+				# echo -e "$yellow 解压密码 = ${cyan}sagasw.com$none"
 				# echo
 				echo -e "$yellow SOCKS 监听端口 = ${cyan}2333${none}"
 				echo
@@ -2242,9 +2242,9 @@ get_v2ray_config_info_link() {
 	echo
 	echo -e "$green 正在生成链接.... 稍等片刻即可....$none"
 	echo
-	create_v2ray_config_text >/tmp/233blog_v2ray.txt
+	create_v2ray_config_text >/tmp/sagasw_v2ray.txt
 	local random=$(echo $RANDOM-$RANDOM-$RANDOM | base64 -w 0)
-	local link=$(curl -s --upload-file /tmp/233blog_v2ray.txt "https://transfer.sh/${random}_233v2_v2ray.txt")
+	local link=$(curl -s --upload-file /tmp/sagasw_v2ray.txt "https://transfer.sh/${random}_233v2_v2ray.txt")
 	if [[ $link ]]; then
 		echo
 		echo "---------- V2Ray 配置信息链接-------------"
@@ -2262,7 +2262,7 @@ get_v2ray_config_info_link() {
 		echo -e "$red 哎呀呀呀...出错咯...请重试$none"
 		echo
 	fi
-	rm -rf /tmp/233blog_v2ray.txt
+	rm -rf /tmp/sagasw_v2ray.txt
 }
 get_v2ray_config_qr_link() {
 
@@ -2273,7 +2273,7 @@ get_v2ray_config_qr_link() {
 }
 get_v2ray_vmess_URL_link() {
 	create_vmess_URL_config
-	local vmess="vmess://$(cat /etc/v2ray/vmess_qr.json | base64 -w 0)"
+	local vmess="vmess://$(cat /usr/local/etc/v2ray/vmess_qr.json | base64 -w 0)"
 	echo
 	echo "---------- V2Ray vmess URL / V2RayNG v0.4.1+ / V2RayN v2.1+ / 仅适合部分客户端 -------------"
 	echo
@@ -2281,7 +2281,7 @@ get_v2ray_vmess_URL_link() {
 	echo
 	echo -e "${yellow}免被墙..推荐使用JMS: ${cyan}https://getjms.com${none}"
 	echo
-	rm -rf /etc/v2ray/vmess_qr.json
+	rm -rf /usr/local/etc/v2ray/vmess_qr.json
 }
 other() {
 	while :; do
@@ -2449,9 +2449,9 @@ update_v2ray() {
 }
 update_v2ray.sh() {
 	if [[ $_test ]]; then
-		local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/233boy/v2ray/test/v2ray.sh" | grep '_version' -m1 | cut -d\" -f2)
+		local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/saga/v2ray/test/v2ray.sh" | grep '_version' -m1 | cut -d\" -f2)
 	else
-		local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/233boy/v2ray/master/v2ray.sh" | grep '_version' -m1 | cut -d\" -f2)
+		local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/saga/v2ray/master/v2ray.sh" | grep '_version' -m1 | cut -d\" -f2)
 	fi
 
 	if [[ ! $latest_version ]]; then
@@ -2473,9 +2473,9 @@ update_v2ray.sh() {
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
 		echo
-		cd /etc/v2ray/233boy/v2ray
+		cd /usr/local/etc/v2ray/sagasw/v2ray
 		git pull
-		cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
+		cp -f /usr/local/etc/v2ray/sagasw/v2ray/v2ray.sh $_v2ray_sh
 		chmod +x $_v2ray_sh
 		echo
 		echo -e "$green 更新成功啦...当前 V2Ray 管理脚本 版本: ${cyan}$latest_version$none"
@@ -2677,7 +2677,7 @@ menu() {
 		echo
 		echo "帮助说明: https://233v2.com/post/1/"
 		echo
-		echo "反馈问题: https://github.com/233boy/v2ray/issues"
+		echo "反馈问题: https://github.com/sagasw/v2ray/issues"
 		echo
 		echo "TG 频道: https://t.me/tg2333"
 		echo

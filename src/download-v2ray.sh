@@ -60,5 +60,5 @@ _update_v2ray_version() {
 
 _mkdir_dir() {
 	mkdir -p /var/log/v2ray
-	mkdir -p /etc/v2ray
+	mkdir -p /usr/local/etc/v2ray
 }

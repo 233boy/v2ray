@@ -5,7 +5,7 @@
             "settings": {
                 "vnext": [
                     {
-                        "address": "233blog.com",
+                        "address": "sagasw.com",
                         "port": 2333,
                         "users": [
                             {
@@ -21,12 +21,12 @@
                 "network": "ws",
                 "security": "tls",
                 "tlsSettings": {
-                    "serverName": "233blog.com"
+                    "serverName": "sagasw.com"
                 },
                 "wsSettings": {
-                    "path": "/233blog",
+                    "path": "/sagasw",
                     "headers": {
-                        "Host": "233blog.com"
+                        "Host": "sagasw.com"
                     }
                 }
             },
