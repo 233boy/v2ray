@@ -33,8 +33,33 @@ _download_v2ray_file() {
 }
 
 _install_v2ray_service() {
-	cp -f "/usr/bin/v2ray/systemd/v2ray.service" "/lib/systemd/system/"
-	sed -i "s/on-failure/always/" /lib/systemd/system/v2ray.service
+	# cp -f "/usr/bin/v2ray/systemd/v2ray.service" "/lib/systemd/system/"
+	# sed -i "s/on-failure/always/" /lib/systemd/system/v2ray.service
+	cat >/lib/systemd/system/v2ray.service <<-EOF
+[Unit]
+Description=V2Ray Service
+Documentation=https://www.v2ray.com/ https://www.v2fly.org/
+After=network.target nss-lookup.target
+
+[Service]
+# If the version of systemd is 240 or above, then uncommenting Type=exec and commenting out Type=simple
+#Type=exec
+Type=simple
+# This service runs as root. You may consider to run it as another user for security concerns.
+# By uncommenting User=nobody and commenting out User=root, the service will run as user nobody.
+# More discussion at https://github.com/v2ray/v2ray-core/issues/1011
+User=root
+#User=nobody
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ExecStart=/usr/bin/v2ray/v2ray -config /etc/v2ray/config.json
+#Restart=on-failure
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
 	systemctl enable v2ray
 }
 
