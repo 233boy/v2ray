@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.35"
+_version="v3.36"
 
 cmd="apt-get"
 
@@ -2872,7 +2872,7 @@ reinstall)
 [aA][Ii] | [Dd])
 	change_v2ray_alterId
 	;;
-[aA][Ii][aA][Ii] | [Dd][Dd])
+[aA][Ii][aA][Ii] | [Dd][Dd] | aid)
 	custom_uuid
 	;;
 reuuid)
