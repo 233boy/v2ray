@@ -14,5 +14,6 @@
 https://github.com/233boy/v2ray/wiki
 
 
-sudo bash -c "$(curl -s -L https://git.io/v2ray.sh)"
+sudo bash -c "$(curl -s -L https://git.io/v2ray.sh)" 
+
 sudo su bash <(curl -s -L https://git.io/v2ray.sh)
