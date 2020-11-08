@@ -145,10 +145,10 @@ _v2_info() {
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
 	fi
-	if [[ $v2ray_transport -ge 18 ]] && [[ $ban_ad ]]; then
+	if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]] && [[ $ban_ad ]]; then
 		echo " 备注: 动态端口已启用...广告拦截已开启..."
 		echo
-	elif [[ $v2ray_transport -ge 18 ]]; then
+	elif [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
 		echo " 备注: 动态端口已启用..."
 		echo
 	elif [[ $ban_ad ]]; then
