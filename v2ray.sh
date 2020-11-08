@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.41"
+_version="v3.42"
 
 cmd="apt-get"
 
@@ -2708,6 +2708,12 @@ L | infolink)
 	get_v2ray_config_info_link
 	;;
 q | qr)
+	if [[ $v2ray_transport == 33 ]]; then
+		echo
+		echo ' V2RAY VLESS 协议相关暂不支持生成 ....'
+		echo
+		exit
+	fi
 	get_v2ray_config_qr_link
 	;;
 s | ss)
