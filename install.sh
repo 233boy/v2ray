@@ -110,6 +110,7 @@ transport=(
 	QUIC_wechat-video_dynamicPort
 	QUIC_dtls_dynamicPort
 	QUIC_wireguard_dynamicPort
+	VLESS_WebSocket_TLS
 )
 
 ciphers=(
@@ -175,7 +176,7 @@ v2ray_config() {
 		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport
 		[ -z "$v2ray_transport" ] && v2ray_transport=1
 		case $v2ray_transport in
-		[1-9] | [1-2][0-9] | 3[0-2])
+		[1-9] | [1-2][0-9] | 3[0-3])
 			echo
 			echo
 			echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport - 1]}$none"
@@ -192,7 +193,7 @@ v2ray_config() {
 }
 v2ray_port_config() {
 	case $v2ray_transport in
-	4 | 5)
+	4 | 5 | 33)
 		tls_config
 		;;
 	*)
@@ -215,7 +216,7 @@ v2ray_port_config() {
 				;;
 			esac
 		done
-		if [[ $v2ray_transport -ge 18 ]]; then
+		if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
 			v2ray_dynamic_port_start
 		fi
 		;;
@@ -331,7 +332,7 @@ tls_config() {
 
 	while :; do
 		echo
-		echo -e "请输入一个 $magenta正确的域名$none，一定一定一定要正确，不！能！出！错！"
+		echo -e "请输入一个 ${magenta}正确的域名${none}，一定一定一定要正确，不！能！出！错！"
 		read -p "(例如：233blog.com): " domain
 		[ -z "$domain" ] && error && continue
 		echo
@@ -343,11 +344,11 @@ tls_config() {
 	get_ip
 	echo
 	echo
-	echo -e "$yellow 请将 $magenta$domain$none $yellow解析到: $cyan$ip$none"
+	echo -e "$yellow 请将 $magenta$domain$none $yellow 解析到: $cyan$ip$none"
 	echo
-	echo -e "$yellow 请将 $magenta$domain$none $yellow解析到: $cyan$ip$none"
+	echo -e "$yellow 请将 $magenta$domain$none $yellow 解析到: $cyan$ip$none"
 	echo
-	echo -e "$yellow 请将 $magenta$domain$none $yellow解析到: $cyan$ip$none"
+	echo -e "$yellow 请将 $magenta$domain$none $yellow 解析到: $cyan$ip$none"
 	echo "----------------------------------------------------------------"
 	echo
 
@@ -372,7 +373,7 @@ tls_config() {
 
 	done
 
-	if [[ $v2ray_transport -ne 5 ]]; then
+	if [[ $v2ray_transport -eq 4 ]]; then
 		auto_tls_config
 	else
 		caddy=true
@@ -442,7 +443,7 @@ path_config_ask() {
 		N | n)
 			echo
 			echo
-			echo -e "$yellow 网站伪装 和 路径分流 = $cyan不想配置$none"
+			echo -e "$yellow 网站伪装 和 路径分流 = $cyan 不想配置 $none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -456,7 +457,7 @@ path_config_ask() {
 path_config() {
 	echo
 	while :; do
-		echo -e "请输入想要 ${magenta}用来分流的路径$none , 例如 /233blog , 那么只需要输入 233blog 即可"
+		echo -e "请输入想要 ${magenta} 用来分流的路径 $none , 例如 /233blog , 那么只需要输入 233blog 即可"
 		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" path
 		[[ -z $path ]] && path="233blog"
 
@@ -483,7 +484,7 @@ path_config() {
 proxy_site_config() {
 	echo
 	while :; do
-		echo -e "请输入 ${magenta}一个正确的$none ${cyan}网址$none 用来作为 ${cyan}网站的伪装$none , 例如 https://liyafly.com"
+		echo -e "请输入 ${magenta}一个正确的 $none ${cyan}网址$none 用来作为 ${cyan}网站的伪装$none , 例如 https://liyafly.com"
 		echo -e "举例...你当前的域名是 $green$domain$none , 伪装的网址的是 https://liyafly.com"
 		echo -e "然后打开你的域名时候...显示出来的内容就是来自 https://liyafly.com 的内容"
 		echo -e "其实就是一个反代...明白就好..."
@@ -532,7 +533,7 @@ blocked_hosts() {
 			blocked_ad_info="关闭"
 			echo
 			echo
-			echo -e "$yellow 广告拦截 = $cyan关闭$none"
+			echo -e "$yellow 广告拦截 = $cyan 关闭 $none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -683,7 +684,7 @@ install_info() {
 	echo
 	echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport - 1]}$none"
 
-	if [[ $v2ray_transport == [45] ]]; then
+	if [[ $v2ray_transport == [45] || $v2ray_transport == 33 ]]; then
 		echo
 		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
 		echo
@@ -701,7 +702,7 @@ install_info() {
 			echo
 			echo -e "$yellow 路径分流 = ${cyan}/${path}$none"
 		fi
-	elif [[ $v2ray_transport -ge 18 ]]; then
+	elif [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
 		echo
 		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
 		echo
@@ -826,74 +827,6 @@ install_v2ray() {
 	_mkdir_dir
 }
 
-open_port() {
-	if [[ $cmd == "apt-get" ]]; then
-		if [[ $1 != "multiport" ]]; then
-
-			iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			iptables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			ip6tables -I INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-
-			# firewall-cmd --permanent --zone=public --add-port=$1/tcp
-			# firewall-cmd --permanent --zone=public --add-port=$1/udp
-			# firewall-cmd --reload
-
-		else
-
-			local multiport="${v2ray_dynamic_port_start_input}:${v2ray_dynamic_port_end_input}"
-			iptables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-			iptables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-			ip6tables -I INPUT -p tcp --match multiport --dports $multiport -j ACCEPT
-			ip6tables -I INPUT -p udp --match multiport --dports $multiport -j ACCEPT
-
-			# local multi_port="${v2ray_dynamic_port_start_input}-${v2ray_dynamic_port_end_input}"
-			# firewall-cmd --permanent --zone=public --add-port=$multi_port/tcp
-			# firewall-cmd --permanent --zone=public --add-port=$multi_port/udp
-			# firewall-cmd --reload
-
-		fi
-		iptables-save >/etc/iptables.rules.v4
-		ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	service iptables save >/dev/null 2>&1
-		# 	service ip6tables save >/dev/null 2>&1
-	fi
-}
-del_port() {
-	if [[ $cmd == "apt-get" ]]; then
-		if [[ $1 != "multiport" ]]; then
-			# if [[ $cmd == "apt-get" ]]; then
-			iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			iptables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			ip6tables -D INPUT -m state --state NEW -m tcp -p tcp --dport $1 -j ACCEPT
-			ip6tables -D INPUT -m state --state NEW -m udp -p udp --dport $1 -j ACCEPT
-			# else
-			# 	firewall-cmd --permanent --zone=public --remove-port=$1/tcp
-			# 	firewall-cmd --permanent --zone=public --remove-port=$1/udp
-			# fi
-		else
-			# if [[ $cmd == "apt-get" ]]; then
-			local ports="${v2ray_dynamicPort_start}:${v2ray_dynamicPort_end}"
-			iptables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-			iptables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-			ip6tables -D INPUT -p tcp --match multiport --dports $ports -j ACCEPT
-			ip6tables -D INPUT -p udp --match multiport --dports $ports -j ACCEPT
-			# else
-			# 	local ports="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
-			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/tcp
-			# 	firewall-cmd --permanent --zone=public --remove-port=$ports/udp
-			# fi
-		fi
-		iptables-save >/etc/iptables.rules.v4
-		ip6tables-save >/etc/iptables.rules.v6
-		# else
-		# 	service iptables save >/dev/null 2>&1
-		# 	service ip6tables save >/dev/null 2>&1
-	fi
-
-}
-
 config() {
 	cp -f /etc/v2ray/233boy/v2ray/config/backup.conf $backup
 	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
@@ -902,40 +835,29 @@ config() {
 	v2ray_id=$uuid
 	alterId=0
 	ban_bt=true
-	if [[ $v2ray_transport -ge 18 ]]; then
+	if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
 		v2ray_dynamicPort_start=${v2ray_dynamic_port_start_input}
 		v2ray_dynamicPort_end=${v2ray_dynamic_port_end_input}
 	fi
 	_load config.sh
 
-	if [[ $cmd == "apt-get" ]]; then
-		cat >/etc/network/if-pre-up.d/iptables <<-EOF
-			#!/bin/sh
-			/sbin/iptables-restore < /etc/iptables.rules.v4
-			/sbin/ip6tables-restore < /etc/iptables.rules.v6
-		EOF
-		chmod +x /etc/network/if-pre-up.d/iptables
-		# else
-		# 	[ $(pgrep "firewall") ] && systemctl stop firewalld
-		# 	systemctl mask firewalld
-		# 	systemctl disable firewalld
-		# 	systemctl enable iptables
-		# 	systemctl enable ip6tables
-		# 	systemctl start iptables
-		# 	systemctl start ip6tables
-	fi
-
-	[[ $shadowsocks ]] && open_port $ssport
-	if [[ $v2ray_transport == [45] ]]; then
-		open_port "80"
-		open_port "443"
-		open_port $v2ray_port
-	elif [[ $v2ray_transport -ge 18 ]]; then
-		open_port $v2ray_port
-		open_port "multiport"
-	else
-		open_port $v2ray_port
-	fi
+	# if [[ $cmd == "apt-get" ]]; then
+	# 	cat >/etc/network/if-pre-up.d/iptables <<-EOF
+	# 		#!/bin/sh
+	# 		/sbin/iptables-restore < /etc/iptables.rules.v4
+	# 		/sbin/ip6tables-restore < /etc/iptables.rules.v6
+	# 	EOF
+	# 	chmod +x /etc/network/if-pre-up.d/iptables
+	# 	# else
+	# 	# 	[ $(pgrep "firewall") ] && systemctl stop firewalld
+	# 	# 	systemctl mask firewalld
+	# 	# 	systemctl disable firewalld
+	# 	# 	systemctl enable iptables
+	# 	# 	systemctl enable ip6tables
+	# 	# 	systemctl start iptables
+	# 	# 	systemctl start ip6tables
+	# fi
+	
 	# systemctl restart v2ray
 	do_service restart v2ray
 	backup_config
@@ -944,13 +866,13 @@ config() {
 
 backup_config() {
 	sed -i "18s/=1/=$v2ray_transport/; 21s/=2333/=$v2ray_port/; 24s/=$old_id/=$uuid/" $backup
-	if [[ $v2ray_transport -ge 18 ]]; then
+	if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
 		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
 	fi
 	if [[ $shadowsocks ]]; then
 		sed -i "42s/=/=true/; 45s/=6666/=$ssport/; 48s/=233blog.com/=$sspass/; 51s/=chacha20-ietf/=$ssciphers/" $backup
 	fi
-	[[ $v2ray_transport == [45] ]] && sed -i "36s/=233blog.com/=$domain/" $backup
+	[[ $v2ray_transport == [45] || $v2ray_transport == 33 ]] && sed -i "36s/=233blog.com/=$domain/" $backup
 	[[ $caddy ]] && sed -i "39s/=/=true/" $backup
 	[[ $ban_ad ]] && sed -i "54s/=/=true/" $backup
 	if [[ $is_path ]]; then
@@ -979,7 +901,7 @@ error() {
 
 pause() {
 
-	read -rsp "$(echo -e "按$green Enter 回车键 $none继续....或按$red Ctrl + C $none取消.")" -d $'\n'
+	read -rsp "$(echo -e "按 $green Enter 回车键 $none 继续....或按 $red Ctrl + C $none 取消.")" -d $'\n'
 	echo
 }
 do_service() {
