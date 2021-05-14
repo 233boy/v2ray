@@ -12,3 +12,18 @@
 
 ## 更多 V2Ray 教程文章
 https://github.com/233boy/v2ray/wiki
+
+Github 反馈： https://github.com/233boy/v2ray/issues
+任何有关于 V2Ray 的问题，请自行到 V2Ray 官方反馈。
+目前只支持配置一个 V2Ray 账号…一个 Shadowsocks 账号。。不支持 SSR。。
+使用国际大厂的 VPS，请自行在安全组 (防火墙) 开放端口和 UDP 协议 (如果你要使用含有 mKCP 的传输协议)
+
+备份
+为了避免由于不可抗拒的原因所造成本人主动删除脚本，所以建议请将本脚本 Fork 一份
+备份地址： https://github.com/233boy/v2ray/fork
+安装方法，确保你已经 Fork 了脚本，将 233boy 修改成你的 Github 用户名
+
+git clone https://github.com/233boy/v2ray -b master
+cd v2ray
+chmod +x install.sh
+./install.sh local
