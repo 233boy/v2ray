@@ -89,7 +89,7 @@
 	],
 	"dns": {
 		"servers": [
-			"https+local://cloudflare-dns.com/dns-query",
+			"https+local://1.1.1.1/dns-query",
 			"1.1.1.1",
 			"1.0.0.1",
 			"8.8.8.8",
