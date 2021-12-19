@@ -5,7 +5,8 @@ _download_caddy_file() {
 	if [[ ! ${caddy_arch} ]]; then
 		echo -e "$red 获取 Caddy 下载参数失败！$none" && exit 1
 	fi
-	local caddy_download_link="https://caddyserver.com/download/linux/${caddy_arch}?license=personal"
+	# local caddy_download_link="https://caddyserver.com/download/linux/${caddy_arch}?license=personal"
+	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v1.0.4/caddy_v1.0.4_linux_${caddy_arch}.tar.gz"
 
 	mkdir -p $caddy_tmp
 
@@ -23,7 +24,7 @@ _download_caddy_file() {
 	fi
 }
 _install_caddy_service() {
-	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
+	# setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
 
 	if [[ $systemd ]]; then
 		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
@@ -34,7 +35,7 @@ _install_caddy_service() {
 		if [[ ! $(grep "ReadWriteDirectories" /lib/systemd/system/caddy.service) ]]; then
 			sed -i "/ReadWritePaths/a ReadWriteDirectories=/etc/ssl/caddy" /lib/systemd/system/caddy.service
 		fi
-		# # sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
+		sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
 		# sed -i "/on-abnormal/a RestartSec=3" /lib/systemd/system/caddy.service
 		# sed -i "s/on-abnormal/always/" /lib/systemd/system/caddy.service
 
@@ -66,23 +67,23 @@ _install_caddy_service() {
 		systemctl enable caddy
 	else
 		cp -f ${caddy_tmp}init/linux-sysvinit/caddy /etc/init.d/caddy
-		# sed -i "s/www-data/root/g" /etc/init.d/caddy
+		sed -i "s/www-data/root/g" /etc/init.d/caddy
 		chmod +x /etc/init.d/caddy
 		update-rc.d -f caddy defaults
 	fi
 
-	if [ -z "$(grep www-data /etc/passwd)" ]; then
-		useradd -M -s /usr/sbin/nologin www-data
-	fi
+	# if [ -z "$(grep www-data /etc/passwd)" ]; then
+	# 	useradd -M -s /usr/sbin/nologin www-data
+	# fi
 	# chown -R www-data.www-data /etc/ssl/caddy
 
 	# ref https://github.com/caddyserver/caddy/tree/master/dist/init/linux-systemd
 
 	mkdir -p /etc/caddy
-	chown -R root:root /etc/caddy
+	# chown -R root:root /etc/caddy
 	mkdir -p /etc/ssl/caddy
-	chown -R root:www-data /etc/ssl/caddy
-	chmod 0770 /etc/ssl/caddy
+	# chown -R root:www-data /etc/ssl/caddy
+	# chmod 0770 /etc/ssl/caddy
 
 	## create sites dir
 	mkdir -p /etc/caddy/sites

@@ -58,28 +58,28 @@ if [[ $is_uninstall_v2ray && $is_uninstall_caddy ]]; then
 	pause
 	echo
 
-	if [[ $shadowsocks ]]; then
-		del_port $ssport
-	fi
-	if [[ $socks ]]; then
-		del_port $socks_port
-	fi
-	if [[ $mtproto ]]; then
-		del_port $mtproto_port
-	fi
+	# if [[ $shadowsocks ]]; then
+	# 	del_port $ssport
+	# fi
+	# if [[ $socks ]]; then
+	# 	del_port $socks_port
+	# fi
+	# if [[ $mtproto ]]; then
+	# 	del_port $mtproto_port
+	# fi
 
-	if [[ $v2ray_transport == [45] ]]; then
-		del_port "80"
-		del_port "443"
-		del_port $v2ray_port
-	elif [[ $v2ray_transport -ge 18 ]]; then
-		del_port $v2ray_port
-		del_port "multiport"
-	else
-		del_port $v2ray_port
-	fi
+	# if [[ $v2ray_transport == [45] ]]; then
+	# 	del_port "80"
+	# 	del_port "443"
+	# 	del_port $v2ray_port
+	# elif [[ $v2ray_transport -ge 18 ]]; then
+	# 	del_port $v2ray_port
+	# 	del_port "multiport"
+	# else
+	# 	del_port $v2ray_port
+	# fi
 
-	[ $cmd == "apt-get" ] && rm -rf /etc/network/if-pre-up.d/iptables
+	[[ -f /etc/network/if-pre-up.d/iptables ]] && rm -rf /etc/network/if-pre-up.d/iptables
 
 	# [ $v2ray_pid ] && systemctl stop v2ray
 	[ $v2ray_pid ] && do_service stop v2ray
@@ -121,28 +121,28 @@ elif [[ $is_uninstall_v2ray ]]; then
 	pause
 	echo
 
-	if [[ $shadowsocks ]]; then
-		del_port $ssport
-	fi
-	if [[ $socks ]]; then
-		del_port $socks_port
-	fi
-	if [[ $mtproto ]]; then
-		del_port $mtproto_port
-	fi
+	# if [[ $shadowsocks ]]; then
+	# 	del_port $ssport
+	# fi
+	# if [[ $socks ]]; then
+	# 	del_port $socks_port
+	# fi
+	# if [[ $mtproto ]]; then
+	# 	del_port $mtproto_port
+	# fi
 
-	if [[ $v2ray_transport == [45] ]]; then
-		del_port "80"
-		del_port "443"
-		del_port $v2ray_port
-	elif [[ $v2ray_transport -ge 18 ]]; then
-		del_port $v2ray_port
-		del_port "multiport"
-	else
-		del_port $v2ray_port
-	fi
+	# if [[ $v2ray_transport == [45] ]]; then
+	# 	del_port "80"
+	# 	del_port "443"
+	# 	del_port $v2ray_port
+	# elif [[ $v2ray_transport -ge 18 ]]; then
+	# 	del_port $v2ray_port
+	# 	del_port "multiport"
+	# else
+	# 	del_port $v2ray_port
+	# fi
 
-	[ $cmd == "apt-get" ] && rm -rf /etc/network/if-pre-up.d/iptables
+	[[ -f /etc/network/if-pre-up.d/iptables ]] && rm -rf /etc/network/if-pre-up.d/iptables
 
 	# [ $v2ray_pid ] && systemctl stop v2ray
 	[ $v2ray_pid ] && do_service stop v2ray

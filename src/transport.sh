@@ -31,4 +31,5 @@ transport=(
 	QUIC_wechat-video_dynamicPort
 	QUIC_dtls_dynamicPort
 	QUIC_wireguard_dynamicPort
+	VLESS_WebSocket_TLS
 )

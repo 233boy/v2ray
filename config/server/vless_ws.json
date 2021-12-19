@@ -7,7 +7,7 @@
 	"inbounds": [
 		{
 			"port": 2333,
-			"protocol": "vmess",
+			"protocol": "vless",
 			"settings": {
 				"clients": [
 					{
@@ -15,8 +15,10 @@
 						"level": 1,
 						"alterId": 233
 					}
-				]
+				],
+				"decryption": "none"
 			},
+			"listen": "127.0.0.1",
 			"streamSettings": {
 				"network": "ws"
 			},

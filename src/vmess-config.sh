@@ -44,6 +44,10 @@ case $v2ray_transport in
 	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/dynamic/kcp.json"
 	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/kcp.json"
 	;;
+33)
+	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/vless_ws.json"
+	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/vless_ws_tls.json"
+	;;
 *)
 	v2ray_server_config_file="/etc/v2ray/233boy/v2ray/config/server/dynamic/quic.json"
 	v2ray_client_config_file="/etc/v2ray/233boy/v2ray/config/client/quic.json"
@@ -58,7 +62,7 @@ cp -f $v2ray_client_config_file $v2ray_client_config
 sed -i "9s/2333/$v2ray_port/; 14s/$old_id/$v2ray_id/; 16s/233/$alterId/" $v2ray_server_config
 
 # change dynamic port
-if [[ $v2ray_transport -ge 18 ]]; then
+if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
 	local multi_port="${v2ray_dynamicPort_start}-${v2ray_dynamicPort_end}"
 	sed -i "s/10000-20000/$multi_port/" $v2ray_server_config
 fi
@@ -97,7 +101,7 @@ esac
 
 ## change client config file
 [[ -z $ip ]] && get_ip
-if [[ $v2ray_transport == [45] ]]; then
+if [[ $v2ray_transport == [45] || $v2ray_transport == 33 ]]; then
 	sed -i "s/233blog.com/$domain/; 9s/2333/443/; 12s/$old_id/$v2ray_id/; 13s/233/$alterId/" $v2ray_client_config
 	if [[ $is_path ]]; then
 		sed -i "27s/233blog/$path/" $v2ray_client_config
