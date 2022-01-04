@@ -50,6 +50,7 @@ Type=simple
 # More discussion at https://github.com/v2ray/v2ray-core/issues/1011
 User=root
 #User=nobody
+Environment="V2RAY_VMESS_AEAD_FORCED=false"
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
