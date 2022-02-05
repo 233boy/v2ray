@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.50"
+_version="v3.51"
 
 cmd="apt-get"
 
@@ -2294,25 +2294,13 @@ other() {
 		echo
 		echo -e "$yellow 1. $none安装 BBR"
 		echo
-		echo -e "$yellow 2. $none安装 LotServer(锐速)"
-		echo
-		echo -e "$yellow 3. $none卸载 LotServer(锐速)"
-		echo
-		read -p "$(echo -e "请选择 [${magenta}1-3$none]:")" _opt
+		read -p "$(echo -e "请选择 [${magenta}1$none]:")" _opt
 		if [[ -z $_opt ]]; then
 			error
 		else
 			case $_opt in
 			1)
 				install_bbr
-				break
-				;;
-			2)
-				install_lotserver
-				break
-				;;
-			3)
-				uninstall_lotserver
 				break
 				;;
 			*)
@@ -2334,18 +2322,6 @@ install_bbr() {
 		_try_enable_bbr
 		[[ ! $enable_bbr ]] && bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
 	fi
-}
-install_lotserver() {
-	# https://moeclub.org/2017/03/08/14/
-	wget --no-check-certificate -qO /tmp/appex.sh "https://raw.githubusercontent.com/0oVicero0/serverSpeeder_Install/master/appex.sh"
-	bash /tmp/appex.sh 'install'
-	rm -rf /tmp/appex.sh
-}
-uninstall_lotserver() {
-	# https://moeclub.org/2017/03/08/14/
-	wget --no-check-certificate -qO /tmp/appex.sh "https://raw.githubusercontent.com/0oVicero0/serverSpeeder_Install/master/appex.sh"
-	bash /tmp/appex.sh 'uninstall'
-	rm -rf /tmp/appex.sh
 }
 
 update() {
