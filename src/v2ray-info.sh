@@ -15,7 +15,7 @@ _v2_args() {
 		header="http"
 		host="www.baidu.com"
 		;;
-	3 | 4 | 20)
+	3 | 4 | 20 | 33)
 		net="ws"
 		;;
 	5)
@@ -96,7 +96,35 @@ _v2_info() {
 		echo
 		echo -e "$yellow 路径 (path) = ${cyan}${_path}$none"
 		echo
-		echo -e "$yellow TLS (Enable TLS) = ${cyan}打开$none"
+		echo -e "$yellow 底层传输安全 (TLS) = ${cyan}tls$none"
+		echo
+		if [[ $ban_ad ]]; then
+			echo " 备注: 广告拦截已开启.."
+			echo
+		fi
+	elif [[ $v2ray_transport == 33 ]]; then
+		echo
+		echo -e "$green ---提示..这是 VLESS 服务器配置--- $none"
+		echo
+		echo -e "$yellow 地址 (Address) = $cyan${domain}$none"
+		echo
+		echo -e "$yellow 端口 (Port) = ${cyan}443${none}"
+		echo
+		echo -e "$yellow 用户ID (User ID / UUID) = $cyan${v2ray_id}$none"
+		echo
+		echo -e "$yellow 流控 (Flow) = ${cyan}空${none}"
+		echo
+		echo -e "$yellow 加密 (Encryption) = ${cyan}none${none}"
+		echo
+		echo -e "$yellow 传输协议 (Network) = ${cyan}${net}$none"
+		echo
+		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
+		echo
+		echo -e "$yellow 伪装域名 (host) = ${cyan}${domain}$none"
+		echo
+		echo -e "$yellow 路径 (path) = ${cyan}${_path}$none"
+		echo
+		echo -e "$yellow 底层传输安全 (TLS) = ${cyan}tls$none"
 		echo
 		if [[ $ban_ad ]]; then
 			echo " 备注: 广告拦截已开启.."
@@ -117,10 +145,10 @@ _v2_info() {
 		echo -e "$yellow 伪装类型 (header type) = ${cyan}${header}$none"
 		echo
 	fi
-	if [[ $v2ray_transport -ge 18 ]] && [[ $ban_ad ]]; then
+	if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]] && [[ $ban_ad ]]; then
 		echo " 备注: 动态端口已启用...广告拦截已开启..."
 		echo
-	elif [[ $v2ray_transport -ge 18 ]]; then
+	elif [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
 		echo " 备注: 动态端口已启用..."
 		echo
 	elif [[ $ban_ad ]]; then
@@ -131,7 +159,7 @@ _v2_info() {
 	echo
 	echo "V2Ray 客户端使用教程: https://233v2.com/post/4/"
 	echo
-	echo -e "提示: 输入$cyan v2ray url $none可生成 vmess URL 链接 / 输入$cyan v2ray qr $none可生成二维码链接"
+	echo -e "提示: 输入 $cyan v2ray url $none 可生成 vmess URL 链接 / 输入 $cyan v2ray qr $none 可生成二维码链接"
 	echo
 	echo -e "${yellow}免被墙..推荐使用JMS: ${cyan}https://getjms.com${none}"
 	echo

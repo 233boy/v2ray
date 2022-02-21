@@ -1,7 +1,7 @@
 # local email=$(((RANDOM << 22)))
 # tls ${email}@gmail.com
 case $v2ray_transport in
-4)
+4|33)
 	if [[ $is_path ]]; then
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
