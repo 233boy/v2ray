@@ -27,43 +27,50 @@ _install_caddy_service() {
 	# setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
 
 	if [[ $systemd ]]; then
-		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
+		# cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
 		# if ! wget https://raw.githubusercontent.com/caddyserver/caddy/master/dist/init/linux-systemd/caddy.service -O /lib/systemd/system/caddy.service; then
 		# 	echo -e "$red 下载 caddy.service 失败！$none" && exit 1
 		# fi
 		# sed -i "s/-log-timestamps=false//g" /lib/systemd/system/caddy.service
-		if [[ ! $(grep "ReadWriteDirectories" /lib/systemd/system/caddy.service) ]]; then
-			sed -i "/ReadWritePaths/a ReadWriteDirectories=/etc/ssl/caddy" /lib/systemd/system/caddy.service
-		fi
-		sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
+		# if [[ ! $(grep "ReadWriteDirectories" /lib/systemd/system/caddy.service) ]]; then
+		# 	sed -i "/ReadWritePaths/a ReadWriteDirectories=/etc/ssl/caddy" /lib/systemd/system/caddy.service
+		# fi
+		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
 		# sed -i "/on-abnormal/a RestartSec=3" /lib/systemd/system/caddy.service
 		# sed -i "s/on-abnormal/always/" /lib/systemd/system/caddy.service
 
 		#### 。。。。。 Warning.....Warning.......Warning........Warning......
 		#### 。。。。。 use root user run caddy...
 
-		# cat >/lib/systemd/system/caddy.service <<-EOF
-		# 	[Unit]
-		# 	Description=Caddy HTTP/2 web server
-		# 	Documentation=https://caddyserver.com/docs
-		# 	After=network.target
-		# 	Wants=network.target
+		cat >/lib/systemd/system/caddy.service <<-EOF
+[Unit]
+Description=Caddy HTTP/2 web server
+Documentation=https://caddyserver.com/docs
+After=network.target
+Wants=network.target
 
-		# 	[Service]
-		# 	Restart=always
-		# 	RestartSec=3
-		# 	Environment=CADDYPATH=/root/.caddy
-		# 	ExecStart=/usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
-		# 	ExecReload=/bin/kill -USR1 $MAINPID
-		# 	KillMode=mixed
-		# 	KillSignal=SIGQUIT
-		# 	TimeoutStopSec=5s
-		# 	LimitNOFILE=1048576
-		# 	LimitNPROC=512
+[Service]
+Restart=on-abnormal
+User=root
+Group=root
+Environment=CADDYPATH=/etc/ssl/caddy
+ExecStart=/usr/local/bin/caddy -log stdout -log-timestamps=false -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
+ExecReload=/bin/kill -USR1 \$MAINPID
+KillMode=mixed
+KillSignal=SIGQUIT
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+PrivateDevices=false
+ProtectHome=true
+ProtectSystem=full
+ReadWritePaths=/etc/ssl/caddy
+ReadWriteDirectories=/etc/ssl/caddy
 
-		# 	[Install]
-		# 	WantedBy=multi-user.target
-		# EOF
+[Install]
+WantedBy=multi-user.target
+		EOF
 		systemctl enable caddy
 	else
 		cp -f ${caddy_tmp}init/linux-sysvinit/caddy /etc/init.d/caddy
