@@ -5,14 +5,12 @@ case $v2ray_transport in
 	if [[ $is_path ]]; then
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
-    gzip
-	timeouts none
-    proxy / $proxy_site {
-        except /${path}
+    reverse_proxy $proxy_site {
+        header_up Host {upstream_hostport}
+        header_up X-Forwarded-Host {host}
     }
-    proxy /${path} 127.0.0.1:${v2ray_port} {
-        without /${path}
-        websocket
+    handle_path /${path} {
+        reverse_proxy 127.0.0.1:${v2ray_port}
     }
 }
 import sites/*
@@ -20,10 +18,7 @@ import sites/*
 	else
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
-	timeouts none
-	proxy / 127.0.0.1:${v2ray_port} {
-		websocket
-	}
+	reverse_proxy 127.0.0.1:${v2ray_port}
 }
 import sites/*
 		EOF
@@ -33,28 +28,18 @@ import sites/*
 	if [[ $is_path ]]; then
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
-    gzip
-	timeouts none
-    proxy / $proxy_site {
-        except /${path}
+    reverse_proxy $proxy_site {
+        header_up Host {upstream_hostport}
+        header_up X-Forwarded-Host {host}
     }
-    proxy /${path} https://127.0.0.1:${v2ray_port} {
-        header_upstream Host {host}
-		header_upstream X-Forwarded-Proto {scheme}
-		insecure_skip_verify
-    }
+	reverse_proxy /${path} h2c://127.0.0.1:${v2ray_port}
 }
 import sites/*
 		EOF
 	else
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
-	timeouts none
-	proxy / https://127.0.0.1:${v2ray_port} {
-        header_upstream Host {host}
-		header_upstream X-Forwarded-Proto {scheme}
-		insecure_skip_verify
-	}
+	reverse_proxy h2c://127.0.0.1:${v2ray_port}
 }
 import sites/*
 		EOF

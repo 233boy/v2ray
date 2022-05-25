@@ -6,7 +6,8 @@ _download_caddy_file() {
 		echo -e "$red 获取 Caddy 下载参数失败！$none" && exit 1
 	fi
 	# local caddy_download_link="https://caddyserver.com/download/linux/${caddy_arch}?license=personal"
-	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v1.0.4/caddy_v1.0.4_linux_${caddy_arch}.tar.gz"
+	# local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v1.0.4/caddy_v1.0.4_linux_${caddy_arch}.tar.gz"
+	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v2.5.1/caddy_2.5.1_linux_${caddy_arch}.tar.gz"
 
 	mkdir -p $caddy_tmp
 
@@ -43,30 +44,25 @@ _install_caddy_service() {
 		#### 。。。。。 use root user run caddy...
 
 		cat >/lib/systemd/system/caddy.service <<-EOF
+#https://github.com/caddyserver/dist/blob/master/init/caddy.service
 [Unit]
-Description=Caddy HTTP/2 web server
-Documentation=https://caddyserver.com/docs
-After=network.target
-Wants=network.target
+Description=Caddy
+Documentation=https://caddyserver.com/docs/
+After=network.target network-online.target
+Requires=network-online.target
 
 [Service]
-Restart=on-abnormal
+Type=notify
 User=root
 Group=root
-Environment=CADDYPATH=/etc/ssl/caddy
-ExecStart=/usr/local/bin/caddy -log stdout -log-timestamps=false -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
-ExecReload=/bin/kill -USR1 \$MAINPID
-KillMode=mixed
-KillSignal=SIGQUIT
+ExecStart=/usr/local/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile
 TimeoutStopSec=5s
 LimitNOFILE=1048576
 LimitNPROC=512
 PrivateTmp=true
-PrivateDevices=false
-ProtectHome=true
 ProtectSystem=full
-ReadWritePaths=/etc/ssl/caddy
-ReadWriteDirectories=/etc/ssl/caddy
+#AmbientCapabilities=CAP_NET_BIND_SERVICE
 
 [Install]
 WantedBy=multi-user.target
