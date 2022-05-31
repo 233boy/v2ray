@@ -6,7 +6,8 @@ _download_caddy_file() {
 		echo -e "$red 获取 Caddy 下载参数失败！$none" && exit 1
 	fi
 	# local caddy_download_link="https://caddyserver.com/download/linux/${caddy_arch}?license=personal"
-	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v1.0.4/caddy_v1.0.4_linux_${caddy_arch}.tar.gz"
+	# local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v1.0.4/caddy_v1.0.4_linux_${caddy_arch}.tar.gz"
+	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v2.5.1/caddy_2.5.1_linux_${caddy_arch}.tar.gz"
 
 	mkdir -p $caddy_tmp
 
@@ -27,43 +28,45 @@ _install_caddy_service() {
 	# setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
 
 	if [[ $systemd ]]; then
-		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
+		# cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
 		# if ! wget https://raw.githubusercontent.com/caddyserver/caddy/master/dist/init/linux-systemd/caddy.service -O /lib/systemd/system/caddy.service; then
 		# 	echo -e "$red 下载 caddy.service 失败！$none" && exit 1
 		# fi
 		# sed -i "s/-log-timestamps=false//g" /lib/systemd/system/caddy.service
-		if [[ ! $(grep "ReadWriteDirectories" /lib/systemd/system/caddy.service) ]]; then
-			sed -i "/ReadWritePaths/a ReadWriteDirectories=/etc/ssl/caddy" /lib/systemd/system/caddy.service
-		fi
-		sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
+		# if [[ ! $(grep "ReadWriteDirectories" /lib/systemd/system/caddy.service) ]]; then
+		# 	sed -i "/ReadWritePaths/a ReadWriteDirectories=/etc/ssl/caddy" /lib/systemd/system/caddy.service
+		# fi
+		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
 		# sed -i "/on-abnormal/a RestartSec=3" /lib/systemd/system/caddy.service
 		# sed -i "s/on-abnormal/always/" /lib/systemd/system/caddy.service
 
 		#### 。。。。。 Warning.....Warning.......Warning........Warning......
 		#### 。。。。。 use root user run caddy...
 
-		# cat >/lib/systemd/system/caddy.service <<-EOF
-		# 	[Unit]
-		# 	Description=Caddy HTTP/2 web server
-		# 	Documentation=https://caddyserver.com/docs
-		# 	After=network.target
-		# 	Wants=network.target
+		cat >/lib/systemd/system/caddy.service <<-EOF
+#https://github.com/caddyserver/dist/blob/master/init/caddy.service
+[Unit]
+Description=Caddy
+Documentation=https://caddyserver.com/docs/
+After=network.target network-online.target
+Requires=network-online.target
 
-		# 	[Service]
-		# 	Restart=always
-		# 	RestartSec=3
-		# 	Environment=CADDYPATH=/root/.caddy
-		# 	ExecStart=/usr/local/bin/caddy -log stdout -agree=true -conf=/etc/caddy/Caddyfile -root=/var/tmp
-		# 	ExecReload=/bin/kill -USR1 $MAINPID
-		# 	KillMode=mixed
-		# 	KillSignal=SIGQUIT
-		# 	TimeoutStopSec=5s
-		# 	LimitNOFILE=1048576
-		# 	LimitNPROC=512
+[Service]
+Type=notify
+User=root
+Group=root
+ExecStart=/usr/local/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+#AmbientCapabilities=CAP_NET_BIND_SERVICE
 
-		# 	[Install]
-		# 	WantedBy=multi-user.target
-		# EOF
+[Install]
+WantedBy=multi-user.target
+		EOF
 		systemctl enable caddy
 	else
 		cp -f ${caddy_tmp}init/linux-sysvinit/caddy /etc/init.d/caddy

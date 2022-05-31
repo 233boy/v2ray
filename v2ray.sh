@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.45"
+_version="v3.55"
 
 cmd="apt-get"
 
@@ -88,6 +88,30 @@ v2ray_ver="$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
 . /etc/v2ray/233boy/v2ray/src/init.sh
 systemd=true
 # _test=true
+
+# fix VMessAEAD
+if [[ ! $(grep 'v2ray.vmess.aead.forced=false' /lib/systemd/system/v2ray.service) ]]; then
+	sed -i 's|ExecStart=|ExecStart=/usr/bin/env v2ray.vmess.aead.forced=false |' /lib/systemd/system/v2ray.service
+	systemctl daemon-reload
+	systemctl restart v2ray
+fi
+
+# fix caddy2 config
+if [[ $caddy ]]; then
+	/usr/local/bin/caddy version >/dev/null 2>&1
+	if [[ $? == 1 ]]; then
+		echo -e "\n $yellow 警告: 脚本将自动更新 Caddy 版本。 $none  \n"
+		systemctl stop caddy
+		_load download-caddy.sh
+		_download_caddy_file
+		_install_caddy_service
+		systemctl daemon-reload
+		_load caddy-config.sh
+		systemctl restart caddy
+		echo -e "\n $green 更新 Caddy 版本完成, 要是出问题了你可以重装解决。 $none  \n"
+		exit 0
+	fi
+fi
 
 if [[ $v2ray_ver != v* ]]; then
 	v2ray_ver="v$v2ray_ver"
@@ -1730,9 +1754,9 @@ change_proxy_site_config() {
 }
 domain_check() {
 	# test_domain=$(dig $new_domain +short)
-	# test_domain=$(ping $new_domain -c 1 -4 | grep -oE -m1 "([0-9]{1,3}\.){3}[0-9]{1,3}")
+	test_domain=$(ping $new_domain -c 1 -4 -W 2 | grep -oE -m1 "([0-9]{1,3}\.){3}[0-9]{1,3}")
 	# test_domain=$(wget -qO- --header='accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$new_domain&type=A" | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -1)
-	test_domain=$(curl -sH 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$new_domain&type=A" | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -1)
+	# test_domain=$(curl -sH 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$new_domain&type=A" | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -1)
 	if [[ $test_domain != $ip ]]; then
 		echo
 		echo -e "$red 检测域名解析错误....$none"
@@ -2287,25 +2311,13 @@ other() {
 		echo
 		echo -e "$yellow 1. $none安装 BBR"
 		echo
-		echo -e "$yellow 2. $none安装 LotServer(锐速)"
-		echo
-		echo -e "$yellow 3. $none卸载 LotServer(锐速)"
-		echo
-		read -p "$(echo -e "请选择 [${magenta}1-3$none]:")" _opt
+		read -p "$(echo -e "请选择 [${magenta}1$none]:")" _opt
 		if [[ -z $_opt ]]; then
 			error
 		else
 			case $_opt in
 			1)
 				install_bbr
-				break
-				;;
-			2)
-				install_lotserver
-				break
-				;;
-			3)
-				uninstall_lotserver
 				break
 				;;
 			*)
@@ -2327,18 +2339,6 @@ install_bbr() {
 		_try_enable_bbr
 		[[ ! $enable_bbr ]] && bash <(curl -s -L https://github.com/teddysun/across/raw/master/bbr.sh)
 	fi
-}
-install_lotserver() {
-	# https://moeclub.org/2017/03/08/14/
-	wget --no-check-certificate -qO /tmp/appex.sh "https://raw.githubusercontent.com/0oVicero0/serverSpeeder_Install/master/appex.sh"
-	bash /tmp/appex.sh 'install'
-	rm -rf /tmp/appex.sh
-}
-uninstall_lotserver() {
-	# https://moeclub.org/2017/03/08/14/
-	wget --no-check-certificate -qO /tmp/appex.sh "https://raw.githubusercontent.com/0oVicero0/serverSpeeder_Install/master/appex.sh"
-	bash /tmp/appex.sh 'uninstall'
-	rm -rf /tmp/appex.sh
 }
 
 update() {
