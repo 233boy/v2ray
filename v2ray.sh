@@ -1500,14 +1500,29 @@ change_v2ray_id() {
 			break
 		else
 			if [[ $y_n == [Yy] ]]; then
+				
+				echo -e "是否自定义ID [${magenta}Y/N$none]"
+				read -p "$(echo -e "默认 [${cyan}N$none]:")" y_n
+				if [[ $y_n == [Yy] ]]; then
+					read -p "$(echo -e "用户ID:")" uuid
+					v2ray_id=$uuid
+					
+				elif [[ $y_n == [Nn] ]]; then
+					v2ray_id=$uuid
+
+				else
+					error
+				fi
+				
 				echo
 				echo
 				echo -e "$yellow 修改用户ID = $cyan确定$none"
+				echo -e "$yellow 用户ID = $uuid"
 				echo "----------------------------------------------------------------"
 				echo
 				pause
 				backup_config uuid
-				v2ray_id=$uuid
+				
 				config
 				clear
 				view_v2ray_config_info
