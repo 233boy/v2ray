@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.60"
+_version="v3.61"
 
 cmd="apt-get"
 
@@ -90,6 +90,7 @@ if [[ $? == 0 ]]; then
 	v2ray_ver="$(/usr/bin/v2ray/v2ray -version | head -n 1 | cut -d " " -f2)"
 else
 	v2ray_ver="$(/usr/bin/v2ray/v2ray version | head -n 1 | cut -d " " -f2)"
+	v2ray_ver_v5=1
 fi
 
 . /etc/v2ray/233boy/v2ray/src/init.sh
@@ -97,7 +98,7 @@ systemd=true
 # _test=true
 
 # fix VMessAEAD
-if [[ ! $(grep 'run -config' /lib/systemd/system/v2ray.service) ]]; then
+if [[ ! $(grep 'run -config' /lib/systemd/system/v2ray.service)  && $v2ray_ver_v5 ]]; then
 	_load download-v2ray.sh
 	_install_v2ray_service
 	systemctl daemon-reload
