@@ -10,7 +10,7 @@ none='\e[0m'
 # Root
 [[ $(id -u) != 0 ]] && echo -e " 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}" && exit 1
 
-_version="v3.61"
+_version="v3.62"
 
 cmd="apt-get"
 
@@ -2617,8 +2617,6 @@ menu() {
 		echo "TG 频道: https://t.me/tg2333"
 		echo
 		echo "捐赠脚本作者: https://233v2.com/donate/"
-		echo
-		echo "捐助 V2Ray: https://www.v2ray.com/chapter_00/02_donate.html"
 		echo
 		echo -e "$yellow  1. $none查看 V2Ray 配置"
 		echo

@@ -57,6 +57,8 @@ NoNewPrivileges=true
 ExecStart=/usr/bin/env v2ray.vmess.aead.forced=false /usr/bin/v2ray/v2ray run -config /etc/v2ray/config.json
 Restart=on-failure
 StartLimitBurst=0
+LimitNOFILE=1048576
+LimitNPROC=512
 #Restart=always
 
 [Install]
