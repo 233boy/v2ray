@@ -26,7 +26,7 @@ _download_v2ray_file() {
 	fi
 
 	unzip -o $v2ray_tmp_file -d "/usr/bin/v2ray/"
-	chmod +x /usr/bin/v2ray/{v2ray,v2ctl}
+	chmod +x /usr/bin/v2ray/v2ray
 	if [[ ! $(cat /root/.bashrc | grep v2ray) ]]; then
 		echo "alias v2ray=$_v2ray_sh" >>/root/.bashrc
 	fi
