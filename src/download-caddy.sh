@@ -7,7 +7,7 @@ _download_caddy_file() {
 	fi
 	# local caddy_download_link="https://caddyserver.com/download/linux/${caddy_arch}?license=personal"
 	# local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v1.0.4/caddy_v1.0.4_linux_${caddy_arch}.tar.gz"
-	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v2.6.1/caddy_2.6.2_linux_${caddy_arch}.tar.gz"
+	local caddy_download_link="https://github.com/caddyserver/caddy/releases/download/v2.6.2/caddy_2.6.2_linux_${caddy_arch}.tar.gz"
 
 	mkdir -p $caddy_tmp
 
