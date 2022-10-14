@@ -1,11 +1,14 @@
 # local email=$(((RANDOM << 22)))
 # tls ${email}@gmail.com
+if [[ $proxy_site ]]; then
+	proxy_is=$(echo $proxy_site | sed 's#/$##')
+fi
 case $v2ray_transport in
 4|33)
 	if [[ $is_path ]]; then
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
-    reverse_proxy $proxy_site {
+    reverse_proxy $proxy_is {
         header_up Host {upstream_hostport}
         header_up X-Forwarded-Host {host}
     }
@@ -28,7 +31,7 @@ import sites/*
 	if [[ $is_path ]]; then
 		cat >/etc/caddy/Caddyfile <<-EOF
 $domain {
-    reverse_proxy $proxy_site {
+    reverse_proxy $proxy_is {
         header_up Host {upstream_hostport}
         header_up X-Forwarded-Host {host}
     }
