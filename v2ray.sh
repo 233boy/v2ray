@@ -1186,13 +1186,13 @@ path_config() {
 proxy_site_config() {
 	echo
 	while :; do
-		echo -e "Por favor, digite ${magenta} um $none ${cyan} URL$none correto para ser usado como um falso $none para sites ${cyan}, por exemplo https://liyafly.com"
-		echo -e "Exemplo... digamos que seu domínio atual seja $green $domain $none, e o URL falso seja https://liyafly.com"
-		echo -e "Então, quando você abre seu domínio... o conteúdo exibido é o conteúdo de https://liyafly.com"
+		echo -e "Por favor, digite ${magenta} um $none ${cyan} URL$none correto para ser usado como um falso $none para sites ${cyan}, por exemplo https://google.com"
+		echo -e "Exemplo... digamos que seu domínio atual seja $green $domain $none, e o URL falso seja https://google.com"
+		echo -e "Então, quando você abre seu domínio... o conteúdo exibido é o conteúdo de https://google.com"
 		echo -e "Na verdade, é uma anti-geração... apenas entenda..."
 		echo -e "Se você não conseguir disfarçar com sucesso... você pode usar a configuração v2ray para modificar o URL disfarçado"
-		read -p "$(echo -e "(padrão: [${cyan}https://liyafly.com$none]):")" new_proxy_site
-		[[ -z $new_proxy_site ]] && new_proxy_site="https://liyafly.com"
+		read -p "$(echo -e "(padrão: [${cyan}https://google.com$none]):")" new_proxy_site
+		[[ -z $new_proxy_site ]] && new_proxy_site="https://google.com"
 
 		case $new_proxy_site in
 		*[#$]*)
@@ -1573,7 +1573,7 @@ change_domain() {
 					domain_check
 					echo
 					echo
-					echo -e "$yellow Resolução de nome de domínio = ${cyan} Tenho certeza que já está resolvido$none"
+					echo -e "$yellow Resolução de nome de domínio = ${cyan}já está resolvido$none"
 					echo "----------------------------------------------------------------"
 					echo
 					pause
@@ -1688,9 +1688,9 @@ change_proxy_site_config() {
 	if [[ $v2ray_transport == [45] || $v2ray_transport == 33 ]] && [[ $caddy && $is_path ]]; then
 		echo
 		while :; do
-			echo -e "Por favor, digite ${magenta} um correto $none ${cyan} url $none é usado como um falso $none para ${cyan} sites, por exemplo https://liyafly.com"
-			echo -e "Exemplo... seu nome de domínio atual é $green $domain $none, o URL falso é https://liyafly.com"
-			echo -e "Então, quando você abre seu nome de domínio... o conteúdo exibido é o conteúdo de https://liyafly.com"
+			echo -e "Por favor, digite ${magenta} um correto $none ${cyan} url $none é usado como um falso $none para ${cyan} sites, por exemplo https://google.com"
+			echo -e "Exemplo... seu nome de domínio atual é $green $domain $none, o URL falso é https://google.com"
+			echo -e "Então, quando você abre seu nome de domínio... o conteúdo exibido é o conteúdo de https://google.com"
 			echo -e "Na verdade é uma anti-geração... apenas entenda..."
 			echo -e "Se você não conseguir disfarçar com sucesso...você pode usar a configuração v2ray para modificar o URL disfarçado"
 			read -p "$(echo -e "(URL atualmente disfarçado: [${cyan}${proxy_site}$none]):")" new_proxy_site
@@ -2182,7 +2182,7 @@ create_v2ray_config_text() {
 	if [[ $v2ray_transport == [45] ]]; then
 		if [[ ! $caddy ]]; then
 			echo
-			echo "avisar! Configure o TLS você mesmo... Tutorial: https://233v2.com/post/3/"
+			echo "aviso ! Configure o TLS você mesmo... Tutorial: https://233v2.com/post/3/"
 		fi
 		echo
 		echo "Endereço (Address) = ${domain}"
@@ -2277,17 +2277,17 @@ get_v2ray_config_info_link() {
 		echo
 		echo "---------- Link de informações de configuração do V2Ray ------------"
 		echo
-		echo -e "$yellow 链接 = $cyan$link$none"
+		echo -e "$yellow Link = $cyan$link$none"
 		echo
-		echo -e " V2Ray 客户端使用教程: https://233v2.com/post/4/"
+		echo -e " Tutorial do cliente V2Ray: https://233v2.com/post/4/"
 		echo
-		echo "备注...链接将在 14 天后失效..."
+		echo "Observação... o link expirará em 14 dias..."
 		echo
-		echo "提醒...请不要把链接分享出去...除非你有特别的理由...."
+		echo "Lembrete... por favor, não compartilhe o link... a menos que você tenha um motivo específico...."
 		echo
 	else
 		echo
-		echo -e "$red 哎呀呀呀...出错咯...请重试$none"
+		echo -e "$red oops...algo deu errado...por favor tente novamente$none"
 		echo
 	fi
 	rm -rf /tmp/233blog_v2ray.txt
@@ -2565,7 +2565,7 @@ do_service() {
 }
 _help() {
 	echo
-	echo "........... Informações de ajuda do script de administração do V2Ray por 233v2.com ........."
+	echo "........... Informações de ajuda do script de administração do V2Ray por @TALKERA ........."
 	echo -e "
 	${green}v2ray menu $none Gerenciar V2Ray (equivalente a entrada v2ray direta)
 
@@ -2610,13 +2610,9 @@ menu() {
 		echo
 		echo -e "## Versão do V2Ray: $cyan$v2ray_ver$none / status do V2Ray: $v2ray_status ##"
 		echo
-		echo "Descrição da ajuda: https://233v2.com/post/1/"
-		echo
-		echo "perguntas de feedback: https://github.com/233boy/v2ray/issues"
-		echo
 		echo "canal TG: https://t.me/ssh_t_project"
 		echo
-		echo "Roteirista de Doação: https://233v2.com/donate/"
+		echo "creditos: https://233v2.com/"
 		echo
 		echo -e "$yellow  1. $none Ver configuração do V2Ray"
 		echo
