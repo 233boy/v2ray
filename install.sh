@@ -1011,7 +1011,7 @@ esac
 clear
 while :; do
 	echo
-	echo "...........Script de instalação e script de gerenciamento de um clique V2Ray por 233v2.com .........."
+	echo "...........Script de instalação e script de gerenciamento de um clique V2Ray por 233v2.com edit by @TALKERA .........."
 	echo
 	echo "Descrição da ajuda: https://233v2.com/post/1/"
 	echo
