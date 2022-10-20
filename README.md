@@ -1,5 +1,5 @@
 
-\\\\ TRADUZIDO POR @TALKERA ////
+\\\\\\ TRADUZIDO POR @TALKERA ////
 
 Projeto_SSH: t.me/ssh_t_project
 
