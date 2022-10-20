@@ -47,22 +47,22 @@ Hahaha.. Eu deliberadamente quero escrever o suficiente para 23. Claro, o script
 
 ### Gerenciamento rápido
 ````
-Informações do v2ray Exibir informações de configuração do V2Ray
-Configuração do v2ray Modificar a configuração do V2Ray
-link v2ray Gerar link do arquivo de configuração do V2Ray
+v2ray information Ver informações de configuração do V2Ray
+v2ray configuration Modifique a configuração do V2Ray
+v2ray link Gerar link do arquivo de configuração do V2Ray
 v2ray infolink Gerar link de informações de configuração do V2Ray
-v2ray qr Gerar o link do código QR de configuração do V2Ray
+v2ray qr Gerar link de código QR de configuração do V2Ray
 v2ray ss Modificar a configuração do Shadowsocks
-v2ray ssinfo Ver informações de configuração do Shadowsocks
+v2ray ssinfo Exibir informações de configuração do Shadowsocks
 v2ray ssqr gera o link do código QR de configuração do Shadowsocks
-Status do v2ray Veja o status de execução do V2Ray
-Iniciar v2ray Iniciar V2Ray
-v2ray parar parar V2Ray
-A reinicialização do v2ray reinicia o V2Ray
+v2ray status Veja o status de execução do V2Ray
+v2ray Start Iniciar O v2ray
+v2ray stop Parar o V2ray
+v2ray restarts reinicia o V2Ray
 v2ray log Ver log de execução do V2Ray
-atualização de atualização v2ray V2Ray
+v2ray update atualizar v2ray
 v2ray update.sh atualiza o script de gerenciamento do V2Ray
-v2ray desinstalar desinstalar V2Ray
+v2ray uninstall desinstalar v2ray
 ````
 
 ### Caminho do arquivo de configuração
