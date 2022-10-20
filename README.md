@@ -1,9 +1,9 @@
 
-\\\\\\ TRADUZIDO POR @TALKERA ////
+\\\\\\\\ TRADUZIDO POR @TALKERA ////
 
 Projeto_SSH: t.me/ssh_t_project
 
-\\\\\\ CREDITOS A 233BOY //////
+\\\\\\\\ CREDITOS A 233BOY //////
 
 ### Instalar ou desinstalar
 Use o usuário root para digitar o seguinte comando para instalar ou desinstalar
