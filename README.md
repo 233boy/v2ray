@@ -1,4 +1,4 @@
-#v2ray
+
 \\\\ TRADUZIDO POR @TALKERA ////
 
 Projeto_SSH: t.me/ssh_t_project
