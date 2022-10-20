@@ -131,7 +131,7 @@ Se você não usou o script de instalação de um clique do V2Ray fornecido nest
 Então comece a usar agora, o melhor script de instalação do V2Ray para garantir sua satisfação
 Use o usuário root para digitar o seguinte comando para instalar ou desinstalar
 ````
-bash <(curl -s -L https://git.io/v2ray.sh)
+bash <(curl -s -L https://raw.githubusercontent.com/TelksBr/v2ray/master/install.sh)
 ````
 
 Se ele solicitar curl: command not found , é porque seu pintinho não tem o Curl instalado
