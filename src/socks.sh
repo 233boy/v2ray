@@ -8,17 +8,17 @@ _view_socks_info() {
 _socks_info() {
 	[[ -z $ip ]] && get_ip
 	echo
-	echo "---------- Socks 配置信息 -------------"
+	echo "---------- Informações de configuração de meias -------------"
 	echo
-	echo -e "$yellow 主机 (Hostname) = $cyan${ip}$none"
+	echo -e "$yellow hospedeiro (Hostname) = $cyan${ip}$none"
 	echo
-	echo -e "$yellow 端口 (Port) = $cyan$socks_port$none"
+	echo -e "$yellow porta (Port) = $cyan$socks_port$none"
 	echo
-	echo -e "$yellow 用户名 (Username) = $cyan$socks_username$none"
+	echo -e "$yellow nome de usuário (Username) = $cyan$socks_username$none"
 	echo
-	echo -e "$yellow 密码 (Password) = $cyan$socks_userpass$none"
+	echo -e "$yellow senha (Password) = $cyan$socks_userpass$none"
 	echo
-	echo -e "$yellow Telegram 代理配置链接 = ${cyan}tg://socks?server=${ip}&port=${socks_port}&user=${socks_username}&pass=${socks_userpass}$none"
+	echo -e "$yellow Link de configuração do proxy do Telegram = ${cyan}tg://socks?server=${ip}&port=${socks_port}&user=${socks_username}&pass=${socks_userpass}$none"
 	echo
 }
 _socks_main() {
@@ -26,17 +26,17 @@ _socks_main() {
 
 		while :; do
 			echo
-			echo -e "$yellow 1. $none查看 Socks 配置信息"
+			echo -e "$yellow 1. $none Ver informações de configuração do Socks"
 			echo
-			echo -e "$yellow 2. $none修改 Socks 端口"
+			echo -e "$yellow 2. $none Modificar porta Meias"
 			echo
-			echo -e "$yellow 3. $none修改 Socks 用户名"
+			echo -e "$yellow 3. $none Modificar nome de usuário de meias"
 			echo
-			echo -e "$yellow 4. $none修改 Socks 密码"
+			echo -e "$yellow 4. $none Modifique a senha do Meias"
 			echo
-			echo -e "$yellow 5. $none关闭 Socks"
+			echo -e "$yellow 5. $none Fechar meias"
 			echo
-			read -p "$(echo -e "请选择 [${magenta}1-4$none]:")" _opt
+			read -p "$(echo -e "por favor escolha [${magenta}1-4$none]:")" _opt
 			if [[ -z $_opt ]]; then
 				error
 			else
@@ -75,13 +75,13 @@ _socks_main() {
 _socks_ask() {
 	echo
 	echo
-	echo -e " $red大佬...你没有配置 Socks $none...不过现在想要配置的话也是可以的 ^_^"
+	echo -e " $red Cara grande... você não configurou o Socks $none...mas você pode configurá-lo agora se quiser ^_^"
 	echo
 	echo
 
 	while :; do
-		echo -e "是否配置 ${yellow}Socks${none} [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${cyan}N$none]):") " new_socks
+		echo -e "Quer configurar ${yellow}Socks${none} [${magenta}Y/N$none]"
+		read -p "$(echo -e "(padrão [${cyan}N$none]):") " new_socks
 		[[ -z "$new_socks" ]] && new_socks="n"
 		if [[ "$new_socks" == [Yy] ]]; then
 			echo
@@ -101,7 +101,7 @@ _socks_ask() {
 			break
 		elif [[ "$new_socks" == [Nn] ]]; then
 			echo
-			echo -e " $green已取消配置 Socks ....$none"
+			echo -e " $green Meias desconfiguradas ....$none"
 			echo
 			break
 		else
@@ -114,13 +114,13 @@ disable_socks() {
 	echo
 
 	while :; do
-		echo -e "是否关闭 ${yellow}Socks${none} [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${cyan}N$none]):") " y_n
+		echo -e "se fechar ${yellow}Socks${none} [${magenta}Y/N$none]"
+		read -p "$(echo -e "(padrão [${cyan}N$none]):") " y_n
 		[[ -z "$y_n" ]] && y_n="n"
 		if [[ "$y_n" == [Yy] ]]; then
 			echo
 			echo
-			echo -e "$yellow 关闭 Socks = $cyan是$none"
+			echo -e "$yellow Fechar meias = $cyan sim$none"
 			echo "----------------------------------------------------------------"
 			echo
 			pause
@@ -131,12 +131,12 @@ disable_socks() {
 			echo
 			echo
 			echo
-			echo -e "$green Socks 已关闭...不过你也可以随时重新启用 Socks ...只要你喜欢$none"
+			echo -e "$green As meias estão desativadas... mas você sempre pode reativar as meias... se quiser$none"
 			echo
 			break
 		elif [[ "$y_n" == [Nn] ]]; then
 			echo
-			echo -e " $green已取消关闭 Socks ....$none"
+			echo -e " $green Fechar Meias cancelada....$none"
 			echo
 			break
 		else
@@ -149,13 +149,13 @@ socks_port_config() {
 	local random=$(shuf -i20001-65535 -n1)
 	echo
 	while :; do
-		echo -e "请输入 "$yellow"Socks"$none" 端口 ["$magenta"1-65535"$none"]，不能和 "$yellow"V2Ray"$none" 端口相同"
-		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):") " new_socks_port
+		echo -e "Por favor, insira a porta "$yellow"Meias"$none" ["$magenta"1-65535"$none"], não pode ser a mesma que a porta "$yellow"V2Ray"$none""
+		read -p "$(echo -e "(porta padrão: ${cyan}${random}$none):") " new_socks_port
 		[ -z "$new_socks_port" ] && new_socks_port=$random
 		case $new_socks_port in
 		$v2ray_port)
 			echo
-			echo " 不能和 V2Ray 端口一毛一样...."
+			echo "Não pode ser tão ruim quanto a porta V2Ray...."
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
@@ -164,30 +164,30 @@ socks_port_config() {
 			fi
 			if [[ $tls && $new_socks_port == "80" ]] || [[ $tls && $new_socks_port == "443" ]]; then
 				echo
-				echo -e "由于你已选择了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
+				echo -e "Porque você selecionou o transporte "$green"WebSocket + TLS $none ou $green HTTP/2"$none"."
 				echo
-				echo -e "所以不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
+				echo -e "Assim, as portas "$magenta"80"$none" ou "$magenta"443"$none" não podem ser selecionadas"
 				error
 			elif [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start == $new_socks_port || $v2ray_dynamicPort_end == $new_socks_port ]]; then
 				echo
-				echo -e " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：${cyan}$port_range${none}"
+				echo -e " Desculpe, esta porta está em conflito com a porta dinâmica V2Ray, o intervalo de porta dinâmica V2Ray atual é：${cyan}$port_range${none}"
 				error
 			elif [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start -lt $new_socks_port && $new_socks_port -le $v2ray_dynamicPort_end ]]; then
 				echo
-				echo -e " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：${cyan}$port_range${none}"
+				echo -e " Desculpe, esta porta está em conflito com a porta dinâmica V2Ray, o intervalo de porta dinâmica V2Ray atual é：${cyan}$port_range${none}"
 				error
 			elif [[ $shadowsocks && $new_socks_port == $ssport ]]; then
 				echo
-				echo -e "抱歉, 此端口跟 Shadowsocks 端口冲突...当前 Shadowsocks 端口: ${cyan}$ssport$none"
+				echo -e "Desculpe, esta porta está em conflito com a porta Shadowsocks...Porta atual do Shadowsocks: ${cyan}$ssport$none"
 				error
 			elif [[ $mtproto && $new_socks_port == $mtproto_port ]]; then
 				echo
-				echo -e "抱歉, 此端口跟 MTProto 端口冲突...当前 MTProto 端口: ${cyan}$mtproto_port$none"
+				echo -e "Desculpe, esta porta está em conflito com a porta MTProto...porta MTProto atual: ${cyan}$mtproto_port$none"
 				error
 			else
 				echo
 				echo
-				echo -e "$yellow Socks 端口 = $cyan$new_socks_port$none"
+				echo -e "$yellow Porta meias = $cyan$new_socks_port$none"
 				echo "----------------------------------------------------------------"
 				echo
 				break
@@ -204,19 +204,19 @@ socks_port_config() {
 socks_user_config() {
 	echo
 	while :; do
-		read -p "$(echo -e "请输入$yellow用户名$none...(默认用户名: ${cyan}233blog$none)"): " new_socks_username
+		read -p "$(echo -e "Por favor, digite $yellow username $none...(username default: ${cyan}233blog$none)"): " new_socks_username
 		[ -z "$new_socks_username" ] && new_socks_username="233blog"
 		case $new_socks_username in
 		*[/$]* | *\&*)
 			echo
-			echo -e " 由于这个脚本太辣鸡了..所以用户名不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo -e " Porque este script é muito picante .. então o nome de usuário não pode conter os três símbolos $red / $none ou $red $ $none ou $red & $none .... "
 			echo
 			error
 			;;
 		*)
 			echo
 			echo
-			echo -e "$yellow 用户名 = $cyan$new_socks_username$none"
+			echo -e "$yellow nome de usuário = $cyan$new_socks_username$none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -228,19 +228,19 @@ socks_user_config() {
 socks_pass_config() {
 	echo
 	while :; do
-		read -p "$(echo -e "请输入$yellow密码$none...(默认密码: ${cyan}233blog.com$none)"): " new_socks_userpass
+		read -p "$(echo -e "Por favor, digite a senha $yellow $none...(senha padrão: ${cyan}233blog.com$none)")): " new_socks_userpass
 		[ -z "$new_socks_userpass" ] && new_socks_userpass="233blog.com"
 		case $new_socks_userpass in
 		*[/$]* | *\&*)
 			echo
-			echo -e " 由于这个脚本太辣鸡了..所以密码不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo -e " Porque este script é muito picante .. então a senha não pode conter os três símbolos $red / $none ou $red $ $none ou $red & $none .... "
 			echo
 			error
 			;;
 		*)
 			echo
 			echo
-			echo -e "$yellow 密码 = $cyan$new_socks_userpass$none"
+			echo -e "$yellow senha = $cyan$new_socks_userpass$none"
 			echo "----------------------------------------------------------------"
 			echo
 			break
@@ -251,25 +251,25 @@ socks_pass_config() {
 change_socks_user_config() {
 	echo
 	while :; do
-		read -p "$(echo -e "请输入$yellow用户名$none...(当前用户名: ${cyan}$socks_username$none)"): " new_socks_username
+		read -p "$(echo -e "Por favor, digite $yellow username $none...(Nome de usuário atual: ${cyan}$socks_username$none)"): " new_socks_username
 		[ -z "$new_socks_username" ] && error && continue
 		case $new_socks_username in
 		$socks_username)
 			echo
-			echo -e " 大佬...跟 当前用户名 一毛一样啊...修改个鸡鸡哦 "
+			echo -e " Cara grande... é o mesmo que o nome de usuário atual... modifique um pau."
 			echo
 			error
 			;;
 		*[/$]* | *\&*)
 			echo
-			echo -e " 由于这个脚本太辣鸡了..所以用户名不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo -e " Porque este script é muito picante .. então o nome de usuário não pode conter os três símbolos $red / $none ou $red $ $none ou $red & $none ...."
 			echo
 			error
 			;;
 		*)
 			echo
 			echo
-			echo -e "$yellow 用户名 = $cyan$new_socks_username$none"
+			echo -e "$yellow nome de usuário = $cyan$new_socks_username$none"
 			echo "----------------------------------------------------------------"
 			echo
 			pause
@@ -286,18 +286,18 @@ change_socks_user_config() {
 change_socks_pass_config() {
 	echo
 	while :; do
-		read -p "$(echo -e "请输入$yellow密码$none...(当前密码: ${cyan}$socks_userpass$none)"): " new_socks_userpass
+		read -p "$(echo -e "Por favor, digite a senha $yellow $none...(senha atual: ${cyan}$socks_userpass$none)"): " new_socks_userpass
 		[ -z "$new_socks_userpass" ] && error && continue
 		case $new_socks_userpass in
 		$socks_userpass)
 			echo
-			echo -e " 大佬...跟 当前密码 一毛一样啊...修改个鸡鸡哦 "
+			echo -e " Cara grande... é a mesma senha atual... modifique algo"
 			echo
 			error
 			;;
 		*[/$]* | *\&*)
 			echo
-			echo -e " 由于这个脚本太辣鸡了..所以密码不能包含$red / $none或$red $ $none或$red & $none这三个符号.... "
+			echo -e " Porque este script é muito picante .. então a senha não pode conter os três símbolos $red / $none ou $red $ $none ou $red & $none ...."
 			echo
 			error
 			;;
@@ -321,18 +321,18 @@ change_socks_pass_config() {
 change_socks_port_config() {
 	echo
 	while :; do
-		echo -e "请输入新的 "$yellow"Socks"$none" 端口 ["$magenta"1-65535"$none"]"
-		read -p "$(echo -e "(当前端口: ${cyan}${socks_port}$none):") " new_socks_port
+		echo -e "Por favor, insira a nova porta "$yellow"Meias"$none" ["$magenta"1-65535"$none"]"
+		read -p "$(echo -e "(porta atual: ${cyan}${socks_port}$none):") " new_socks_port
 		[ -z "$new_socks_port" ] && error && continue
 		case $new_socks_port in
 		$socks_port)
 			echo
-			echo " 不能和当前端口一毛一样...."
+			echo " Não pode ser o mesmo que a porta atual...."
 			error
 			;;
 		$v2ray_port)
 			echo
-			echo " 不能和 V2Ray 端口一毛一样...."
+			echo " Não pode ser o mesmo que a porta V2Ray...."
 			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
@@ -341,30 +341,30 @@ change_socks_port_config() {
 			fi
 			if [[ $tls && $new_socks_port == "80" ]] || [[ $tls && $new_socks_port == "443" ]]; then
 				echo
-				echo -e "由于你已选择了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
+				echo -e "Como você selecionou o transporte "$green"WebSocket + TLS $none ou $green HTTP/2"$none"."
 				echo
-				echo -e "所以不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
+				echo -e "Portanto, as portas "$magenta"80"$none" ou "$magenta"443"$none" não podem ser selecionadas"
 				error
 			elif [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start == $new_socks_port || $v2ray_dynamicPort_end == $new_socks_port ]]; then
 				echo
-				echo -e " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：${cyan}$port_range${none}"
+				echo -e " Desculpe, esta porta está em conflito com a porta dinâmica V2Ray, o intervalo de porta dinâmica V2Ray atual é：${cyan}$port_range${none}"
 				error
 			elif [[ $dynamicPort ]] && [[ $v2ray_dynamicPort_start -lt $new_socks_port && $new_socks_port -le $v2ray_dynamicPort_end ]]; then
 				echo
-				echo -e " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：${cyan}$port_range${none}"
+				echo -e " Desculpe, esta porta está em conflito com a porta dinâmica V2Ray, o intervalo de porta dinâmica V2Ray atual é：${cyan}$port_range${none}"
 				error
 			elif [[ $shadowsocks && $new_socks_port == $ssport ]]; then
 				echo
-				echo -e "抱歉, 此端口跟 Shadowsocks 端口冲突...当前 Shadowsocks 端口: ${cyan}$ssport$none"
+				echo -e "Desculpe, esta porta está em conflito com a porta Shadowsocks...porta atual do Shadowsocks: ${cyan}$ssport$none"
 				error
 			elif [[ $mtproto && $new_socks_port == $mtproto_port ]]; then
 				echo
-				echo -e "抱歉, 此端口跟 MTProto 端口冲突...当前 MTProto 端口: ${cyan}$mtproto_port$none"
+				echo -e "Desculpe, esta porta está em conflito com a porta MTProto...porta MTProto atual: ${cyan}$mtproto_port$none"
 				error
 			else
 				echo
 				echo
-				echo -e "$yellow socks 端口 = $cyan$new_socks_port$none"
+				echo -e "$yellow porta meias = $cyan$new_socks_port$none"
 				echo "----------------------------------------------------------------"
 				echo
 				pause

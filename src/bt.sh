@@ -1,19 +1,19 @@
 _ban_bt_main() {
 	if [[ $ban_bt ]]; then
-		local _info="$green已开启$none"
+		local _info="$green ativado$none"
 	else
-		local _info="$red已关闭$none"
+		local _info="$red desativado$none"
 	fi
 	_opt=''
 	while :; do
 		echo
-		echo -e "$yellow 1. $none开启 BT 屏蔽"
+		echo -e "$yellow 1. $none Ative o bloqueio de BT"
 		echo
-		echo -e "$yellow 2. $none关闭 BT 屏蔽"
+		echo -e "$yellow 2. $none Desligue o bloqueio de BT"
 		echo
-		echo -e "当前 BT 屏蔽状态: $_info"
+		echo -e "Status atual de bloqueio de BT: $_info"
 		echo
-		read -p "$(echo -e "请选择 [${magenta}1-2$none]:")" _opt
+		read -p "$(echo -e "por favor escolha [${magenta}1-2$none]:")" _opt
 		if [[ -z $_opt ]]; then
 			error
 		else
@@ -21,12 +21,12 @@ _ban_bt_main() {
 			1)
 				if [[ $ban_bt ]]; then
 					echo
-					echo -e " 大胸弟...难不成你没有看到 (当前 BT 屏蔽状态: $_info) 这个帅帅的提示么.....还开启个鸡鸡哦"
+					echo -e " Peitos grandes... É possível que você não tenha visto (status atual de BT bloqueado: $_info) este belo lembrete...
 					echo
 				else
 					echo
 					echo
-					echo -e "$yellow  BT 屏蔽 = $cyan开启$none"
+					echo -e "$yellow  escudo BT = $cyan ligar$none"
 					echo "----------------------------------------------------------------"
 					echo
 					pause
@@ -35,7 +35,7 @@ _ban_bt_main() {
 					config
 					echo
 					echo
-					echo -e "$green  BT 屏蔽已开启...如果出现异常..那就关闭它咯$none"
+					echo -e "$green O bloqueio de BT está ativado... se algo der errado... desligue-o$none"
 					echo
 				fi
 				break
@@ -44,7 +44,7 @@ _ban_bt_main() {
 				if [[ $ban_bt ]]; then
 					echo
 					echo
-					echo -e "$yellow  BT 屏蔽 = $cyan关闭$none"
+					echo -e "$yellow  escudo BT = $cyan desligar$none"
 					echo "----------------------------------------------------------------"
 					echo
 					pause
@@ -53,11 +53,11 @@ _ban_bt_main() {
 					config
 					echo
 					echo
-					echo -e "$red  BT 屏蔽已关闭...不过你也可以随时重新开启 ...只要你喜欢$none"
+					echo -e "$red  O bloqueio de BT está desativado... mas você sempre pode ativá-lo novamente... se quiser$none"
 					echo
 				else
 					echo
-					echo -e " 大胸弟...难不成你没有看到 (当前 BT 屏蔽状态: $_info) 这个帅帅的提示么.....还关闭个鸡鸡哦"
+					echo -e " Peitos grandes... Será que você não viu (status atual de BT bloqueado: $_info) este belo lembrete... e feche o pau."
 					echo
 				fi
 				break
