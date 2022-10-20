@@ -130,9 +130,9 @@ _sys_timezone() {
 	fi
 
 	echo
-	timedatectl set-timezone Asia/Shanghai
+	timedatectl set-timezone America/Sao_Paulo
 	timedatectl set-ntp true
-	echo "Seu host foi definido para o fuso horário da Ásia/Xangai e sincronizado automaticamente com o systemd-timesyncd."
+	echo "Seu host foi definido para o fuso horário da America/Sao_Paulo e sincronizado automaticamente com o systemd-timesyncd."
 	echo
 
 	if [[ $IS_OPENVZ ]]; then
@@ -1011,11 +1011,11 @@ esac
 clear
 while :; do
 	echo
-	echo "...........Script de instalação e script de gerenciamento de um clique V2Ray por 233v2.com edit by @TALKERA .........."
+	echo "...........Script de instalação e script de gerenciamento V2Ray edit by @TALKERA .........."
 	echo
-	echo "Descrição da ajuda: https://233v2.com/post/1/"
+	echo "MEU CANAL NO TELEEGRAM: t.me/ssh_t_roject"
 	echo
-	echo "Criar tutorial: https://233v2.com/post/2/"
+	echo "creditos: https://233v2.com"
 	echo
 	echo " 1. Instalar"
 	echo
