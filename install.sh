@@ -1013,7 +1013,7 @@ while :; do
 	echo
 	echo "...........Script de instalação e script de gerenciamento V2Ray edit by @TALKERA .........."
 	echo
-	echo "MEU CANAL NO TELEEGRAM: t.me/ssh_t_roject"
+	echo "MEU CANAL NO TELEEGRAM: t.me/ssh_t_project"
 	echo
 	echo "creditos: https://233v2.com"
 	echo
