@@ -169,8 +169,8 @@ v2ray_config() {
 		echo "备注1: 含有 [dynamicPort] 的即启用动态端口.."
 		echo "备注2: [utp | srtp | wechat-video | dtls | wireguard] 分别伪装成 [BT下载 | 视频通话 | 微信视频通话 | DTLS 1.2 数据包 | WireGuard 数据包]"
 		echo
-		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport
-		[ -z "$v2ray_transport" ] && v2ray_transport=1
+		#read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport
+		v2ray_transport=2
 		case $v2ray_transport in
 		[1-9] | [1-2][0-9] | 3[0-3])
 			echo
@@ -196,8 +196,8 @@ v2ray_port_config() {
 		local random=$(shuf -i20001-65535 -n1)
 		while :; do
 			echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
-			read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" v2ray_port
-			[ -z "$v2ray_port" ] && v2ray_port=$random
+			#read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" v2ray_port
+			v2ray_port=$random
 			case $v2ray_port in
 			[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 				echo
@@ -511,8 +511,8 @@ blocked_hosts() {
 	echo
 	while :; do
 		echo -e "是否开启广告拦截(会影响性能) [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${cyan}N$none]):")" blocked_ad
-		[[ -z $blocked_ad ]] && blocked_ad="n"
+		#read -p "$(echo -e "(默认 [${cyan}N$none]):")" blocked_ad
+		blocked_ad="n"
 
 		case $blocked_ad in
 		Y | y)
@@ -546,8 +546,8 @@ shadowsocks_config() {
 
 	while :; do
 		echo -e "是否配置 ${yellow}Shadowsocks${none} [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${cyan}N$none]):") " install_shadowsocks
-		[[ -z "$install_shadowsocks" ]] && install_shadowsocks="n"
+		#read -p "$(echo -e "(默认 [${cyan}N$none]):") " install_shadowsocks
+		install_shadowsocks="n"
 		if [[ "$install_shadowsocks" == [Yy] ]]; then
 			echo
 			shadowsocks=true
@@ -899,7 +899,7 @@ error() {
 
 pause() {
 
-	read -rsp "$(echo -e "按 $green Enter 回车键 $none 继续....或按 $red Ctrl + C $none 取消.")" -d $'\n'
+	#read -rsp "$(echo -e "按 $green Enter 回车键 $none 继续....或按 $red Ctrl + C $none 取消.")" -d $'\n'
 	echo
 }
 do_service() {
@@ -1027,7 +1027,7 @@ while :; do
 		echo -e "$yellow 温馨提示.. 本地安装已启用 ..$none"
 		echo
 	fi
-	read -p "$(echo -e "请选择 [${magenta}1-2$none]:")" choose
+	choose=1
 	case $choose in
 	1)
 		install
