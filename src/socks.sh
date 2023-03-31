@@ -81,8 +81,8 @@ _socks_ask() {
 
 	while :; do
 		echo -e "是否配置 ${yellow}Socks${none} [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${cyan}N$none]):") " new_socks
-		[[ -z "$new_socks" ]] && new_socks="n"
+		#read -p "$(echo -e "(默认 [${cyan}N$none]):") " new_socks
+		new_socks="y"
 		if [[ "$new_socks" == [Yy] ]]; then
 			echo
 			socks=true
@@ -150,8 +150,8 @@ socks_port_config() {
 	echo
 	while :; do
 		echo -e "请输入 "$yellow"Socks"$none" 端口 ["$magenta"1-65535"$none"]，不能和 "$yellow"V2Ray"$none" 端口相同"
-		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):") " new_socks_port
-		[ -z "$new_socks_port" ] && new_socks_port=$random
+		#read -p "$(echo -e "(默认端口: ${cyan}${random}$none):") " new_socks_port
+		new_socks_port=$random
 		case $new_socks_port in
 		$v2ray_port)
 			echo
@@ -204,8 +204,8 @@ socks_port_config() {
 socks_user_config() {
 	echo
 	while :; do
-		read -p "$(echo -e "请输入$yellow用户名$none...(默认用户名: ${cyan}233blog$none)"): " new_socks_username
-		[ -z "$new_socks_username" ] && new_socks_username="233blog"
+		#read -p "$(echo -e "请输入$yellow用户名$none...(默认用户名: ${cyan}233blog$none)"): " new_socks_username
+		new_socks_username="aa321321"
 		case $new_socks_username in
 		*[/$]* | *\&*)
 			echo
@@ -228,8 +228,8 @@ socks_user_config() {
 socks_pass_config() {
 	echo
 	while :; do
-		read -p "$(echo -e "请输入$yellow密码$none...(默认密码: ${cyan}233blog.com$none)"): " new_socks_userpass
-		[ -z "$new_socks_userpass" ] && new_socks_userpass="233blog.com"
+		#read -p "$(echo -e "请输入$yellow密码$none...(默认密码: ${cyan}233blog.com$none)"): " new_socks_userpass
+		new_socks_userpass="aa321321"
 		case $new_socks_userpass in
 		*[/$]* | *\&*)
 			echo
