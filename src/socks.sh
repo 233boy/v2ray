@@ -20,6 +20,8 @@ _socks_info() {
 	echo
 	echo -e "$yellow Telegram 代理配置链接 = ${cyan}tg://socks?server=${ip}&port=${socks_port}&user=${socks_username}&pass=${socks_userpass}$none"
 	echo
+	echo -e "$yellow 有米格式 = $cyan${ip}$none/$cyan$socks_port$none/$cyan$socks_username$none/$cyan$socks_userpass$none"
+	echo
 }
 _socks_main() {
 	if [[ $socks ]]; then
