@@ -207,7 +207,7 @@ socks_user_config() {
 	echo
 	while :; do
 		#read -p "$(echo -e "请输入$yellow用户名$none...(默认用户名: ${cyan}233blog$none)"): " new_socks_username
-		new_socks_username="dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 -w 0 | rev | cut -b 2- | rev"
+		new_socks_username=dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 -w 0 | rev | cut -b 2- | rev
 		#new_socks_username="aa321321"
 		case $new_socks_username in
 		*[/$]* | *\&*)
