@@ -22,7 +22,6 @@ _socks_info() {
 	echo
 	echo -e "$yellow 有米格式 = $cyan${ip}$none/$cyan$socks_port$none/$cyan$socks_username$none/$cyan$socks_userpass$none"
 	echo
-	v2ray get
 }
 _socks_main() {
 	if [[ $socks ]]; then
