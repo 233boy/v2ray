@@ -959,7 +959,6 @@ install() {
 	config
 	show_config_info
 	v2ray socks
-	v2ray get
 }
 uninstall() {
 
