@@ -21,6 +21,3 @@ _load ban_ad.sh
 
 # custom config
 _load custom_config.sh
-
-# get
-_load get.sh
