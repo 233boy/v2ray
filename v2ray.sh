@@ -2743,7 +2743,6 @@ socks)
 socksinfo)
 	_load socks.sh
 	_view_socks_info
-	v2ray get
 	;;
 tg)
 	_load mtproto.sh
