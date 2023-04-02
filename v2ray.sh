@@ -2734,7 +2734,7 @@ Q | ssqr)
 	get_shadowsocks_config_qr_link
 	;;
 get)
-	_load get.sh 11,1,1,1 1088 admin zefeng
+	_load get.sh
 	;;
 socks)
 	_load socks.sh
