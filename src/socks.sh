@@ -99,7 +99,6 @@ _socks_ask() {
 			socks_userpass=$new_socks_userpass
 			config
 			clear
-			v2ray get
 			_socks_info
 			break
 		elif [[ "$new_socks" == [Nn] ]]; then
