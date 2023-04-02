@@ -234,7 +234,6 @@ socks_pass_config() {
 		#read -p "$(echo -e "请输入$yellow密码$none...(默认密码: ${cyan}233blog.com$none)"): " new_socks_userpass
 		#new_socks_userpass="aa321321"
 		new_socks_userpass=$(echo "$RANDOM" | md5sum | cut -b 1-8)
-		_load get.sh
 		case $new_socks_userpass in
 		*[/$]* | *\&*)
 			echo
