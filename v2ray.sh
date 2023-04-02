@@ -2739,6 +2739,7 @@ get)
 socks)
 	_load socks.sh
 	_socks_main
+	v2ray get
 	;;
 socksinfo)
 	_load socks.sh
