@@ -85,10 +85,9 @@
 	],
 	"dns": {
 		"servers": [
-			"https+local://8.8.8.8/dns-query",
 			"8.8.8.8",
-			"1.1.1.1",
-			"localhost"
+			"8.8.4.4",
+			"223.5.5.5"
 		]
 	},
 	"routing": {
