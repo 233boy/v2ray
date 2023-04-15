@@ -112,11 +112,9 @@
 	],
 	"dns": {
 		"servers": [
-			"https+local://dns.google/dns-query",
 			"8.8.8.8",
-			"1.1.1.1",
-			"localhost",
-			"8.8.4.4"
+			"8.8.4.4",
+			"223.5.5.5"
 		]
 	},
 	"routing": {
