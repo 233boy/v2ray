@@ -51,7 +51,7 @@
 		//include_socks
 		//include_mtproto
 		//include_in_config
-		//
+		//v2ray/config/server/dynamic/tcp.json
 	],
 	"outbounds": [
 		{
