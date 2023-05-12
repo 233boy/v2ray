@@ -90,7 +90,7 @@ _socks_ask() {
 			socks_user_config
 			socks_pass_config
 			pause
-			open_port $new_socks_port
+			# open_port $new_socks_port
 			backup_config +socks
 			socks_port=$new_socks_port
 			socks_username=$new_socks_username
@@ -125,7 +125,7 @@ disable_socks() {
 			echo
 			pause
 			backup_config -socks
-			del_port $socks_port
+			# del_port $socks_port
 			socks=''
 			config
 			echo

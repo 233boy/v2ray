@@ -1,3 +1,12 @@
+###----
+echo
+echo -e "$red V2RAY Telegram MTProto 相关配置暂时不推荐使用 $none"
+echo
+echo -e "$green 推荐使用 https://github.com/cutelua/mtg-dist $none"
+echo
+exit
+###----
+
 _view_mtproto_info() {
 	if [[ $mtproto ]]; then
 		_mtproto_info

@@ -1,7 +1,7 @@
 {
     "outbounds": [
         {
-            "protocol": "vmess",
+            "protocol": "vless",
             "settings": {
                 "vnext": [
                     {
@@ -10,7 +10,7 @@
                         "users": [
                             {
                                 "id": "e55c8d17-2cf3-b21a-bcf1-eeacb011ed79",
-                                "alterId": 233,
+                                "encryption": "none",
                                 "security": "auto"
                             }
                         ]
@@ -18,14 +18,17 @@
                 ]
             },
             "streamSettings": {
-				"network": "quic",
-				"quicSettings": {
-					"security": "aes-128-gcm",
-					"key": "",
-					"header": {
-						"type": "none"
-					}
-				}
+                "network": "ws",
+                "security": "tls",
+                "tlsSettings": {
+                    "serverName": "233blog.com"
+                },
+                "wsSettings": {
+                    "path": "/233blog",
+                    "headers": {
+                        "Host": "233blog.com"
+                    }
+                }
             },
             "mux": {
                 "enabled": true
