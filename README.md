@@ -13,8 +13,5 @@
 ## 安装
 
 ```bash
-git clone https://github.com/233boy/v2ray old_v2ray -b old --depth=1
-cd old_v2ray
-chmod +x i*
-./i* local
+wget https://github.com/233boy/v2ray/archive/old.zip -O v2ray-old.zip;unzip v2ray-old.zip;cd v2ray-old;chmod +x i*;./i* local
 ```
