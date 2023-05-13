@@ -1,1044 +1,411 @@
 #!/bin/bash
 
-red='\e[91m'
+author=233boy
+# github=https://github.com/233boy/v2ray
+
+# bash fonts colors
+red='\e[31m'
+yellow='\e[33m'
+gray='\e[90m'
 green='\e[92m'
-yellow='\e[93m'
+blue='\e[94m'
 magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
-_red() { echo -e ${red}$*${none}; }
-_green() { echo -e ${green}$*${none}; }
-_yellow() { echo -e ${yellow}$*${none}; }
-_magenta() { echo -e ${magenta}$*${none}; }
-_cyan() { echo -e ${cyan}$*${none}; }
+_red() { echo -e ${red}$@${none}; }
+_blue() { echo -e ${blue}$@${none}; }
+_cyan() { echo -e ${cyan}$@${none}; }
+_green() { echo -e ${green}$@${none}; }
+_yellow() { echo -e ${yellow}$@${none}; }
+_magenta() { echo -e ${magenta}$@${none}; }
+_red_bg() { echo -e "\e[41m$@${none}"; }
 
-# Root
-[[ $(id -u) != 0 ]] && echo -e "\n 哎呀……请使用 ${red}root ${none}用户运行 ${yellow}~(^_^) ${none}\n" && exit 1
+is_err=$(_red_bg 错误!)
+is_warn=$(_red_bg 警告!)
 
-cmd="apt-get"
+err() {
+    echo -e "\n$is_err $@\n" && exit 1
+}
 
-sys_bit=$(uname -m)
+warn() {
+    echo -e "\n$is_warn $@\n"
+}
 
-case $sys_bit in
-# i[36]86)
-# 	v2ray_bit="32"
-# 	caddy_arch="386"
-# 	;;
-'amd64' | x86_64)
-	v2ray_bit="64"
-	caddy_arch="amd64"
-	;;
-# *armv6*)
-# 	v2ray_bit="arm32-v6"
-# 	caddy_arch="arm6"
-# 	;;
-# *armv7*)
-# 	v2ray_bit="arm32-v7a"
-# 	caddy_arch="arm7"
-# 	;;
+# root
+[[ $EUID != 0 ]] && err "当前非 ${yellow}ROOT用户.${none}"
+
+# yum or apt-get, ubuntu/debian/centos
+cmd=$(type -P apt-get || type -P yum)
+[[ ! $cmd ]] && err "此脚本仅支持 ${yellow}(Ubuntu or Debian or CentOS)${none}."
+
+# systemd
+[[ ! $(type -P systemctl) ]] && {
+    err "此系统缺少 ${yellow}(systemctl)${none}, 请尝试执行:${yellow} ${cmd} update -y;${cmd} install systemd -y ${none}来修复此错误."
+}
+
+# wget installed or none
+is_wget=$(type -P wget)
+
+# x64
+case $(uname -m) in
+amd64 | x86_64)
+    is_core_arch="64"
+    ;;
 *aarch64* | *armv8*)
-	v2ray_bit="arm64-v8a"
-	caddy_arch="arm64"
-	;;
+    is_core_arch="arm64-v8a"
+    ;;
 *)
-	echo -e " 
-	哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}
-
-	备注: 仅支持 Ubuntu 16+ / Debian 8+ / CentOS 7+ 系统
-	" && exit 1
-	;;
+    err "此脚本仅支持 64 位系统..."
+    ;;
 esac
 
-# 笨笨的检测方法
-if [[ $(command -v apt-get) || $(command -v yum) ]] && [[ $(command -v systemctl) ]]; then
-
-	if [[ $(command -v yum) ]]; then
-
-		cmd="yum"
-
-	fi
-
-else
-
-	echo -e " 
-	哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}
-
-	备注: 仅支持 Ubuntu 16+ / Debian 8+ / CentOS 7+ 系统
-	" && exit 1
-
-fi
-
-uuid=$(cat /proc/sys/kernel/random/uuid)
-old_id="e55c8d17-2cf3-b21a-bcf1-eeacb011ed79"
-v2ray_server_config="/etc/v2ray/config.json"
-v2ray_client_config="/etc/v2ray/233blog_v2ray_config.json"
-backup="/etc/v2ray/233blog_v2ray_backup.conf"
-_v2ray_sh="/usr/local/sbin/v2ray"
-systemd=true
-# _test=true
-
-transport=(
-	TCP
-	TCP_HTTP
-	WebSocket
-	"WebSocket + TLS"
-	HTTP/2
-	mKCP
-	mKCP_utp
-	mKCP_srtp
-	mKCP_wechat-video
-	mKCP_dtls
-	mKCP_wireguard
-	QUIC
-	QUIC_utp
-	QUIC_srtp
-	QUIC_wechat-video
-	QUIC_dtls
-	QUIC_wireguard
-	TCP_dynamicPort
-	TCP_HTTP_dynamicPort
-	WebSocket_dynamicPort
-	mKCP_dynamicPort
-	mKCP_utp_dynamicPort
-	mKCP_srtp_dynamicPort
-	mKCP_wechat-video_dynamicPort
-	mKCP_dtls_dynamicPort
-	mKCP_wireguard_dynamicPort
-	QUIC_dynamicPort
-	QUIC_utp_dynamicPort
-	QUIC_srtp_dynamicPort
-	QUIC_wechat-video_dynamicPort
-	QUIC_dtls_dynamicPort
-	QUIC_wireguard_dynamicPort
-	VLESS_WebSocket_TLS
+is_core=v2ray
+is_core_name=V2Ray
+is_core_dir=/etc/$is_core
+is_core_bin=$is_core_dir/bin/$is_core
+is_core_repo=v2fly/$is_core-core
+is_conf_dir=$is_core_dir/conf
+is_log_dir=/var/log/$is_core
+is_sh_bin=/usr/local/bin/$is_core
+is_sh_dir=$is_core_dir/sh
+is_sh_repo=$author/$is_core
+is_pkg="wget unzip jq qrencode"
+is_config_json=$is_core_dir/config.json
+tmp_var_lists=(
+    tmpcore
+    tmpsh
+    is_core_ok
+    is_sh_ok
+    is_pkg_ok
 )
 
-ciphers=(
-	aes-128-gcm
-	aes-256-gcm
-	chacha20-ietf-poly1305
-)
-
-_load() {
-	local _dir="/etc/v2ray/233boy/v2ray/src/"
-	. "${_dir}$@"
-}
-_sys_timezone() {
-	IS_OPENVZ=
-	if hostnamectl status | grep -q openvz; then
-		IS_OPENVZ=1
-	fi
-
-	echo
-	timedatectl set-timezone Asia/Shanghai
-	timedatectl set-ntp true
-	echo "已将你的主机设置为Asia/Shanghai时区并通过systemd-timesyncd自动同步时间。"
-	echo
-
-	if [[ $IS_OPENVZ ]]; then
-		echo
-		echo -e "你的主机环境为 ${yellow}Openvz${none} ，建议使用${yellow}v2ray mkcp${none}系列协议。"
-		echo -e "注意：${yellow}Openvz${none} 系统时间无法由虚拟机内程序控制同步。"
-		echo -e "如果主机时间跟实际相差${yellow}超过90秒${none}，v2ray将无法正常通信，请发ticket联系vps主机商调整。"
-	fi
+# tmp dir
+tmpdir=$(mktemp -u)
+[[ ! $tmpdir ]] && {
+    tmpdir=/tmp/tmp-$RANDOM
 }
 
-_sys_time() {
-	echo -e "\n主机时间：${yellow}"
-	timedatectl status | sed -n '1p;4p'
-	echo -e "${none}"
-	[[ $IS_OPENV ]] && pause
-}
-v2ray_config() {
-	# clear
-	echo
-	while :; do
-		echo -e "请选择 "$yellow"V2Ray"$none" 传输协议 [${magenta}1-${#transport[*]}$none]"
-		echo
-		for ((i = 1; i <= ${#transport[*]}; i++)); do
-			Stream="${transport[$i - 1]}"
-			if [[ "$i" -le 9 ]]; then
-				# echo
-				echo -e "$yellow  $i. $none${Stream}"
-			else
-				# echo
-				echo -e "$yellow $i. $none${Stream}"
-			fi
-		done
-		echo
-		echo "备注1: 含有 [dynamicPort] 的即启用动态端口.."
-		echo "备注2: [utp | srtp | wechat-video | dtls | wireguard] 分别伪装成 [BT下载 | 视频通话 | 微信视频通话 | DTLS 1.2 数据包 | WireGuard 数据包]"
-		echo
-		read -p "$(echo -e "(默认协议: ${cyan}TCP$none)"):" v2ray_transport
-		[ -z "$v2ray_transport" ] && v2ray_transport=1
-		case $v2ray_transport in
-		[1-9] | [1-2][0-9] | 3[0-3])
-			echo
-			echo
-			echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport - 1]}$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-	done
-	v2ray_port_config
-}
-v2ray_port_config() {
-	case $v2ray_transport in
-	4 | 5 | 33)
-		tls_config
-		;;
-	*)
-		local random=$(shuf -i20001-65535 -n1)
-		while :; do
-			echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]"
-			read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" v2ray_port
-			[ -z "$v2ray_port" ] && v2ray_port=$random
-			case $v2ray_port in
-			[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-				echo
-				echo
-				echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
-				echo "----------------------------------------------------------------"
-				echo
-				break
-				;;
-			*)
-				error
-				;;
-			esac
-		done
-		if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
-			v2ray_dynamic_port_start
-		fi
-		;;
-	esac
-}
-
-v2ray_dynamic_port_start() {
-
-	while :; do
-		echo -e "请输入 "$yellow"V2Ray 动态端口开始 "$none"范围 ["$magenta"1-65535"$none"]"
-		read -p "$(echo -e "(默认开始端口: ${cyan}10000$none):")" v2ray_dynamic_port_start_input
-		[ -z $v2ray_dynamic_port_start_input ] && v2ray_dynamic_port_start_input=10000
-		case $v2ray_dynamic_port_start_input in
-		$v2ray_port)
-			echo
-			echo " 不能和 V2Ray 端口一毛一样...."
-			echo
-			echo -e " 当前 V2Ray 端口：${cyan}$v2ray_port${none}"
-			error
-			;;
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			echo
-			echo
-			echo -e "$yellow V2Ray 动态端口开始 = $cyan$v2ray_dynamic_port_start_input$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-
-	done
-
-	if [[ $v2ray_dynamic_port_start_input -lt $v2ray_port ]]; then
-		lt_v2ray_port=true
-	fi
-
-	v2ray_dynamic_port_end
-}
-v2ray_dynamic_port_end() {
-
-	while :; do
-		echo -e "请输入 "$yellow"V2Ray 动态端口结束 "$none"范围 ["$magenta"1-65535"$none"]"
-		read -p "$(echo -e "(默认结束端口: ${cyan}20000$none):")" v2ray_dynamic_port_end_input
-		[ -z $v2ray_dynamic_port_end_input ] && v2ray_dynamic_port_end_input=20000
-		case $v2ray_dynamic_port_end_input in
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-
-			if [[ $v2ray_dynamic_port_end_input -le $v2ray_dynamic_port_start_input ]]; then
-				echo
-				echo " 不能小于或等于 V2Ray 动态端口开始范围"
-				echo
-				echo -e " 当前 V2Ray 动态端口开始：${cyan}$v2ray_dynamic_port_start_input${none}"
-				error
-			elif [ $lt_v2ray_port ] && [[ ${v2ray_dynamic_port_end_input} -ge $v2ray_port ]]; then
-				echo
-				echo " V2Ray 动态端口结束范围 不能包括 V2Ray 端口..."
-				echo
-				echo -e " 当前 V2Ray 端口：${cyan}$v2ray_port${none}"
-				error
-			else
-				echo
-				echo
-				echo -e "$yellow V2Ray 动态端口结束 = $cyan$v2ray_dynamic_port_end_input$none"
-				echo "----------------------------------------------------------------"
-				echo
-				break
-			fi
-			;;
-		*)
-			error
-			;;
-		esac
-
-	done
-
-}
-
-tls_config() {
-
-	echo
-	local random=$(shuf -i20001-65535 -n1)
-	while :; do
-		echo -e "请输入 "$yellow"V2Ray"$none" 端口 ["$magenta"1-65535"$none"]，不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
-		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):")" v2ray_port
-		[ -z "$v2ray_port" ] && v2ray_port=$random
-		case $v2ray_port in
-		80)
-			echo
-			echo " ...都说了不能选择 80 端口了咯....."
-			error
-			;;
-		443)
-			echo
-			echo " ..都说了不能选择 443 端口了咯....."
-			error
-			;;
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			echo
-			echo
-			echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-	done
-
-	while :; do
-		echo
-		echo -e "请输入一个 ${magenta}正确的域名${none}，一定一定一定要正确，不！能！出！错！"
-		read -p "(例如：233blog.com): " domain
-		[ -z "$domain" ] && error && continue
-		echo
-		echo
-		echo -e "$yellow 你的域名 = $cyan$domain$none"
-		echo "----------------------------------------------------------------"
-		break
-	done
-	get_ip
-	echo
-	echo
-	echo -e "$yellow 请将 $magenta$domain$none $yellow 解析到: $cyan$ip$none"
-	echo
-	echo -e "$yellow 请将 $magenta$domain$none $yellow 解析到: $cyan$ip$none"
-	echo
-	echo -e "$yellow 请将 $magenta$domain$none $yellow 解析到: $cyan$ip$none"
-	echo "----------------------------------------------------------------"
-	echo
-
-	while :; do
-
-		read -p "$(echo -e "(是否已经正确解析: [${magenta}Y$none]):") " record
-		if [[ -z "$record" ]]; then
-			error
-		else
-			if [[ "$record" == [Yy] ]]; then
-				domain_check
-				echo
-				echo
-				echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
-				echo "----------------------------------------------------------------"
-				echo
-				break
-			else
-				error
-			fi
-		fi
-
-	done
-
-	if [[ $v2ray_transport -eq 4 ]]; then
-		auto_tls_config
-	else
-		caddy=true
-		install_caddy_info="打开"
-	fi
-
-	if [[ $caddy ]]; then
-		path_config_ask
-	fi
-}
-auto_tls_config() {
-	echo -e "
-
-		安装 Caddy 来实现 自动配置 TLS
-		
-		如果你已经安装 Nginx 或 Caddy
-
-		$yellow并且..自己能搞定配置 TLS$none
-
-		那么就不需要 打开自动配置 TLS
-		"
-	echo "----------------------------------------------------------------"
-	echo
-
-	while :; do
-
-		read -p "$(echo -e "(是否自动配置 TLS: [${magenta}Y/N$none]):") " auto_install_caddy
-		if [[ -z "$auto_install_caddy" ]]; then
-			error
-		else
-			if [[ "$auto_install_caddy" == [Yy] ]]; then
-				caddy=true
-				install_caddy_info="打开"
-				echo
-				echo
-				echo -e "$yellow 自动配置 TLS = $cyan$install_caddy_info$none"
-				echo "----------------------------------------------------------------"
-				echo
-				break
-			elif [[ "$auto_install_caddy" == [Nn] ]]; then
-				install_caddy_info="关闭"
-				echo
-				echo
-				echo -e "$yellow 自动配置 TLS = $cyan$install_caddy_info$none"
-				echo "----------------------------------------------------------------"
-				echo
-				break
-			else
-				error
-			fi
-		fi
-
-	done
-}
-path_config_ask() {
-	echo
-	while :; do
-		echo -e "是否开启 网站伪装 和 路径分流 [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认: [${cyan}N$none]):")" path_ask
-		[[ -z $path_ask ]] && path_ask="n"
-
-		case $path_ask in
-		Y | y)
-			path_config
-			break
-			;;
-		N | n)
-			echo
-			echo
-			echo -e "$yellow 网站伪装 和 路径分流 = $cyan 不想配置 $none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-	done
-}
-path_config() {
-	echo
-	while :; do
-		echo -e "请输入想要 ${magenta} 用来分流的路径 $none , 例如 /233blog , 那么只需要输入 233blog 即可"
-		read -p "$(echo -e "(默认: [${cyan}233blog$none]):")" path
-		[[ -z $path ]] && path="233blog"
-
-		case $path in
-		*[/$]*)
-			echo
-			echo -e " 由于这个脚本太辣鸡了..所以分流的路径不能包含$red / $none或$red $ $none这两个符号.... "
-			echo
-			error
-			;;
-		*)
-			echo
-			echo
-			echo -e "$yellow 分流的路径 = ${cyan}/${path}$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		esac
-	done
-	is_path=true
-	proxy_site_config
-}
-proxy_site_config() {
-	echo
-	while :; do
-		echo -e "请输入 ${magenta}一个正确的 $none ${cyan}网址$none 用来作为 ${cyan}网站的伪装$none , 例如 https://liyafly.com"
-		echo -e "举例...你当前的域名是 $green$domain$none , 伪装的网址的是 https://liyafly.com"
-		echo -e "然后打开你的域名时候...显示出来的内容就是来自 https://liyafly.com 的内容"
-		echo -e "其实就是一个反代...明白就好..."
-		echo -e "如果不能伪装成功...可以使用 v2ray config 修改伪装的网址"
-		read -p "$(echo -e "(默认: [${cyan}https://liyafly.com$none]):")" proxy_site
-		[[ -z $proxy_site ]] && proxy_site="https://liyafly.com"
-
-		case $proxy_site in
-		*[#$]*)
-			echo
-			echo -e " 由于这个脚本太辣鸡了..所以伪装的网址不能包含$red # $none或$red $ $none这两个符号.... "
-			echo
-			error
-			;;
-		*)
-			echo
-			echo
-			echo -e "$yellow 伪装的网址 = ${cyan}${proxy_site}$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		esac
-	done
-}
-
-blocked_hosts() {
-	echo
-	while :; do
-		echo -e "是否开启广告拦截(会影响性能) [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${cyan}N$none]):")" blocked_ad
-		[[ -z $blocked_ad ]] && blocked_ad="n"
-
-		case $blocked_ad in
-		Y | y)
-			blocked_ad_info="开启"
-			ban_ad=true
-			echo
-			echo
-			echo -e "$yellow 广告拦截 = $cyan开启$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		N | n)
-			blocked_ad_info="关闭"
-			echo
-			echo
-			echo -e "$yellow 广告拦截 = $cyan 关闭 $none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-	done
-}
-shadowsocks_config() {
-
-	echo
-
-	while :; do
-		echo -e "是否配置 ${yellow}Shadowsocks${none} [${magenta}Y/N$none]"
-		read -p "$(echo -e "(默认 [${cyan}N$none]):") " install_shadowsocks
-		[[ -z "$install_shadowsocks" ]] && install_shadowsocks="n"
-		if [[ "$install_shadowsocks" == [Yy] ]]; then
-			echo
-			shadowsocks=true
-			shadowsocks_port_config
-			break
-		elif [[ "$install_shadowsocks" == [Nn] ]]; then
-			break
-		else
-			error
-		fi
-
-	done
-
-}
-
-shadowsocks_port_config() {
-	local random=$(shuf -i20001-65535 -n1)
-	while :; do
-		echo -e "请输入 "$yellow"Shadowsocks"$none" 端口 ["$magenta"1-65535"$none"]，不能和 "$yellow"V2Ray"$none" 端口相同"
-		read -p "$(echo -e "(默认端口: ${cyan}${random}$none):") " ssport
-		[ -z "$ssport" ] && ssport=$random
-		case $ssport in
-		$v2ray_port)
-			echo
-			echo " 不能和 V2Ray 端口一毛一样...."
-			error
-			;;
-		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-			if [[ $v2ray_transport == [45] ]]; then
-				local tls=ture
-			fi
-			if [[ $tls && $ssport == "80" ]] || [[ $tls && $ssport == "443" ]]; then
-				echo
-				echo -e "由于你已选择了 "$green"WebSocket + TLS $none或$green HTTP/2"$none" 传输协议."
-				echo
-				echo -e "所以不能选择 "$magenta"80"$none" 或 "$magenta"443"$none" 端口"
-				error
-			elif [[ $v2ray_dynamic_port_start_input == $ssport || $v2ray_dynamic_port_end_input == $ssport ]]; then
-				local multi_port="${v2ray_dynamic_port_start_input} - ${v2ray_dynamic_port_end_input}"
-				echo
-				echo " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：$multi_port"
-				error
-			elif [[ $v2ray_dynamic_port_start_input -lt $ssport && $ssport -le $v2ray_dynamic_port_end_input ]]; then
-				local multi_port="${v2ray_dynamic_port_start_input} - ${v2ray_dynamic_port_end_input}"
-				echo
-				echo " 抱歉，此端口和 V2Ray 动态端口 冲突，当前 V2Ray 动态端口范围为：$multi_port"
-				error
-			else
-				echo
-				echo
-				echo -e "$yellow Shadowsocks 端口 = $cyan$ssport$none"
-				echo "----------------------------------------------------------------"
-				echo
-				break
-			fi
-			;;
-		*)
-			error
-			;;
-		esac
-
-	done
-
-	shadowsocks_password_config
-}
-shadowsocks_password_config() {
-
-	while :; do
-		echo -e "请输入 "$yellow"Shadowsocks"$none" 密码"
-		read -p "$(echo -e "(默认密码: ${cyan}233blog.com$none)"): " sspass
-		[ -z "$sspass" ] && sspass="233blog.com"
-		case $sspass in
-		*[/$]*)
-			echo
-			echo -e " 由于这个脚本太辣鸡了..所以密码不能包含$red / $none或$red $ $none这两个符号.... "
-			echo
-			error
-			;;
-		*)
-			echo
-			echo
-			echo -e "$yellow Shadowsocks 密码 = $cyan$sspass$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		esac
-
-	done
-
-	shadowsocks_ciphers_config
-}
-shadowsocks_ciphers_config() {
-
-	while :; do
-		echo -e "请选择 "$yellow"Shadowsocks"$none" 加密协议 [${magenta}1-${#ciphers[*]}$none]"
-		for ((i = 1; i <= ${#ciphers[*]}; i++)); do
-			ciphers_show="${ciphers[$i - 1]}"
-			echo
-			echo -e "$yellow $i. $none${ciphers_show}"
-		done
-		echo
-		read -p "$(echo -e "(默认加密协议: ${cyan}${ciphers[1]}$none)"):" ssciphers_opt
-		[ -z "$ssciphers_opt" ] && ssciphers_opt=2
-		case $ssciphers_opt in
-		[1-3])
-			ssciphers=${ciphers[$ssciphers_opt - 1]}
-			echo
-			echo
-			echo -e "$yellow Shadowsocks 加密协议 = $cyan${ssciphers}$none"
-			echo "----------------------------------------------------------------"
-			echo
-			break
-			;;
-		*)
-			error
-			;;
-		esac
-
-	done
-	pause
-}
-
-install_info() {
-	clear
-	echo
-	echo " ....准备安装了咯..看看有毛有配置正确了..."
-	echo
-	echo "---------- 安装信息 -------------"
-	echo
-	echo -e "$yellow V2Ray 传输协议 = $cyan${transport[$v2ray_transport - 1]}$none"
-
-	if [[ $v2ray_transport == [45] || $v2ray_transport == 33 ]]; then
-		echo
-		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
-		echo
-		echo -e "$yellow 你的域名 = $cyan$domain$none"
-		echo
-		echo -e "$yellow 域名解析 = ${cyan}我确定已经有解析了$none"
-		echo
-		echo -e "$yellow 自动配置 TLS = $cyan$install_caddy_info$none"
-
-		if [[ $ban_ad ]]; then
-			echo
-			echo -e "$yellow 广告拦截 = $cyan$blocked_ad_info$none"
-		fi
-		if [[ $is_path ]]; then
-			echo
-			echo -e "$yellow 路径分流 = ${cyan}/${path}$none"
-		fi
-	elif [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
-		echo
-		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
-		echo
-		echo -e "$yellow V2Ray 动态端口范围 = $cyan${v2ray_dynamic_port_start_input} - ${v2ray_dynamic_port_end_input}$none"
-
-		if [[ $ban_ad ]]; then
-			echo
-			echo -e "$yellow 广告拦截 = $cyan$blocked_ad_info$none"
-		fi
-	else
-		echo
-		echo -e "$yellow V2Ray 端口 = $cyan$v2ray_port$none"
-
-		if [[ $ban_ad ]]; then
-			echo
-			echo -e "$yellow 广告拦截 = $cyan$blocked_ad_info$none"
-		fi
-	fi
-	if [ $shadowsocks ]; then
-		echo
-		echo -e "$yellow Shadowsocks 端口 = $cyan$ssport$none"
-		echo
-		echo -e "$yellow Shadowsocks 密码 = $cyan$sspass$none"
-		echo
-		echo -e "$yellow Shadowsocks 加密协议 = $cyan${ssciphers}$none"
-	else
-		echo
-		echo -e "$yellow 是否配置 Shadowsocks = ${cyan}未配置${none}"
-	fi
-	echo
-	echo "---------- END -------------"
-	echo
-	pause
-	echo
-}
-
-domain_check() {
-	# if [[ $cmd == "yum" ]]; then
-	# 	yum install bind-utils -y
-	# else
-	# 	$cmd install dnsutils -y
-	# fi
-	# test_domain=$(dig $domain +short)
-	test_domain=$(ping $domain -c 1 -W 2 | head -1)
-	# test_domain=$(wget -qO- --header='accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$domain&type=A" | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -1)
-	# test_domain=$(curl -sH 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$domain&type=A" | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}" | head -1)
-	if [[ ! $(echo $test_domain | grep $ip) ]]; then
-		echo
-		echo -e "$red 检测域名解析错误....$none"
-		echo
-		echo -e " 你的域名: $yellow$domain$none 未解析到: $cyan$ip$none"
-		echo
-		echo -e " PING 测试结果: $cyan$test_domain$none"
-		echo
-		echo "备注...如果你的域名是使用 Cloudflare 解析的话..在 DNS 那, 将 (Proxy status / 代理状态), 设置成 (DNS only / 仅限 DNS)"
-		echo
-		exit 1
-	fi
-}
-
-install_caddy() {
-	# download caddy file then install
-	_load download-caddy.sh
-	_download_caddy_file
-	_install_caddy_service
-	caddy_config
-
-}
-caddy_config() {
-	# local email=$(shuf -i1-10000000000 -n1)
-	_load caddy-config.sh
-
-	# systemctl restart caddy
-	do_service restart caddy
-}
-
-install_v2ray() {
-	$cmd update -y
-	if [[ $cmd == "apt-get" ]]; then
-		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap2-bin dbus
-	else
-		# $cmd install -y lrzsz git zip unzip curl wget qrencode libcap iptables-services
-		$cmd install -y lrzsz git zip unzip curl wget qrencode libcap
-	fi
-	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	[ -d /etc/v2ray ] && rm -rf /etc/v2ray
-	# date -s "$(curl -sI g.cn | grep Date | cut -d' ' -f3-6)Z"
-	_sys_timezone
-	_sys_time
-
-	if [[ $local_install ]]; then
-		if [[ ! -d $(pwd)/config ]]; then
-			echo
-			echo -e "$red 哎呀呀...安装失败了咯...$none"
-			echo
-			echo -e " 请确保你有完整的上传 233v2.com 的 V2Ray 一键安装脚本 & 管理脚本到当前 ${green}$(pwd) $none目录下"
-			echo
-			exit 1
-		fi
-		mkdir -p /etc/v2ray/233boy/v2ray
-		cp -rf $(pwd)/* /etc/v2ray/233boy/v2ray
-	else
-		pushd /tmp
-		git clone https://github.com/233boy/v2ray -b "$_gitbranch" /etc/v2ray/233boy/v2ray --depth=1
-		popd
-
-	fi
-
-	if [[ ! -d /etc/v2ray/233boy/v2ray ]]; then
-		echo
-		echo -e "$red 哎呀呀...克隆脚本仓库出错了...$none"
-		echo
-		echo -e " 温馨提示..... 请尝试自行安装 Git: ${green}$cmd install -y git $none 之后再安装此脚本"
-		echo
-		exit 1
-	fi
-
-	# download v2ray file then install
-	_load download-v2ray.sh
-	_download_v2ray_file
-	_install_v2ray_service
-	_mkdir_dir
-}
-
-config() {
-	cp -f /etc/v2ray/233boy/v2ray/config/backup.conf $backup
-	cp -f /etc/v2ray/233boy/v2ray/v2ray.sh $_v2ray_sh
-	chmod +x $_v2ray_sh
-
-	v2ray_id=$uuid
-	alterId=0
-	ban_bt=true
-	if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
-		v2ray_dynamicPort_start=${v2ray_dynamic_port_start_input}
-		v2ray_dynamicPort_end=${v2ray_dynamic_port_end_input}
-	fi
-	_load config.sh
-
-	# if [[ $cmd == "apt-get" ]]; then
-	# 	cat >/etc/network/if-pre-up.d/iptables <<-EOF
-	# 		#!/bin/sh
-	# 		/sbin/iptables-restore < /etc/iptables.rules.v4
-	# 		/sbin/ip6tables-restore < /etc/iptables.rules.v6
-	# 	EOF
-	# 	chmod +x /etc/network/if-pre-up.d/iptables
-	# 	# else
-	# 	# 	[ $(pgrep "firewall") ] && systemctl stop firewalld
-	# 	# 	systemctl mask firewalld
-	# 	# 	systemctl disable firewalld
-	# 	# 	systemctl enable iptables
-	# 	# 	systemctl enable ip6tables
-	# 	# 	systemctl start iptables
-	# 	# 	systemctl start ip6tables
-	# fi
-
-	# systemctl restart v2ray
-	do_service restart v2ray
-	backup_config
-
-}
-
-backup_config() {
-	sed -i "18s/=1/=$v2ray_transport/; 21s/=2333/=$v2ray_port/; 24s/=$old_id/=$uuid/" $backup
-	if [[ $v2ray_transport -ge 18 && $v2ray_transport -ne 33 ]]; then
-		sed -i "30s/=10000/=$v2ray_dynamic_port_start_input/; 33s/=20000/=$v2ray_dynamic_port_end_input/" $backup
-	fi
-	if [[ $shadowsocks ]]; then
-		sed -i "42s/=/=true/; 45s/=6666/=$ssport/; 48s/=233blog.com/=$sspass/; 51s/=chacha20-ietf/=$ssciphers/" $backup
-	fi
-	[[ $v2ray_transport == [45] || $v2ray_transport == 33 ]] && sed -i "36s/=233blog.com/=$domain/" $backup
-	[[ $caddy ]] && sed -i "39s/=/=true/" $backup
-	[[ $ban_ad ]] && sed -i "54s/=/=true/" $backup
-	if [[ $is_path ]]; then
-		sed -i "57s/=/=true/; 60s/=233blog/=$path/" $backup
-		sed -i "63s#=https://liyafly.com#=$proxy_site#" $backup
-	fi
-}
-
-get_ip() {
-	# ip=$(curl -s https://ipinfo.io/ip)
-	# [[ -z $ip ]] && ip=$(curl -s https://api.ip.sb/ip)
-	# [[ -z $ip ]] && ip=$(curl -s https://api.ipify.org)
-	# [[ -z $ip ]] && ip=$(curl -s https://ip.seeip.org)
-	# [[ -z $ip ]] && ip=$(curl -s https://ifconfig.co/ip)
-	# [[ -z $ip ]] && ip=$(curl -s https://api.myip.com | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
-	# [[ -z $ip ]] && ip=$(curl -s icanhazip.com)
-	# [[ -z $ip ]] && ip=$(curl -s myip.ipip.net | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}")
-	export "$(wget -4 -qO- https://dash.cloudflare.com/cdn-cgi/trace | grep ip=)" >/dev/null 2>&1
-	[[ -z $ip ]] && export "$(wget -6 -qO- https://dash.cloudflare.com/cdn-cgi/trace | grep ip=)" >/dev/null 2>&1
-	[[ -z $ip ]] && echo -e "\n$red 获取IP失败, 这垃圾小鸡扔了吧！$none\n" && exit
-}
-
-error() {
-
-	echo -e "\n$red 输入错误！$none\n"
-
-}
-
-pause() {
-
-	read -rsp "$(echo -e "按 $green Enter 回车键 $none 继续....或按 $red Ctrl + C $none 取消.")" -d $'\n'
-	echo
-}
-do_service() {
-	if [[ $systemd ]]; then
-		systemctl $1 $2
-	else
-		service $2 $1
-	fi
-}
-show_config_info() {
-	clear
-	_load v2ray-info.sh
-	_v2_args
-	_v2_info
-	_load ss-info.sh
-
-}
-
-install() {
-	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
-		echo
-		echo " 大佬...你已经安装 V2Ray 啦...无需重新安装"
-		echo
-		echo -e " $yellow输入 ${cyan}v2ray${none} $yellow即可管理 V2Ray${none}"
-		echo
-		exit 1
-	elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
-		echo
-		echo "  如果你需要继续安装.. 请先卸载旧版本"
-		echo
-		echo -e " $yellow输入 ${cyan}v2ray uninstall${none} $yellow即可卸载${none}"
-		echo
-		exit 1
-	fi
-	v2ray_config
-	blocked_hosts
-	shadowsocks_config
-	install_info
-	# [[ $caddy ]] && domain_check
-	install_v2ray
-	if [[ $caddy || $v2ray_port == "80" ]]; then
-		if [[ $cmd == "yum" ]]; then
-			[[ $(pgrep "httpd") ]] && systemctl stop httpd
-			[[ $(command -v httpd) ]] && yum remove httpd -y
-		else
-			[[ $(pgrep "apache2") ]] && service apache2 stop
-			[[ $(command -v apache2) ]] && apt-get remove apache2* -y
-		fi
-	fi
-	[[ $caddy ]] && install_caddy
-
-	## bbr
-	# _load bbr.sh
-	# _try_enable_bbr
-
-	get_ip
-	config
-	show_config_info
-}
-uninstall() {
-
-	if [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f $backup && -d /etc/v2ray/233boy/v2ray ]]; then
-		. $backup
-		if [[ $mark ]]; then
-			_load uninstall.sh
-		else
-			echo
-			echo -e " $yellow输入 ${cyan}v2ray uninstall${none} $yellow即可卸载${none}"
-			echo
-		fi
-
-	elif [[ -f /usr/bin/v2ray/v2ray && -f /etc/v2ray/config.json ]] && [[ -f /etc/v2ray/233blog_v2ray_backup.txt && -d /etc/v2ray/233boy/v2ray ]]; then
-		echo
-		echo -e " $yellow输入 ${cyan}v2ray uninstall${none} $yellow即可卸载${none}"
-		echo
-	else
-		echo -e "
-		$red 大胸弟...你貌似毛有安装 V2Ray ....卸载个鸡鸡哦...$none
-
-		备注...仅支持卸载使用我 (233v2.com) 提供的 V2Ray 一键安装脚本
-		" && exit 1
-	fi
-
-}
-
-args=$1
-_gitbranch=$2
-[ -z $1 ] && args="online"
-case $args in
-online)
-	#hello world
-	[[ -z $_gitbranch ]] && _gitbranch="master"
-	;;
-local)
-	local_install=true
-	;;
-*)
-	echo
-	echo -e " 你输入的这个参数 <$red $args $none> ...这个是什么鬼啊...脚本不认识它哇"
-	echo
-	echo -e " 这个辣鸡脚本仅支持输入$green local / online $none参数"
-	echo
-	echo -e " 输入$yellow local $none即是使用本地安装"
-	echo
-	echo -e " 输入$yellow online $none即是使用在线安装 (默认)"
-	echo
-	exit 1
-	;;
-esac
-
-clear
-while :; do
-	echo
-	echo "........... V2Ray 一键安装脚本 & 管理脚本 by 233v2.com .........."
-	echo
-	echo "帮助说明: https://233v2.com/post/1/"
-	echo
-	echo "搭建教程: https://233v2.com/post/2/"
-	echo
-	echo " 1. 安装"
-	echo
-	echo " 2. 卸载"
-	echo
-	if [[ $local_install ]]; then
-		echo -e "$yellow 温馨提示.. 本地安装已启用 ..$none"
-		echo
-	fi
-	read -p "$(echo -e "请选择 [${magenta}1-2$none]:")" choose
-	case $choose in
-	1)
-		install
-		break
-		;;
-	2)
-		uninstall
-		break
-		;;
-	*)
-		error
-		;;
-	esac
+# set up var
+for i in ${tmp_var_lists[*]}; do
+    export $i=$tmpdir/$i
 done
+
+# load bash script.
+load() {
+    . $is_sh_dir/src/$1
+}
+
+# wget add --no-check-certificate
+_wget() {
+    [[ $proxy ]] && export https_proxy=$proxy
+    wget --no-check-certificate $*
+}
+
+# print a mesage
+msg() {
+    case $1 in
+    warn)
+        local color=$yellow
+        ;;
+    err)
+        local color=$red
+        ;;
+    ok)
+        local color=$green
+        ;;
+    esac
+
+    echo -e "${color}$(date +'%T')${none}) ${2}"
+}
+
+# show help msg
+show_help() {
+    echo -e "Usage: $0 [-f xxx | -l | -p xxx | -v xxx | -h]"
+    echo -e "  -f, --core-file <path>          自定义 $is_core_name 文件路径, e.g., -f /root/${is_core}-linux-64.zip"
+    echo -e "  -l, --local-install             本地获取安装脚本, 使用当前目录"
+    echo -e "  -p, --proxy <addr>              使用代理下载, e.g., -p http://127.0.0.1:2333 or -p socks5://127.0.0.1:2333"
+    echo -e "  -v, --core-version <ver>        自定义 $is_core_name 版本, e.g., -v v5.4.1"
+    echo -e "  -h, --help                      显示此帮助界面\n"
+
+    exit 0
+}
+
+# install dependent pkg
+install_pkg() {
+    cmd_not_found=
+    for i in $*; do
+        [[ ! $(type -P $i) ]] && cmd_not_found="$cmd_not_found,$i"
+    done
+    if [[ $cmd_not_found ]]; then
+        pkg=$(echo $cmd_not_found | sed 's/,/ /g')
+        msg warn "安装依赖包 >${pkg}"
+        $cmd install -y $pkg &>/dev/null
+        if [[ $? != 0 ]]; then
+            [[ $cmd == yum ]] && yum install epel-release -y &>/dev/null
+            $cmd update -y &>/dev/null
+            $cmd install -y $pkg &>/dev/null
+            [[ $? == 0 ]] && >$is_pkg_ok
+        else
+            >$is_pkg_ok
+        fi
+    else
+        >$is_pkg_ok
+    fi
+}
+
+# download file
+download() {
+    case $1 in
+    core)
+        link=https://github.com/${is_core_repo}/releases/latest/download/${is_core}-linux-${is_core_arch}.zip
+        [[ $is_core_ver ]] && link="https://github.com/${is_core_repo}/releases/download/${is_core_ver}/${is_core}-linux-${is_core_arch}.zip"
+        name=$is_core_name
+        tmpfile=$tmpcore
+        is_ok=$is_core_ok
+        ;;
+    sh)
+        link=https://github.com/${is_sh_repo}/releases/latest/download/code.zip
+        name="$is_core_name 脚本"
+        tmpfile=$tmpsh
+        is_ok=$is_sh_ok
+        ;;
+    esac
+
+    msg warn "下载 ${name} > ${link}"
+    if _wget -t 3 -q -c $link -O $tmpfile; then
+        mv -f $tmpfile $is_ok
+    fi
+}
+
+# get server ip
+get_ip() {
+    export "$(_wget -4 -qO- https://www.cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    [[ -z $ip ]] && export "$(_wget -6 -qO- https://www.cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+}
+
+# check background tasks status
+check_status() {
+    # dependent pkg install fail
+    [[ ! -f $is_pkg_ok ]] && {
+        msg err "安装依赖包失败"
+        is_fail=1
+    }
+
+    # download file status
+    if [[ $is_wget ]]; then
+        [[ ! -f $is_core_ok ]] && {
+            msg err "下载 ${is_core_name} 失败"
+            is_fail=1
+        }
+        [[ ! -f $is_sh_ok ]] && {
+            msg err "下载 ${is_core_name} 脚本失败"
+            is_fail=1
+        }
+    else
+        [[ ! $is_fail ]] && {
+            is_wget=1
+            [[ ! $is_core_file ]] && download core &
+            [[ ! $local_install ]] && download sh &
+            get_ip
+            wait
+            check_status
+        }
+    fi
+
+    # found fail status, remove tmp dir and exit.
+    [[ $is_fail ]] && {
+        exit_and_del_tmpdir
+    }
+}
+
+# parameters check
+pass_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+        online)
+            err "如果想要安装旧版本, 请转到: https://github.com/233boy/v2ray/tree/old"
+            ;;
+        -f | --core-file)
+            [[ -z $2 ]] && {
+                err "($1) 缺少必需参数, 正确使用示例: [$1 /root/$is_core-linux-64.zip]"
+            } || [[ ! -f $2 ]] && {
+                err "($2) 不是一个常规的文件."
+            }
+            is_core_file=$2
+            shift 2
+            ;;
+        -l | --local-install)
+            [[ ! -f ${PWD}/src/core.sh || ! -f ${PWD}/$is_core.sh ]] && {
+                err "当前目录 (${PWD}) 非完整的脚本目录."
+            }
+            local_install=1
+            shift 1
+            ;;
+        -p | --proxy)
+            [[ -z $2 ]] && {
+                err "($1) 缺少必需参数, 正确使用示例: [$1 http://127.0.0.1:2333 or -p socks5://127.0.0.1:2333]"
+            }
+            proxy=$2
+            shift 2
+            ;;
+        -v | --core-version)
+            [[ -z $2 ]] && {
+                err "($1) 缺少必需参数, 正确使用示例: [$1 v1.8.1]"
+            }
+            is_core_ver=v${2#v}
+            shift 2
+            ;;
+        -h | --help)
+            show_help
+            ;;
+        *)
+            echo -e "\n${is_err} ($@) 为未知参数...\n"
+            show_help
+            ;;
+        esac
+    done
+    [[ $is_core_ver && $is_core_file ]] && {
+        err "无法同时自定义 ${is_core_name} 版本和 ${is_core_name} 文件."
+    }
+}
+
+# exit and remove tmpdir
+exit_and_del_tmpdir() {
+    rm -rf $tmpdir
+    [[ ! $1 ]] && {
+        msg err "哦豁.."
+        msg err "安装过程出现错误..."
+        echo -e "反馈问题) https://github.com/${is_sh_repo}/issues"
+        echo
+        exit 1
+    }
+    exit
+}
+
+# main
+main() {
+
+    # check old version
+    [[ -f $is_sh_bin && -d $is_core_dir/bin && -d $is_sh_dir && -d $is_conf_dir ]] && {
+        err "检测到脚本已安装, 如需重装请使用${green} ${is_core} reinstall ${none}命令."
+    }
+
+    # check parameters
+    [[ $# -gt 0 ]] && pass_args $@
+
+    # show welcome msg
+    clear
+    echo
+    echo "........... $is_core_name script by $author .........."
+    echo
+
+    # start installing...
+    msg warn "开始安装..."
+    [[ $is_core_ver ]] && msg warn "${is_core_name} 版本: ${yellow}$is_core_ver${none}"
+    [[ $proxy ]] && msg warn "使用代理: ${yellow}$proxy${none}"
+    # create tmpdir
+    mkdir -p $tmpdir
+    # if is_core_file, copy file
+    [[ $is_core_file ]] && {
+        cp -f $is_core_file $is_core_ok
+        msg warn "${is_core_name} 文件使用 > ${yellow}$is_core_file${none}"
+    }
+    # local dir install sh script
+    [[ $local_install ]] && {
+        >$is_sh_ok
+        msg warn "${yellow}本地获取安装脚本 > $PWD ${none}"
+    }
+
+    timedatectl set-ntp true &>/dev/null
+    [[ $? != 0 ]] && {
+        msg warn "${yellow}\e[4m提醒!!! 无法设置自动同步时间, 可能会影响使用 VMess 协议.${none}"
+    }
+
+    # install dependent pkg
+    install_pkg $is_pkg &
+
+    # if wget installed. download core, sh, get ip
+    [[ $is_wget ]] && {
+        [[ ! $is_core_file ]] && download core &
+        [[ ! $local_install ]] && download sh &
+        get_ip
+    }
+
+    # waiting for background tasks is done
+    wait
+
+    # check background tasks status
+    check_status
+
+    # test $is_core_file
+    if [[ $is_core_file ]]; then
+        unzip -qo $is_core_ok -d $tmpdir/testzip &>/dev/null
+        [[ $? != 0 ]] && {
+            msg err "${is_core_name} 文件无法通过测试."
+            exit_and_del_tmpdir
+        }
+        for i in ${is_core} geoip.dat geosite.dat; do
+            [[ ! -f $tmpdir/testzip/$i ]] && is_file_err=1 && break
+        done
+        [[ $is_file_err ]] && {
+            msg err "${is_core_name} 文件无法通过测试."
+            exit_and_del_tmpdir
+        }
+    fi
+
+    # get server ip.
+    [[ ! $ip ]] && {
+        msg err "获取服务器 IP 失败."
+        exit_and_del_tmpdir
+    }
+
+    # create sh dir...
+    mkdir -p $is_sh_dir
+
+    # copy sh file or unzip sh zip file.
+    if [[ $local_install ]]; then
+        cp -rf $PWD/* $is_sh_dir
+    else
+        unzip -qo $is_sh_ok -d $is_sh_dir
+    fi
+
+    # create core bin dir
+    mkdir -p $is_core_dir/bin
+    # copy core file or unzip core zip file
+    if [[ $is_core_file ]]; then
+        cp -rf $tmpdir/testzip/* $is_core_dir/bin
+    else
+        unzip -qo $is_core_ok -d $is_core_dir/bin
+    fi
+    chmod +x $is_core_bin
+
+    # add alias
+    echo "alias $is_core=$is_sh_bin" >>/root/.bashrc
+
+    # core command
+    ln -sf $is_sh_dir/$is_core.sh $is_sh_bin
+    chmod +x $is_sh_bin
+
+    # create log dir
+    mkdir -p $is_log_dir
+
+    # show a tips msg
+    msg ok "生成配置文件..."
+
+    # create systemd service
+    load systemd.sh
+    is_new_install=1
+    install_service $is_core &>/dev/null
+
+    # create condf dir
+    mkdir -p $is_conf_dir
+
+    load core.sh
+    # create a tcp config
+    add tcp
+    # remove tmp dir and exit.
+    exit_and_del_tmpdir ok
+}
+
+# start.
+main $@

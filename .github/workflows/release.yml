@@ -1,0 +1,31 @@
+name: Main
+
+on: push
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: get ver
+        run: |
+          echo "$(cat v2ray.sh | grep ver=)" >> $GITHUB_ENV
+          echo "old=$(git tag | tail -n1)" >> $GITHUB_ENV
+      # - name: test
+      #   if: env.is_sh_ver == env.old 
+      #   run: |
+      #     echo not found new version.
+      #     exit 1
+      - name: zip
+        run: zip -9vr code.zip . -x .\*
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: code.zip
+          tag_name: ${{ env.is_sh_ver }}
