@@ -19,6 +19,7 @@ protocol_list=(
     VMess-TCP-dynamic-port
     VMess-mKCP-dynamic-port
     VMess-QUIC-dynamic-port
+    Socks
 )
 ss_method_list=(
     aes-128-gcm
@@ -69,6 +70,7 @@ info_list=(
     "SNI (serverName)"
     "指纹 (Fingerprint)"
     "公钥 (Public key)"
+    "用户名 (Username)"
 )
 change_list=(
     "更改协议"
@@ -86,6 +88,7 @@ change_list=(
     "更改动态端口"
     "更改伪装网站"
     "更改 mKCP seed"
+    "更改用户名 (Username)"
 )
 servername_list=(
     www.amazon.com
@@ -216,7 +219,7 @@ ask() {
     set_header_type)
         is_tmp_list=(${header_type_list[@]})
         is_default_arg=$is_random_header_type
-        [[ $(grep tcp <<<"$is_new_protocol-$net") ]] && {
+        [[ $(grep -i tcp <<<"$is_new_protocol-$net") ]] && {
             is_tmp_list=(none http)
             is_default_arg=none
         }
@@ -531,7 +534,7 @@ change() {
     4)
         # new password
         is_new_pass=$3
-        if [[ $net == 'ss' || $is_trojan ]]; then
+        if [[ $net == 'ss' || $is_trojan || $is_socks_pass ]]; then
             [[ $is_auto ]] && get_uuid && is_new_pass=$tmp_uuid
         else
             err "($is_config_file) 不支持更改密码."
@@ -539,6 +542,7 @@ change() {
         [[ ! $is_new_pass ]] && ask string is_new_pass "请输入新密码:"
         trojan_password=$is_new_pass
         ss_password=$is_new_pass
+        is_socks_pass=$is_new_pass
         add $net
         ;;
     5)
@@ -687,6 +691,12 @@ change() {
         [[ $is_auto ]] && get_uuid && is_new_kcp_seed=$tmp_uuid
         [[ ! $is_new_kcp_seed ]] && ask string is_new_kcp_seed "请输入新 mKCP seed:"
         kcp_seed=$is_new_kcp_seed
+        add $net
+        ;;
+    15)
+        # new socks user
+        [[ ! $is_socks_user ]] && err "($is_config_file) 不支持更改用户名 (Username)."
+        ask string is_socks_user "请输入新用户名 (Username):"
         add $net
         ;;
     esac
@@ -861,7 +871,10 @@ add() {
         door)
             is_new_protocol=Dokodemo-Door
             ;;
-        http | socks)
+        socks)
+            is_new_protocol=Socks
+            ;;
+        http)
             is_new_protocol=local-$is_lower
             ;;
         *)
@@ -908,7 +921,13 @@ add() {
         is_use_door_addr=$3
         is_use_door_port=$4
         ;;
-    *http | *socks)
+    socks)
+        is_socks=1
+        is_use_port=$2
+        is_use_socks_user=$3
+        is_use_socks_pass=$4
+        ;;
+    *http)
         is_use_port=$2
         ;;
     esac
@@ -1016,6 +1035,8 @@ add() {
         [[ $is_use_host ]] && host=$is_use_host
         [[ $is_use_door_addr ]] && door_addr=$is_use_door_addr
         [[ $is_use_servername ]] && is_servername=$is_use_servername
+        [[ $is_use_socks_user ]] && is_socks_user=$is_use_socks_user
+        [[ $is_use_socks_pass ]] && is_socks_pass=$is_use_socks_pass
     fi
 
     if [[ $is_use_tls ]]; then
@@ -1039,11 +1060,17 @@ add() {
             # set port
             [[ ! $port ]] && ask string port "请输入端口:"
 
-            case ${is_new_protocol} in
+            case ${is_new_protocol,,} in
             *tcp* | *kcp* | *quic*)
                 [[ ! $header_type ]] && ask set_header_type
                 ;;
-            Shadowsocks)
+            socks)
+                # set user
+                [[ ! $is_socks_user ]] && ask string is_socks_user "请设置用户名:"
+                # set password
+                [[ ! $is_socks_pass ]] && ask string is_socks_pass "请设置密码:"
+                ;;
+            shadowsocks)
                 # set method
                 [[ ! $ss_method ]] && ask set_ss_method
                 # set password
@@ -1130,12 +1157,12 @@ get() {
         get file $2
         if [[ $is_config_file ]]; then
             is_json_str=$(cat $is_conf_dir/"$is_config_file")
-            is_json_data_base=$(jq '.inbounds[0]|.protocol,.port,.settings.clients[0].id,.settings.clients[0].password,.settings.method,.settings.password,.settings.address,.settings.port,.settings.detour.to' <<<$is_json_str)
+            is_json_data_base=$(jq '.inbounds[0]|.protocol,.port,.settings.clients[0].id,.settings.clients[0].password,.settings.method,.settings.password,.settings.address,.settings.port,.settings.detour.to,.settings.accounts[0].user,.settings.accounts[0].pass' <<<$is_json_str)
             [[ $? != 0 ]] && err "无法读取此文件: $is_config_file"
             is_json_data_more=$(jq '.inbounds[0]|.streamSettings|.network,.security,.tcpSettings.header.type,.kcpSettings.seed,.kcpSettings.header.type,.quicSettings.header.type,.wsSettings.path,.httpSettings.path,.grpcSettings.serviceName' <<<$is_json_str)
             is_json_data_host=$(jq '.inbounds[0]|.streamSettings|.grpc_host,.wsSettings.headers.Host,.httpSettings.host[0]' <<<$is_json_str)
             is_json_data_reality=$(jq '.inbounds[0]|.streamSettings|.realitySettings.serverNames[0],.realitySettings.publicKey,.realitySettings.privateKey' <<<$is_json_str)
-            is_up_var_set=(null is_protocol port uuid trojan_password ss_method ss_password door_addr door_port is_dynamic_port net is_reality tcp_type kcp_seed kcp_type quic_type ws_path h2_path grpc_path grpc_host ws_host h2_host is_servername is_public_key is_private_key)
+            is_up_var_set=(null is_protocol port uuid trojan_password ss_method ss_password door_addr door_port is_dynamic_port is_socks_user is_socks_pass net is_reality tcp_type kcp_seed kcp_type quic_type ws_path h2_path grpc_path grpc_host ws_host h2_host is_servername is_public_key is_private_key)
             [[ $is_debug ]] && msg "\n------------- debug: $is_config_file -------------"
             i=0
             for v in $(sed 's/""/null/g;s/"//g' <<<"$is_json_data_base $is_json_data_more $is_json_data_host $is_json_data_reality"); do
@@ -1220,7 +1247,9 @@ get() {
         *socks*)
             is_protocol=socks
             net=socks
-            json_str=''"$is_listen_127"',settings:{udp:true}'
+            [[ ! $is_socks_user ]] && is_socks_user=233boy
+            [[ ! $is_socks_pass ]] && is_socks_pass=$uuid
+            json_str='settings:{auth:"password",accounts:[{user:'\"$is_socks_user\"',pass:'\"$is_socks_pass\"'}],udp:true}'
             ;;
         *)
             err "无法识别协议: $is_config_file"
@@ -1453,7 +1482,12 @@ info() {
         is_info_show=(0 1 2 13 14)
         is_info_str=($is_protocol $is_addr $port $door_addr $door_port)
         ;;
-    socks | http)
+    socks)
+        is_can_change=(0 1 15 4)
+        is_info_show=(0 1 2 19 10)
+        is_info_str=($is_protocol $is_addr $port $is_socks_user $is_socks_pass)
+        ;;
+    http)
         is_can_change=(0 1)
         is_info_show=(0 1 2)
         is_info_str=($is_protocol 127.0.0.1 $port)
