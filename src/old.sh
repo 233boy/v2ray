@@ -107,7 +107,7 @@ if [[ $is_old_use ]]; then
 		fi
 	fi
 	if [[ $socks ]]; then
-		add socks $socks_port
+		add socks $socks_port $socks_username $socks_userpass
 	fi
 	port=$v2ray_port
 	uuid=$v2ray_id
