@@ -1435,7 +1435,7 @@ info() {
         is_can_change=(0 1 5 7)
         is_info_show=(0 1 2 3 4 5)
         is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-${net}-$is_addr\"',add:'\"$is_addr\"',port:'\"$port\"',id:'\"$uuid\"',net:'\"$net\"',type:'\"$header_type\"',path:'\"$kcp_seed\"'}' <<<{})
-        is_url=vmess://$(base64 -w 0 <<<$is_vmess_url)
+        is_url=vmess://$(echo -n $is_vmess_url | base64 -w 0)
         is_tmp_port=$port
         [[ $is_dynamic_port ]] && {
             is_can_change+=(12)
@@ -1450,7 +1450,7 @@ info() {
     ss)
         is_can_change=(0 1 4 6)
         is_info_show=(0 1 2 10 11)
-        is_url="ss://$(base64 -w 0 <<<"${ss_method}:${ss_password}")@${is_addr}:${port}#233boy-ss-${is_addr}"
+        is_url="ss://$(echo -n ${ss_method}:${ss_password} | base64 -w 0)@${is_addr}:${port}#233boy-ss-${is_addr}"
         is_info_str=($is_protocol $is_addr $port $ss_password $ss_method)
         ;;
     ws | h2 | grpc)
@@ -1464,7 +1464,7 @@ info() {
         }
         [[ $is_protocol == 'vmess' ]] && {
             is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-$host\"',add:'\"$is_addr\"',port:'\"443\"',id:'\"$uuid\"',net:'\"$net\"',host:'\"$host\"',path:'\"$path\"',tls:'\"tls\"'}' <<<{})
-            is_url=vmess://$(base64 -w 0 <<<$is_vmess_url)
+            is_url=vmess://$(echo -n $is_vmess_url | base64 -w 0)
         } || {
             [[ $is_trojan ]] && {
                 uuid=$trojan_password
@@ -1493,7 +1493,7 @@ info() {
         is_can_change=(0 1 15 4)
         is_info_show=(0 1 2 19 10)
         is_info_str=($is_protocol $is_addr $port $is_socks_user $is_socks_pass)
-        is_url="socks://$(base64 -w 0 <<<"${is_socks_user}:${is_socks_pass}")@${is_addr}:${port}#233boy-socks-${is_addr}"
+        is_url="socks://$(echo -n ${is_socks_user}:${is_socks_pass} | base64 -w 0)@${is_addr}:${port}#233boy-socks-${is_addr}"
         ;;
     http)
         is_can_change=(0 1)
@@ -1610,6 +1610,7 @@ update() {
     fi
     download $is_update_name $is_new_ver
     msg "更新成功, 当前 $is_show_name 版本: $(_green $is_new_ver)\n"
+    msg "$(_green 请查看更新说明: https://github.com/$is_sh_repo/releases/tag/$is_new_ver)\n"
     manage restart $is_update_name &
 }
 
