@@ -321,10 +321,8 @@ ask() {
 create() {
     case $1 in
     server)
-        get new
-        is_sniffing='sniffing:{enabled:true,destOverride:["http","tls"]}'
-        is_listen_127='"listen": "127.0.0.1"'
         is_tls=none
+        get new
 
         # file name
         if [[ $host ]]; then
@@ -335,10 +333,19 @@ create() {
         is_json_file=$is_conf_dir/$is_config_name
         # get json
         [[ $is_change || ! $json_str ]] && get protocol $2
-        is_new_json=$(jq '{inbounds:[{tag:'\"$is_config_name\"',port:'"$port"',protocol:'\"$is_protocol\"','"$json_str"','"$is_sniffing"'}]}' <<<{})
+        case $net in
+        ws | h2 | grpc | http)
+            is_listen='"listen": "127.0.0.1"'
+            ;;
+        *)
+            is_listen='"listen": "0.0.0.0"'
+            ;;
+        esac
+        is_sniffing='sniffing:{enabled:true,destOverride:["http","tls"]}'
+        is_new_json=$(jq '{inbounds:[{tag:'\"$is_config_name\"',port:'"$port"','"$is_listen"',protocol:'\"$is_protocol\"','"$json_str"','"$is_sniffing"'}]}' <<<{})
         if [[ $is_dynamic_port ]]; then
             [[ ! $is_dynamic_port_range ]] && get dynamic-port
-            is_new_dynamic_port_json=$(jq '{inbounds:[{tag:'\"$is_config_name-link.json\"',port:'\"$is_dynamic_port_range\"',protocol:"vmess",'"$is_stream"','"$is_sniffing"',allocate:{strategy:"random"}}]}' <<<{})
+            is_new_dynamic_port_json=$(jq '{inbounds:[{tag:'\"$is_config_name-link.json\"',port:'\"$is_dynamic_port_range\"','"$is_listen"',protocol:"vmess",'"$is_stream"','"$is_sniffing"',allocate:{strategy:"random"}}]}' <<<{})
         fi
         [[ $is_test_json ]] && return # tmp test
         # only show json, dont save to file.
@@ -1242,7 +1249,7 @@ get() {
         *http*)
             is_protocol=http
             net=http
-            json_str=''"$is_listen_127"''
+            json_str='settings:{"timeout": 233}'
             ;;
         *socks*)
             is_protocol=socks
@@ -1280,20 +1287,20 @@ get() {
             net=ws
             [[ ! $path ]] && path="/$uuid"
             is_stream='streamSettings:{network:"ws",security:'\"$is_tls\"',wsSettings:{path:'\"$path\"',headers:{Host:'\"$host\"'}}}'
-            json_str=''"$is_listen_127"','"$is_server_id_json"','"$is_stream"''
+            json_str=''"$is_server_id_json"','"$is_stream"''
             ;;
         *grpc* | *gun)
             net=grpc
             [[ ! $path ]] && path="$uuid"
             [[ $path ]] && path=$(sed 's#/##g' <<<$path)
             is_stream='streamSettings:{network:"grpc",grpc_host:'\"$host\"',security:'\"$is_tls\"',grpcSettings:{serviceName:'\"$path\"'}}'
-            json_str=''"$is_listen_127"','"$is_server_id_json"','"$is_stream"''
+            json_str=''"$is_server_id_json"','"$is_stream"''
             ;;
         *h2* | *http*)
             net=h2
             [[ ! $path ]] && path="/$uuid"
             is_stream='streamSettings:{network:"h2",security:'\"$is_tls\"',httpSettings:{path:'\"$path\"',host:['\"$host\"']}}'
-            json_str=''"$is_listen_127"','"$is_server_id_json"','"$is_stream"''
+            json_str=''"$is_server_id_json"','"$is_stream"''
             ;;
         *reality*)
             net=reality
@@ -1443,7 +1450,7 @@ info() {
     ss)
         is_can_change=(0 1 4 6)
         is_info_show=(0 1 2 10 11)
-        is_url="ss://$(base64 -w 0 <<<"${ss_method}:${ss_password}")@${ip}:${port}#233boy-ss-${ip}"
+        is_url="ss://$(base64 -w 0 <<<"${ss_method}:${ss_password}")@${is_addr}:${port}#233boy-ss-${is_addr}"
         is_info_str=($is_protocol $is_addr $port $ss_password $ss_method)
         ;;
     ws | h2 | grpc)
@@ -1486,6 +1493,7 @@ info() {
         is_can_change=(0 1 15 4)
         is_info_show=(0 1 2 19 10)
         is_info_str=($is_protocol $is_addr $port $is_socks_user $is_socks_pass)
+        is_url="socks://$(base64 -w 0 <<<"${is_socks_user}:${is_socks_pass}")@${is_addr}:${port}#233boy-socks-${is_addr}"
         ;;
     http)
         is_can_change=(0 1)
