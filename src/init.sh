@@ -79,6 +79,7 @@ is_pkg="wget unzip jq qrencode"
 is_config_json=$is_core_dir/config.json
 is_caddy_bin=/usr/local/bin/caddy
 is_caddy_dir=/etc/caddy
+is_caddy_repo=caddyserver/caddy
 is_caddyfile=$is_caddy_dir/Caddyfile
 is_caddy_conf=$is_caddy_dir/$author
 is_caddy_service=$(systemctl list-units --full -all | grep caddy.service)
@@ -89,6 +90,16 @@ is_core_ver=$($is_core_bin version | head -n1 | cut -d " " -f1-2)
 if [[ $(grep -o ^[0-9] <<<${is_core_ver#* }) -lt 5 ]]; then
     # core version less than 5, e.g, v4.45.2
     is_core_ver_lt_5=1
+    if [[ $(grep 'run -config' /lib/systemd/system/v2ray.service) ]]; then
+        sed -i 's/run //' /lib/systemd/system/v2ray.service
+        systemctl daemon-reload
+    fi
+else
+    is_with_run_arg=run
+    if [[ ! $(grep 'run -config' /lib/systemd/system/v2ray.service) ]]; then
+        sed -i 's/-config/run -config/' /lib/systemd/system/v2ray.service
+        systemctl daemon-reload
+    fi
 fi
 
 if [[ $(pgrep -f $is_core_bin) ]]; then
