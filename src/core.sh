@@ -203,7 +203,7 @@ is_port_used() {
     fi
     is_cant_test_port=1
     msg "$is_warn 无法检测端口是否可用."
-    msg "请执行: $(_yellow "${cmd}update -y; ${cmd}install net-tools -y") 来修复此问题."
+    msg "请执行: $(_yellow "${cmd} update -y; ${cmd} install net-tools -y") 来修复此问题."
 }
 
 # ask input a string or pick a option for list.
@@ -1553,7 +1553,11 @@ url_qr() {
             link="https://233boy.github.io/tools/qr.html#${is_url}"
             msg "\n------------- $is_config_name & QR code 二维码 -------------"
             msg
-            qrencode -t ANSI "${is_url}"
+            if [[ $(type -P qrencode) ]]; then
+                qrencode -t ANSI "${is_url}"
+            else
+                msg "请安装 qrencode: $(_green "$cmd update -y; $cmd install qrencode -y")"
+            fi
             msg
             msg "如果无法正常显示或识别, 请使用下面的链接来生成二维码:"
             msg "\n\e[4;${is_color}m${link}\e[0m\n"
