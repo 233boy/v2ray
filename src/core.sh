@@ -1435,7 +1435,7 @@ info() {
     tcp | kcp | quic)
         is_can_change=(0 1 5 7)
         is_info_show=(0 1 2 3 4 5)
-        is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-${net}-$is_addr\"',add:'\"$is_addr\"',port:'\"$port\"',id:'\"$uuid\"',net:'\"$net\"',type:'\"$header_type\"',path:'\"$kcp_seed\"'}' <<<{})
+        is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-${net}-$is_addr\"',add:'\"$is_addr\"',port:'\"$port\"',id:'\"$uuid\"',aid:"0",net:'\"$net\"',type:'\"$header_type\"',path:'\"$kcp_seed\"'}' <<<{})
         is_url=vmess://$(echo -n $is_vmess_url | base64 -w 0)
         is_tmp_port=$port
         [[ $is_dynamic_port ]] && {
@@ -1464,7 +1464,7 @@ info() {
             is_url_path=serviceName
         }
         [[ $is_protocol == 'vmess' ]] && {
-            is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-$host\"',add:'\"$is_addr\"',port:'\"443\"',id:'\"$uuid\"',net:'\"$net\"',host:'\"$host\"',path:'\"$path\"',tls:'\"tls\"'}' <<<{})
+            is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-$host\"',add:'\"$is_addr\"',port:'\"443\"',id:'\"$uuid\"',aid:"0",net:'\"$net\"',host:'\"$host\"',path:'\"$path\"',tls:'\"tls\"'}' <<<{})
             is_url=vmess://$(echo -n $is_vmess_url | base64 -w 0)
         } || {
             [[ $is_trojan ]] && {
