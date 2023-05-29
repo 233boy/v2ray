@@ -141,7 +141,7 @@ install_pkg() {
         msg warn "安装依赖包 >${pkg}"
         $cmd install -y $pkg &>/dev/null
         if [[ $? != 0 ]]; then
-            [[ $cmd == yum ]] && yum install epel-release -y &>/dev/null
+            [[ $cmd =~ yum ]] && yum install epel-release -y &>/dev/null
             $cmd update -y &>/dev/null
             $cmd install -y $pkg &>/dev/null
             [[ $? == 0 ]] && >$is_pkg_ok
