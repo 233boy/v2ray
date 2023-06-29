@@ -1,6 +1,5 @@
 caddy_config() {
     is_caddy_site_file=$is_caddy_conf/${host}.conf
-    [[ ! $tlsport ]] && tlsport=443
     case $1 in
     new)
         mkdir -p $is_caddy_dir $is_caddy_dir/sites $is_caddy_conf

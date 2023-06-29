@@ -372,7 +372,7 @@ create() {
             api add $is_json_file $is_dynamic_port_link_file &>/dev/null
         fi
         # caddy auto tls
-        [[ $is_caddy && $host ]] && {
+        [[ $is_caddy && $host && ! $is_no_auto_tls ]] && {
             create caddy $net
         }
         # restart core
@@ -1210,10 +1210,10 @@ get() {
                 is_dynamic_port_range=$(jq -r '.inbounds[0].port' $is_dynamic_port_file)
                 [[ $? != 0 ]] && err "无法读取动态端口文件: $is_dynamic_port"
             fi
-            if [[ $is_caddy && $host ]]; then
-                tlsport=$(egrep -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
+            if [[ $is_caddy && $host && -f $is_caddy_conf/$host.conf ]]; then
+                tmp_tlsport=$(egrep -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
             fi
-            [[ ! $tlsport ]] && tlsport=443
+            [[ $tmp_tlsport ]] && tlsport=$tmp_tlsport
             [[ $is_client && $host ]] && port=$tlsport
             get protocol $is_protocol-$net
         fi
