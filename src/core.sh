@@ -1383,7 +1383,7 @@ get() {
         [[ $? != 0 ]] && err "无法生成 Shadowsocks 2022 密码, 请安装 openssl."
         ;;
     ping)
-        is_host_dns=$(ping -4 $host -c 1 -W 2 | head -1)
+        is_host_dns=$(nslookup $host)
         ;;
     log | logerr)
         msg "\n 提醒: 按 $(_green Ctrl + C) 退出\n"
