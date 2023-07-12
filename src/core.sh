@@ -1383,7 +1383,9 @@ get() {
         [[ $? != 0 ]] && err "无法生成 Shadowsocks 2022 密码, 请安装 openssl."
         ;;
     ping)
-        is_host_dns=$(ping $host -c 1 -W 2 | head -1)
+        is_ip_type="-4"
+        [[ $(grep ":" <<<$ip) ]] && is_ip_type="-6"
+        is_host_dns=$(ping $host $is_ip_type -c 1 -W 2 | head -1)
         ;;
     log | logerr)
         msg "\n 提醒: 按 $(_green Ctrl + C) 退出\n"
