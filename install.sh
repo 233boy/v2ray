@@ -49,9 +49,11 @@ is_wget=$(type -P wget)
 # x64
 case $(uname -m) in
 amd64 | x86_64)
+    is_jq_arch=amd64
     is_core_arch="64"
     ;;
 *aarch64* | *armv8*)
+    is_jq_arch=arm64
     is_core_arch="arm64-v8a"
     ;;
 *)
@@ -69,13 +71,15 @@ is_log_dir=/var/log/$is_core
 is_sh_bin=/usr/local/bin/$is_core
 is_sh_dir=$is_core_dir/sh
 is_sh_repo=$author/$is_core
-is_pkg="wget unzip jq"
+is_pkg="wget unzip"
 is_config_json=$is_core_dir/config.json
 tmp_var_lists=(
     tmpcore
     tmpsh
+    tmpjq
     is_core_ok
     is_sh_ok
+    is_jq_ok
     is_pkg_ok
 )
 
@@ -169,6 +173,12 @@ download() {
         tmpfile=$tmpsh
         is_ok=$is_sh_ok
         ;;
+    jq)
+        link=https://github.com/jqlang/jq/releases/download/jq-1.7rc1/jq-linux-$is_jq_arch
+        name="jq"
+        tmpfile=$tmpjq
+        is_ok=$is_jq_ok
+        ;;
     esac
 
     msg warn "下载 ${name} > ${link}"
@@ -179,8 +189,8 @@ download() {
 
 # get server ip
 get_ip() {
-    export "$(_wget -4 -qO- https://www.cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
-    [[ -z $ip ]] && export "$(_wget -6 -qO- https://www.cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    export "$(_wget -4 -qO- https://cloudflare-dns.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    [[ -z $ip ]] && export "$(_wget -6 -qO- https://cloudflare-dns.com/cdn-cgi/trace | grep ip=)" &>/dev/null
 }
 
 # check background tasks status
@@ -201,11 +211,16 @@ check_status() {
             msg err "下载 ${is_core_name} 脚本失败"
             is_fail=1
         }
+        [[ ! -f $is_jq_ok ]] && {
+            msg err "下载 jq 失败"
+            is_fail=1
+        }
     else
         [[ ! $is_fail ]] && {
             is_wget=1
             [[ ! $is_core_file ]] && download core &
             [[ ! $local_install ]] && download sh &
+            [[ $jq_not_found ]] && download jq &
             get_ip
             wait
             check_status
@@ -308,7 +323,7 @@ main() {
     # if is_core_file, copy file
     [[ $is_core_file ]] && {
         cp -f $is_core_file $is_core_ok
-        msg warn "${is_core_name} 文件使用 > ${yellow}$is_core_file${none}"
+        msg warn "${yellow}${is_core_name} 文件使用 > $is_core_file${none}"
     }
     # local dir install sh script
     [[ $local_install ]] && {
@@ -324,10 +339,17 @@ main() {
     # install dependent pkg
     install_pkg $is_pkg &
 
-    # if wget installed. download core, sh, get ip
+    # jq
+    if [[ $(type -P jq) ]]; then
+        >$is_jq_ok
+    else
+        jq_not_found=1
+    fi
+    # if wget installed. download core, sh, jq, get ip
     [[ $is_wget ]] && {
         [[ ! $is_core_file ]] && download core &
         [[ ! $local_install ]] && download sh &
+        [[ $jq_not_found ]] && download jq &
         get_ip
     }
 
@@ -377,14 +399,18 @@ main() {
     else
         unzip -qo $is_core_ok -d $is_core_dir/bin
     fi
-    chmod +x $is_core_bin
 
     # add alias
     echo "alias $is_core=$is_sh_bin" >>/root/.bashrc
 
     # core command
     ln -sf $is_sh_dir/$is_core.sh $is_sh_bin
-    chmod +x $is_sh_bin
+
+    # jq
+    [[ $jq_not_found ]] && mv -f $is_jq_ok /usr/bin/jq
+
+    # chmod
+    chmod +x $is_core_bin $is_sh_bin /usr/bin/jq
 
     # create log dir
     mkdir -p $is_log_dir

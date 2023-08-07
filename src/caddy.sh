@@ -8,6 +8,10 @@ caddy_config() {
 # for more info, see https://233boy.com/$is_core/caddy-auto-tls/
 # 不要编辑这个文件 #
 # 更多相关请阅读此文章: https://233boy.com/$is_core/caddy-auto-tls/
+# https://caddyserver.com/docs/caddyfile/options
+{
+  admin off
+}
 import $is_caddy_conf/*.conf
 import $is_caddy_dir/sites/*.conf
 EOF

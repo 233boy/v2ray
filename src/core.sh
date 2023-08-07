@@ -125,8 +125,8 @@ get_uuid() {
 
 get_ip() {
     [[ $ip || $is_no_auto_tls || $is_gen ]] && return
-    export "$(_wget -4 -qO- https://www.cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
-    [[ ! $ip ]] && export "$(_wget -6 -qO- https://www.cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    export "$(_wget -4 -qO- https://cloudflare-dns.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    [[ ! $ip ]] && export "$(_wget -6 -qO- https://cloudflare-dns.com/cdn-cgi/trace | grep ip=)" &>/dev/null
     [[ ! $ip ]] && {
         err "获取服务器 IP 失败.."
     }
@@ -1061,7 +1061,7 @@ add() {
     fi
 
     if [[ $is_use_tls ]]; then
-        if [[ ! $is_no_auto_tls && ! $is_caddy ]]; then
+        if [[ ! $is_no_auto_tls && ! $is_caddy && ! $is_gen ]]; then
             # test auto tls
             [[ $(is_test port_used 80) || $(is_test port_used 443) ]] && {
                 warn "端口 (80 或 443) 已经被占用, 无法完成自动配置 TLS. 请考虑使用 no-auto-tls"
@@ -1383,9 +1383,12 @@ get() {
         [[ $? != 0 ]] && err "无法生成 Shadowsocks 2022 密码, 请安装 openssl."
         ;;
     ping)
-        is_ip_type="-4"
-        [[ $(grep ":" <<<$ip) ]] && is_ip_type="-6"
-        is_host_dns=$(ping $host $is_ip_type -c 1 -W 2 | head -1)
+        # is_ip_type="-4"
+        # [[ $(grep ":" <<<$ip) ]] && is_ip_type="-6"
+        # is_host_dns=$(ping $host $is_ip_type -c 1 -W 2 | head -1)
+        is_dns_type="a"
+        [[ $(grep ":" <<<$ip) ]] && is_dns_type="aaaa"
+        is_host_dns=$(_wget -qO- --header="accept: application/dns-json" "https://cloudflare-dns.com/dns-query?name=$host&type=$is_dns_type")
         ;;
     log | logerr)
         msg "\n 提醒: 按 $(_green Ctrl + C) 退出\n"
@@ -1760,7 +1763,7 @@ main() {
                 msg "fix: $v"
                 change $v full
             done
-            msg "\nfix 完成.\n"
+            _green "\nfix 完成.\n"
             ;;
         *)
             is_dont_auto_exit=1
@@ -1784,6 +1787,16 @@ main() {
         ;;
     fix-config.json)
         create config.json
+        ;;
+    fix-caddyfile)
+        if [[ $is_caddy ]]; then
+            load caddy.sh
+            caddy_config new
+            manage restart caddy &
+            _green "\nfix 完成.\n"
+        else
+            err "无法执行此操作"
+        fi
         ;;
     i | info)
         info $2

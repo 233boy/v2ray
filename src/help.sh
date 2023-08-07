@@ -43,6 +43,7 @@ show_help() {
             "   dd, ddel [name...]                              删除多个配置**"
             "   fix [name]                                      修复一个配置"
             "   fix-all                                         修复全部配置"
+            "   fix-caddyfile                                   修复 Caddyfile"
             "   fix-config.json                                 修复 config.json\n"
             "管理:"
             "   un, uninstall                                   卸载"

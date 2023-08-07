@@ -128,7 +128,7 @@ load() {
 # wget add --no-check-certificate
 _wget() {
     # [[ $proxy ]] && export https_proxy=$proxy
-    wget --no-check-certificate $@
+    wget --no-check-certificate "$@"
 }
 
 load core.sh

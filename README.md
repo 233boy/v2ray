@@ -89,6 +89,7 @@ Usage: v2ray [options]... [args]...
    dd, ddel [name...]                              删除多个配置**
    fix [name]                                      修复一个配置
    fix-all                                         修复全部配置
+   fix-caddyfile                                   修复 Caddyfile
    fix-config.json                                 修复 config.json
 
 管理:
