@@ -54,7 +54,7 @@ show_help() {
             "   t, test                                         测试运行"
             "   reinstall                                       重装脚本\n"
             "测试:"
-            "   client, genc [name]                             显示用于客户端 JOSN, 仅供参考"
+            "   client, genc [name]                             显示用于客户端 JSON, 仅供参考"
             "   debug [name]                                    显示一些 debug 信息, 仅供参考"
             "   gen [...]                                       同等于 add, 但只显示 JSON 内容, 不创建文件, 测试使用"
             "   no-auto-tls [...]                               同等于 add, 但禁止自动配置 TLS, 可用于 *TLS 相关协议"
