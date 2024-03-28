@@ -5,7 +5,7 @@ _open_bbr() {
 	echo "net.core.default_qdisc = fq" >>/etc/sysctl.conf
 	sysctl -p &>/dev/null
 	echo
-	_green "..已经启用 BBR 优化...."
+	_green "..BBR optimization has been enabled...."
 	echo
 }
 
@@ -15,6 +15,6 @@ _try_enable_bbr() {
 	if [[ $_test1 -eq 4 && $_test2 -ge 9 ]] || [[ $_test1 -ge 5 ]]; then
 		_open_bbr
 	else
-		err "不支持启用 BBR 优化."
+		err "BBR optimization is not supported."
 	fi
 }
