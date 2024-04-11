@@ -489,10 +489,10 @@ change() {
             [[ $is_change_id == 'full' ]] && {
                 [[ $3 ]] && is_change_msg="Change multiple parameters" || is_change_msg=
             }
-            [[ $is_change_msg ]] && _green "\nFast execution: $is_change_msg"
+            [[ $is_change_msg ]] && _green "\n Fast execution: $is_change_msg"
         }
         info $1
-        [[ $is_auto_get_config ]] && msg "\nautomatic selection: $is_config_file"
+        [[ $is_auto_get_config ]] && msg "\n automatic selection: $is_config_file"
     }
     is_old_net=$net
     [[ $is_protocol == 'vless' && ! $is_reality ]] && net=v$net

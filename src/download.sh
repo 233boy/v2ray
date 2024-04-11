@@ -15,7 +15,7 @@ get_latest_version() {
     esac
     latest_ver=$(_wget -qO- $url | grep tag_name | egrep -o 'v([0-9.]+)')
     [[ ! $latest_ver ]] && {
-        err "获取 ${name} 最新版本失败."
+        err "Obtain ${name} Latest version failed."
     }
     unset name url
 }
@@ -38,7 +38,7 @@ download() {
         chmod +x $is_core_bin
         ;;
     sh)
-        name="$is_core_name 脚本"
+        name="$is_core_name Script"
         tmpfile=$tmpdir/sh.zip
         link="https://github.com/${is_sh_repo}/releases/download/${latest_ver}/code.zip"
         download_file
@@ -53,7 +53,7 @@ download() {
         download_file
         [[ ! $(type -P tar) ]] && {
             rm -rf $tmpdir
-            err "请安装 tar"
+            err "Please install tar"
         }
         tar zxf $tmpfile -C $tmpdir
         cp -f $tmpdir/caddy $is_caddy_bin
@@ -66,6 +66,6 @@ download() {
 download_file() {
     if ! _wget -t 5 -c $link -O $tmpfile; then
         rm -rf $tmpdir
-        err "\n下载 ${name} 失败.\n"
+        err "\n download ${name} failed.\n"
     fi
 }
