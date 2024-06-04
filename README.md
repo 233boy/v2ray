@@ -86,6 +86,7 @@ Usage: v2ray [options]... [args]...
    web [name] [domain]                             更改伪装网站
 
 进阶:
+   dns [...]                                       设置 DNS
    dd, ddel [name...]                              删除多个配置**
    fix [name]                                      修复一个配置
    fix-all                                         修复全部配置
