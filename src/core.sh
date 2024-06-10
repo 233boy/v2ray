@@ -384,6 +384,13 @@ create() {
         get info $2
         [[ ! $is_client_id_json ]] && err "($is_config_name) 不支持生成客户端配置."
         is_new_json=$(jq '{outbounds:[{tag:'\"$is_config_name\"',protocol:'\"$is_protocol\"','"$is_client_id_json"','"$is_stream"'}]}' <<<{})
+        if [[ $is_full_client ]]; then
+            is_dns='dns:{servers:[{address:"223.5.5.5",domain:["geosite:cn","geosite:geolocation-cn"],expectIPs:["geoip:cn"]},"1.1.1.1","8.8.8.8"]}'
+            is_route='routing:{rules:[{type:"field",outboundTag:"direct",ip:["geoip:cn","geoip:private"]},{type:"field",outboundTag:"direct",domain:["geosite:cn","geosite:geolocation-cn"]}]}'
+            is_inbounds='inbounds:[{port:2333,listen:"127.0.0.1",protocol:"socks",settings:{udp:true},sniffing:{enabled:true,destOverride:["http","tls"]}}]'
+            is_outbounds='outbounds:[{tag:'\"$is_config_name\"',protocol:'\"$is_protocol\"','"$is_client_id_json"','"$is_stream"'},{tag:"direct",protocol:"freedom"}]'
+            is_new_json=$(jq '{'$is_dns,$is_route,$is_inbounds,$is_outbounds'}' <<<{})
+        fi
         msg
         jq <<<$is_new_json
         msg
@@ -527,7 +534,7 @@ change() {
         [[ ! $is_new_port ]] && ask string is_new_port "请输入新端口:"
         if [[ $is_caddy && $host ]]; then
             net=$is_old_net
-            tlsport=$is_new_port
+            is_https_port=$is_new_port
             load caddy.sh
             caddy_config $net
             manage restart caddy &
@@ -978,7 +985,7 @@ add() {
             ;;
         kcp | quic)
             kcp_seed=
-            [[ $(grep tcp <<<$is_new_protocol) ]] && header_type=
+            [[ $(grep -i tcp <<<$is_new_protocol) ]] && header_type=
             ;;
         h2 | ws | grpc)
             old_host=$host
@@ -989,6 +996,7 @@ add() {
                     path=/$path
                 }
             fi
+            [[ ! $(grep -i trojan <<<$is_new_protocol) ]] && is_trojan=
             ;;
         reality)
             [[ ! $(grep -i reality <<<$is_new_protocol) ]] && is_reality=
@@ -1001,7 +1009,7 @@ add() {
             is_dynamic_port=
         }
 
-        [[ $is_trojan && ! $(is_test uuid $trojan_password) ]] && uuid=
+        [[ ! $(is_test uuid $uuid) ]] && uuid=
     fi
 
     # no-auto-tls only use h2,ws,grpc
@@ -1079,9 +1087,15 @@ add() {
         if [[ ! $is_no_auto_tls && ! $is_caddy && ! $is_gen ]]; then
             # test auto tls
             [[ $(is_test port_used 80) || $(is_test port_used 443) ]] && {
-                warn "端口 (80 或 443) 已经被占用, 无法完成自动配置 TLS. 请考虑使用 no-auto-tls"
-                msg "\e[41m帮助(help)\e[0m: $(msg_ul https://233boy.com/$is_core/no-auto-tls/)\n"
-                exit 1
+                get_port
+                is_http_port=$tmp_port
+                get_port
+                is_https_port=$tmp_port
+                warn "端口 (80 或 443) 已经被占用, 你也可以考虑使用 no-auto-tls"
+                msg "\e[41m no-auto-tls 帮助(help)\e[0m: $(msg_ul https://233boy.com/$is_core/no-auto-tls/)\n"
+                msg "\n Caddy 将使用非标准端口实现自动配置 TLS, HTTP:$is_http_port HTTPS:$is_https_port\n"
+                msg "请确定是否继续???"
+                pause
             }
             is_install_caddy=1
         fi
@@ -1226,10 +1240,10 @@ get() {
                 [[ $? != 0 ]] && err "无法读取动态端口文件: $is_dynamic_port"
             fi
             if [[ $is_caddy && $host && -f $is_caddy_conf/$host.conf ]]; then
-                tmp_tlsport=$(egrep -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
+                is_tmp_https_port=$(egrep -o "$host:[1-9][0-9]?+" $is_caddy_conf/$host.conf | sed s/.*://)
             fi
-            [[ $tmp_tlsport ]] && tlsport=$tmp_tlsport
-            [[ $is_client && $host ]] && port=$tlsport
+            [[ $is_tmp_https_port ]] && is_https_port=$is_tmp_https_port
+            [[ $is_client && $host ]] && port=$is_https_port
             get protocol $is_protocol-$net
         fi
         ;;
@@ -1501,19 +1515,18 @@ info() {
             is_url_path=serviceName
         }
         [[ $is_protocol == 'vmess' ]] && {
-            is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-$net-$host\"',add:'\"$is_addr\"',port:'\"$tlsport\"',id:'\"$uuid\"',aid:"0",net:'\"$net\"',host:'\"$host\"',path:'\"$path\"',tls:'\"tls\"'}' <<<{})
+            is_vmess_url=$(jq -c '{v:2,ps:'\"233boy-$net-$host\"',add:'\"$is_addr\"',port:'\"$is_https_port\"',id:'\"$uuid\"',aid:"0",net:'\"$net\"',host:'\"$host\"',path:'\"$path\"',tls:'\"tls\"'}' <<<{})
             is_url=vmess://$(echo -n $is_vmess_url | base64 -w 0)
         } || {
             [[ $is_trojan ]] && {
                 uuid=$trojan_password
-                is_info_str=($is_protocol $is_addr $tlsport $trojan_password $net $host $path 'tls')
                 is_can_change=(0 1 2 3 4)
                 is_info_show=(0 1 2 10 4 6 7 8)
             }
-            is_url="$is_protocol://$uuid@$host:$tlsport?encryption=none&security=tls&type=$net&host=$host&${is_url_path}=$(sed 's#/#%2F#g' <<<$path)#233boy-$net-$host"
+            is_url="$is_protocol://$uuid@$host:$is_https_port?encryption=none&security=tls&type=$net&host=$host&${is_url_path}=$(sed 's#/#%2F#g' <<<$path)#233boy-$net-$host"
         }
         [[ $is_caddy ]] && is_can_change+=(13)
-        is_info_str=($is_protocol $is_addr $tlsport $uuid $net $host $path 'tls')
+        is_info_str=($is_protocol $is_addr $is_https_port $uuid $net $host $path 'tls')
         ;;
     reality)
         is_color=41
@@ -1550,6 +1563,9 @@ info() {
         fi
         msg "$a $tt= \e[${is_color}m${is_info_str[$i]}\e[0m"
     done
+    if [[ $is_new_install ]]; then
+        warn "首次安装请查看脚本帮助文档: $(msg_ul https://233boy.com/$is_core/$is_core-script/)"
+    fi
     if [[ $is_url ]]; then
         msg "------------- ${info_list[12]} -------------"
         msg "\e[4;${is_color}m${is_url}\e[0m"
@@ -1760,6 +1776,7 @@ main() {
         change ${@:2}
         ;;
     client | genc)
+        [[ $1 == 'client' ]] && is_full_client=1
         create client $2
         ;;
     d | del | rm)
@@ -1845,7 +1862,14 @@ main() {
             is_update_name=sh
             is_update_ver=
         }
-        update $is_update_name $is_update_ver
+        if [[ $2 == 'dat' ]]; then
+            load download.sh
+            download dat
+            msg "$(_green 更新 geoip.dat geosite.dat 成功.)\n"
+            manage restart &
+        else
+            update $is_update_name $is_update_ver
+        fi
         ;;
     ssss | ss2022)
         get $@

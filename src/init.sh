@@ -94,7 +94,8 @@ is_caddy_repo=caddyserver/caddy
 is_caddyfile=$is_caddy_dir/Caddyfile
 is_caddy_conf=$is_caddy_dir/$author
 is_caddy_service=$(systemctl list-units --full -all | grep caddy.service)
-tlsport=443
+is_http_port=80
+is_https_port=443
 
 # core ver
 is_core_ver=$($is_core_bin version | head -n1 | cut -d " " -f1-2)
@@ -129,6 +130,10 @@ if [[ -f $is_caddy_bin && -d $is_caddy_dir && $is_caddy_service ]]; then
         systemctl restart caddy &
     }
     is_caddy_ver=$($is_caddy_bin version | head -n1 | cut -d " " -f1)
+    is_tmp_http_port=$(egrep '^ {2,}http_port|^http_port' $is_caddyfile | egrep -o [0-9]+)
+    is_tmp_https_port=$(egrep '^ {2,}https_port|^https_port' $is_caddyfile | egrep -o [0-9]+)
+    [[ $is_tmp_http_port ]] && is_http_port=$is_tmp_http_port
+    [[ $is_tmp_https_port ]] && is_https_port=$is_tmp_https_port
     if [[ $(pgrep -f $is_caddy_bin) ]]; then
         is_caddy_status=$(_green running)
     else

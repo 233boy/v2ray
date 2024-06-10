@@ -41,18 +41,16 @@ dns_set() {
         esac
     else
         is_tmp_list=(${is_dns_list[@]})
-        ask list dns_pick
-        is_dns_use=${is_dns_list[$REPLY - 1]}
+        ask list is_dns_use null "\n请选择 DNS:\n"
         if [[ $is_dns_use == "set" ]]; then
             ask string is_dns_use "请输入 DNS: "
         fi
     fi
-    is_new_dns=$(sed s/https/https+local/ <<<$is_dns_use)
-    if [[ $is_new_dns == "none" ]]; then
+    if [[ $is_dns_use == "none" ]]; then
         cat <<<$(jq '.dns={}' $is_config_json) >$is_config_json
     else
-        cat <<<$(jq '.dns.servers=["'$is_new_dns'"]' $is_config_json) >$is_config_json
+        cat <<<$(jq '.dns.servers=["'${is_dns_use/https/https+local}'"]' $is_config_json) >$is_config_json
     fi
     manage restart &
-    msg "\n已更新 DNS 为: $(_green $is_new_dns)\n"
+    msg "\n已更新 DNS 为: $(_green $is_dns_use)\n"
 }

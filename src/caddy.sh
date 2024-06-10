@@ -11,6 +11,8 @@ caddy_config() {
 # https://caddyserver.com/docs/caddyfile/options
 {
   admin off
+  http_port $is_http_port
+  https_port $is_https_port
 }
 import $is_caddy_conf/*.conf
 import $is_caddy_dir/sites/*.conf
@@ -18,21 +20,21 @@ EOF
         ;;
     *ws*)
         cat >${is_caddy_site_file} <<<"
-${host}:${tlsport} {
+${host}:${is_https_port} {
     reverse_proxy ${path} 127.0.0.1:${port}
     import ${is_caddy_site_file}.add
 }"
         ;;
     *h2*)
         cat >${is_caddy_site_file} <<<"
-${host}:${tlsport} {
+${host}:${is_https_port} {
     reverse_proxy ${path} h2c://127.0.0.1:${port}
     import ${is_caddy_site_file}.add
 }"
         ;;
     *grpc*)
         cat >${is_caddy_site_file} <<<"
-${host}:${tlsport} {
+${host}:${is_https_port} {
     reverse_proxy /${path}/* h2c://127.0.0.1:${port}
     import ${is_caddy_site_file}.add
 }"

@@ -174,7 +174,7 @@ download() {
         is_ok=$is_sh_ok
         ;;
     jq)
-        link=https://github.com/jqlang/jq/releases/download/jq-1.7rc1/jq-linux-$is_jq_arch
+        link=https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-$is_jq_arch
         name="jq"
         tmpfile=$tmpjq
         is_ok=$is_jq_ok
