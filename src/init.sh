@@ -72,7 +72,7 @@ amd64 | x86_64)
     caddy_arch="arm64"
     ;;
 *)
-    err "此脚本仅支持 64 位系统..."
+    err "Este script suporta apenas sistemas de 64 bits..."
     ;;
 esac
 
