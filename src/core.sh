@@ -1303,7 +1303,7 @@ get() {
             net=socks
             [[ ! $is_socks_user ]] && is_socks_user=233boy
             [[ ! $is_socks_pass ]] && is_socks_pass=$uuid
-            json_str='settings:{auth:"password",accounts:[{user:'\"$is_socks_user\"',pass:'\"$is_socks_pass\"'}],udp:true}'
+            json_str='settings:{auth:"password",accounts:[{user:'\"$is_socks_user\"',pass:'\"$is_socks_pass\"'}],udp:true,ip:"0.0.0.0"}'
             ;;
         *)
             err "无法识别协议: $is_config_file"
