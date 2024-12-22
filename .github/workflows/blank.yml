@@ -1,0 +1,38 @@
+name: Run V2Ray Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-v2ray:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js (if needed)
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y curl git
+        curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh | bash
+
+    - name: Configure V2Ray
+      run: |
+        cp ./config.json /usr/local/etc/v2ray/config.json
+        systemctl restart v2ray
+
+    - name: Verify V2Ray Installation
+      run: v2ray --version
+
+    - name: Start V2Ray Server
+      run: |
+        nohup v2ray -config /usr/local/etc/v2ray/config.json &
