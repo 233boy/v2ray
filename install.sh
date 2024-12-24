@@ -177,7 +177,7 @@ download() {
         is_ok=$is_sh_ok
         ;;
     jq)
-        link=https://github.com/jqlang/jq/releases/download/jq-1.7rc1/jq-linux-$is_jq_arch
+        link=https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-$is_jq_arch
         name="jq"
         tmpfile=$tmpjq
         is_ok=$is_jq_ok
@@ -200,7 +200,8 @@ get_ip() {
 check_status() {
     # dependent pkg install fail
     [[ ! -f $is_pkg_ok ]] && {
-        msg err "Failed to install dependent packages"
+        msg err "安装依赖包失败"
+        msg err "请尝试手动安装依赖包: $cmd update -y; $cmd install -y $pkg"
         is_fail=1
     }
 
