@@ -96,18 +96,18 @@ is_core_ver=$($is_core_bin version | head -n1 | cut -d " " -f1-2)
 
 # proxy
 enable_proxy() {
-	if [[ $proxy ]]; then
-		export http_proxy=$proxy
-		export https_proxy=$proxy
-	fi
+    if [[ $proxy ]]; then
+        export http_proxy=$proxy
+        export https_proxy=$proxy
+    fi
 }
 disable_proxy() {
-	export http_proxy=
-	export https_proxy=
+    export http_proxy=
+    export https_proxy=
 }
 if [[ $(jq 'has("proxy")' $is_config_json) == "true" ]]; then
-	proxy=$(jq -r '.proxy' $is_config_json)
-	enable_proxy
+    proxy=$(jq -r '.proxy' $is_config_json)
+    enable_proxy
 fi
 
 

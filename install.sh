@@ -100,15 +100,15 @@ load() {
 }
 
 enable_proxy() {
-	if [[ $proxy ]]; then
-		export http_proxy=$proxy
-		export https_proxy=$proxy
-	fi
+    if [[ $proxy ]]; then
+        export http_proxy=$proxy
+        export https_proxy=$proxy
+    fi
 }
 
 disable_proxy() {
-	export http_proxy=
-	export https_proxy=
+    export http_proxy=
+    export https_proxy=
 }
 
 # print a mesage
@@ -195,10 +195,10 @@ download() {
 
 # get server ip
 get_ip() {
-	disable_proxy
+    disable_proxy
     export "$(wget -4 -qO- https://cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
     [[ -z $ip ]] && export "$(wget -6 -qO- https://cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
-	enable_proxy
+    enable_proxy
 }
 
 # check background tasks status
@@ -270,7 +270,7 @@ pass_args() {
                 err "($1) 缺少必需参数, 正确使用示例: [$1 http://127.0.0.1:2333 or -p socks5://127.0.0.1:2333]"
             }
             proxy=$2
-			enable_proxy
+            enable_proxy
             shift 2
             ;;
         -v | --core-version)
