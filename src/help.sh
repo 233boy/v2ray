@@ -62,6 +62,7 @@ show_help() {
             "   no-auto-tls [...]                               同等于 add, 但禁止自动配置 TLS, 可用于 *TLS 相关协议"
             "   xapi [...]                                      同等于 $is_core api, 但 API 后端使用当前运行的 $is_core_name 服务\n"
             "其他:"
+			"   proxy [url]                                     设置代理"
             "   bbr                                             启用 BBR, 如果支持"
             "   bin [...]                                       运行 $is_core_name 命令, 例如: $is_core bin help"
             "   api, convert, tls, run, uuid  [...]             兼容 $is_core_name 命令"

@@ -111,6 +111,7 @@ Usage: v2ray [options]... [args]...
    xapi [...]                                      同等于 v2ray api, 但 API 后端使用当前运行的 V2Ray 服务
 
 其他:
+   proxy [url]                                     设置代理
    bbr                                             启用 BBR, 如果支持
    bin [...]                                       运行 V2Ray 命令, 例如: v2ray bin help
    api, convert, tls, run, uuid  [...]             兼容 V2Ray 命令
