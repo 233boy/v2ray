@@ -52,12 +52,6 @@ load() {
     . $is_sh_dir/src/$1
 }
 
-# wget add --no-check-certificate
-_wget() {
-    # [[ $proxy ]] && export https_proxy=$proxy
-    wget --no-check-certificate "$@"
-}
-
 # yum or apt-get
 cmd=$(type -P apt-get || type -P yum)
 
@@ -99,6 +93,23 @@ is_https_port=443
 
 # core ver
 is_core_ver=$($is_core_bin version | head -n1 | cut -d " " -f1-2)
+
+# proxy
+enable_proxy() {
+	if [[ $proxy ]]; then
+		export http_proxy=$proxy
+		export https_proxy=$proxy
+	fi
+}
+disable_proxy() {
+	export http_proxy=
+	export https_proxy=
+}
+if [[ $(jq 'has("proxy")' $is_config_json) == "true" ]]; then
+	proxy=$(jq -r '.proxy' $is_config_json)
+	enable_proxy
+fi
+
 
 if [[ $(grep -o ^[0-9] <<<${is_core_ver#* }) -lt 5 ]]; then
     # core version less than 5, e.g, v4.45.2

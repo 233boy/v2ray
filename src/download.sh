@@ -13,7 +13,7 @@ get_latest_version() {
         url="https://api.github.com/repos/$is_caddy_repo/releases/latest?v=$RANDOM"
         ;;
     esac
-    latest_ver=$(_wget -qO- $url | grep tag_name | egrep -o 'v([0-9.]+)')
+    latest_ver=$(wget -qO- --no-check-certificate $url | grep tag_name | egrep -o 'v([0-9.]+)')
     [[ ! $latest_ver ]] && {
         err "获取 ${name} 最新版本失败."
     }
@@ -75,7 +75,7 @@ download() {
     unset latest_ver
 }
 download_file() {
-    if ! _wget -t 5 -c $link -O $tmpfile; then
+    if ! wget -t 5 -c --no-check-certificate $link -O $tmpfile; then
         rm -rf $tmpdir
         err "\n下载 ${name} 失败.\n"
     fi
