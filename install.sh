@@ -196,8 +196,8 @@ download() {
 # get server ip
 get_ip() {
 	disable_proxy
-    export "$(wget -4 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
-    [[ -z $ip ]] && export "$(wget -6 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
+    export "$(wget -4 -qO- https://cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    [[ -z $ip ]] && export "$(wget -6 -qO- https://cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
 	enable_proxy
 }
 
