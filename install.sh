@@ -99,10 +99,16 @@ load() {
     . $is_sh_dir/src/$1
 }
 
-# wget add --no-check-certificate
-_wget() {
-    [[ $proxy ]] && export https_proxy=$proxy
-    wget --no-check-certificate $*
+enable_proxy() {
+	if [[ $proxy ]]; then
+		export http_proxy=$proxy
+		export https_proxy=$proxy
+	fi
+}
+
+disable_proxy() {
+	export http_proxy=
+	export https_proxy=
 }
 
 # print a mesage
@@ -182,15 +188,17 @@ download() {
     esac
 
     msg warn "下载 ${name} > ${link}"
-    if _wget -t 3 -q -c $link -O $tmpfile; then
+    if wget -t 3 -q -c --no-check-certificate $link -O $tmpfile; then
         mv -f $tmpfile $is_ok
     fi
 }
 
 # get server ip
 get_ip() {
-    export "$(_wget -4 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
-    [[ -z $ip ]] && export "$(_wget -6 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
+	disable_proxy
+    export "$(wget -4 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
+	enable_proxy
+    [[ -z $ip ]] && export "$(wget -6 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
 }
 
 # check background tasks status
@@ -262,6 +270,7 @@ pass_args() {
                 err "($1) 缺少必需参数, 正确使用示例: [$1 http://127.0.0.1:2333 or -p socks5://127.0.0.1:2333]"
             }
             proxy=$2
+			enable_proxy
             shift 2
             ;;
         -v | --core-version)
