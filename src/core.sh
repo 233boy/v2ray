@@ -1187,6 +1187,7 @@ get() {
         [[ ! $is_addr ]] && {
             get_ip
             is_addr=$ip
+            [[ $(grep ":" <<<$ip) ]] && is_addr="[$ip]"
         }
         ;;
     new)
@@ -1536,7 +1537,7 @@ info() {
         is_can_change=(0 1 5 10 11)
         is_info_show=(0 1 2 3 15 8 16 17 18)
         is_info_str=($is_protocol $is_addr $port $uuid xtls-rprx-vision reality $is_servername "ios" $is_public_key)
-        is_url="$is_protocol://$uuid@$ip:$port?encryption=none&security=reality&flow=xtls-rprx-vision&type=tcp&sni=$is_servername&pbk=$is_public_key&fp=ios#233boy-$net-$is_addr"
+        is_url="$is_protocol://$uuid@$is_addr:$port?encryption=none&security=reality&flow=xtls-rprx-vision&type=tcp&sni=$is_servername&pbk=$is_public_key&fp=ios#233boy-$net-$is_addr"
         ;;
     door)
         is_can_change=(0 1 8 9)
