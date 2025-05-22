@@ -125,8 +125,10 @@ get_uuid() {
 
 get_ip() {
     [[ $ip || $is_no_auto_tls || $is_gen || $is_dont_get_ip ]] && return
-    export "$(_wget -4 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
-    [[ ! $ip ]] && export "$(_wget -6 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
+    disable_proxy
+    export "$(wget -4 -qO- https://cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    [[ ! $ip ]] && export "$(wget -6 -qO- https://cloudflare.com/cdn-cgi/trace | grep ip=)" &>/dev/null
+    enable_proxy
     [[ ! $ip ]] && {
         err "获取服务器 IP 失败.."
     }
@@ -1421,7 +1423,7 @@ get() {
         # is_host_dns=$(ping $host $is_ip_type -c 1 -W 2 | head -1)
         is_dns_type="a"
         [[ $(grep ":" <<<$ip) ]] && is_dns_type="aaaa"
-        is_host_dns=$(_wget -qO- --header="accept: application/dns-json" "https://one.one.one.one/dns-query?name=$host&type=$is_dns_type")
+        is_host_dns=$(wget -qO- --header="accept: application/dns-json" "https://cloudflare-dns.com/dns-query?name=$host&type=$is_dns_type")
         ;;
     log | logerr)
         msg "\n 提醒: 按 $(_green Ctrl + C) 退出\n"
@@ -1598,6 +1600,24 @@ footer_msg() {
     ####### 要点13脸吗只会改我链接的小人 #######
 }
 
+# update proxy
+proxy() {
+    if [[ -z $1 ]]; then
+        if [[ $(jq 'has("proxy")' $is_config_json) == 'false' ]]; then
+            echo "当前未配置代理"
+        else
+            echo "当前代理: $(jq -r '.proxy' $is_config_json)"
+        fi
+    else
+        url_pattern='(https?|socks5)://[-[:alnum:]\+&@#/%?=~_|!:,.;]+'
+        if ! [[ $1 =~ $url_pattern ]]; then
+            err "代理地址格式不正确"
+        fi
+        cat <<<$(jq ".proxy=\"$1\"" $is_config_json) >$is_config_json
+        echo "代理已更新为: $1"
+    fi
+}
+
 # URL or qrcode
 url_qr() {
     is_dont_show_info=1
@@ -1720,7 +1740,7 @@ is_main_menu() {
         show_help
         ;;
     9)
-        ask list is_do_other "启用BBR 查看日志 查看错误日志 测试运行 重装脚本 设置DNS"
+        ask list is_do_other "启用BBR 查看日志 查看错误日志 测试运行 重装脚本 设置DNS 设置代理"
         case $REPLY in
         1)
             load bbr.sh
@@ -1741,6 +1761,11 @@ is_main_menu() {
         6)
             load dns.sh
             dns_set
+            ;;
+        7)
+            proxy
+            ask string new_proxy "请输入代理地址:"
+            proxy $new_proxy
             ;;
         esac
         ;;
@@ -1905,6 +1930,9 @@ main() {
         ;;
     xapi)
         api ${@:2}
+        ;;
+    proxy)
+        proxy ${@:2}
         ;;
     h | help | --help)
         load help.sh
