@@ -100,7 +100,7 @@ if [[ $is_old_use ]]; then
 	is_dont_show_info=1
 	if [[ $shadowsocks ]]; then
 		for v in ${ss_method_list[@]}; do
-			[[ $(egrep -i "^${ssciphers}$" <<<$v) ]] && ss_method=$v && break
+			[[ $(grep -E -i "^${ssciphers}$" <<<$v) ]] && ss_method=$v && break
 		done
 		if [[ $ss_method ]]; then
 			add ss $ssport $sspass $ss_method

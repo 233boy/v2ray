@@ -130,8 +130,8 @@ if [[ -f $is_caddy_bin && -d $is_caddy_dir && $is_caddy_service ]]; then
         systemctl restart caddy &
     }
     is_caddy_ver=$($is_caddy_bin version | head -n1 | cut -d " " -f1)
-    is_tmp_http_port=$(egrep '^ {2,}http_port|^http_port' $is_caddyfile | egrep -o [0-9]+)
-    is_tmp_https_port=$(egrep '^ {2,}https_port|^https_port' $is_caddyfile | egrep -o [0-9]+)
+    is_tmp_http_port=$(grep -E '^ {2,}http_port|^http_port' $is_caddyfile | grep -E -o [0-9]+)
+    is_tmp_https_port=$(grep -E '^ {2,}https_port|^https_port' $is_caddyfile | grep -E -o [0-9]+)
     [[ $is_tmp_http_port ]] && is_http_port=$is_tmp_http_port
     [[ $is_tmp_https_port ]] && is_https_port=$is_tmp_https_port
     if [[ $(pgrep -f $is_caddy_bin) ]]; then
