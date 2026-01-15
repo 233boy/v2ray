@@ -778,7 +778,7 @@ uninstall() {
     manage stop &>/dev/null
     manage disable &>/dev/null
     rm -rf $is_core_dir $is_log_dir $is_sh_bin /lib/systemd/system/$is_core.service
-    sed -i "/alias $is_core=/d" /root/.bashrc
+    sed -i "/$is_core/d" /root/.bashrc
     # uninstall caddy; 2 is ask result
     if [[ $REPLY == '2' ]]; then
         manage stop caddy &>/dev/null
