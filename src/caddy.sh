@@ -46,8 +46,24 @@ reverse_proxy https://$proxy_site {
         header_up Host {upstream_hostport}
 }"
         ;;
+    ip)
+        # site block only used to trigger ACME for this host's IP.
+        # IP certificates are only issued under Let's Encrypt's "shortlived"
+        # profile (Caddy >= 2.10.0).
+        is_caddy_addr=$host
+        [[ $(grep : <<<$host) ]] && is_caddy_addr="[$host]"
+        cat >${is_caddy_site_file} <<<"
+${is_caddy_addr}:${is_https_port} {
+    tls {
+        issuer acme {
+            profile shortlived
+        }
+    }
+    respond \"233boy IP\"
+}"
+        ;;
     esac
-    [[ $1 != "new" && $1 != 'proxy' ]] && {
+    [[ $1 != "new" && $1 != 'proxy' && $1 != 'ip' ]] && {
         [[ ! -f ${is_caddy_site_file}.add ]] && echo "# see https://233boy.com/$is_core/caddy-auto-tls/" >${is_caddy_site_file}.add
     }
 }
