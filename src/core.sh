@@ -1583,7 +1583,7 @@ info() {
         is_can_change=(0 1 4)
         is_info_show=(0 1 2 10 8)
         is_info_str=($is_protocol $is_addr $port $hy2_password tls)
-        is_url="hy2://$hy2_password@$is_addr:$port?sni=$is_addr#233boy-hy2-$is_addr"
+        is_url="hysteria2://$hy2_password@$is_addr:$port/?sni=$is_addr#233boy-hy2-$is_addr"
         ;;
     door)
         is_can_change=(0 1 8 9)
