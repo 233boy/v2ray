@@ -20,6 +20,7 @@ protocol_list=(
     VMess-mKCP-dynamic-port
     VMess-QUIC-dynamic-port
     Socks
+    Hysteria2
 )
 ss_method_list=(
     aes-128-gcm
@@ -562,7 +563,7 @@ change() {
     4)
         # new password
         is_new_pass=$3
-        if [[ $net == 'ss' || $is_trojan || $is_socks_pass ]]; then
+        if [[ $net == 'ss' || $is_trojan || $is_socks_pass || $is_hy2 ]]; then
             [[ $is_auto ]] && get_uuid && is_new_pass=$tmp_uuid
         else
             err "($is_config_file) 不支持更改密码."
@@ -571,6 +572,7 @@ change() {
         trojan_password=$is_new_pass
         ss_password=$is_new_pass
         is_socks_pass=$is_new_pass
+        hy2_password=$is_new_pass
         add $net
         ;;
     5)
@@ -897,6 +899,14 @@ add() {
         # r | reality)
         #     is_new_protocol=VLESS-XTLS-uTLS-REALITY
         #     ;;
+        hy2 | hysteria2)
+            is_new_protocol=Hysteria2
+            is_hy2=1
+            is_core_major=$(grep -o ^[0-9] <<<${is_core_ver#* })
+            is_core_minor=$(cut -d. -f2 <<<${is_core_ver#* })
+            [[ $is_core_major -lt 5 || $is_core_minor -lt 18 ]] && \
+                err "hysteria2 需要 v2ray-core >= 5.18.0, 请使用: $is_core update core"
+            ;;
         ss)
             is_new_protocol=Shadowsocks
             ;;
@@ -923,6 +933,18 @@ add() {
     [[ ! $is_new_protocol ]] && ask set_protocol
 
     case ${is_new_protocol,,} in
+    hysteria2)
+        is_use_port=${2:-443}
+        if [[ $2 == auto ]]; then
+            port=
+        elif [[ $2 ]]; then
+            port=$2
+        elif [[ ! $port ]]; then
+            port=443
+        fi
+        is_use_pass=$3
+        is_add_opts="[port] [password]"
+        ;;
     *-tls)
         is_use_tls=1
         is_use_host=$2
@@ -1030,7 +1052,7 @@ add() {
             [[ ! $(is_test port ${is_use_port}) ]] && {
                 err "($is_use_port) 不是一个有效的端口. $is_err_tips"
             }
-            [[ $(is_test port_used $is_use_port) ]] && {
+            [[ ! $is_hy2 && $(is_test port_used $is_use_port) ]] && {
                 err "无法使用 ($is_use_port) 端口. $is_err_tips"
             }
             port=$is_use_port
@@ -1078,7 +1100,7 @@ add() {
         if [[ $is_dynamic_port && $is_use_dynamic_port_start ]]; then
             get dynamic-port-test
         fi
-        [[ $is_use_pass ]] && ss_password=$is_use_pass
+        [[ $is_use_pass ]] && { ss_password=$is_use_pass; hy2_password=$is_use_pass; }
         [[ $is_use_host ]] && host=$is_use_host
         [[ $is_use_door_addr ]] && door_addr=$is_use_door_addr
         [[ $is_use_servername ]] && is_servername=$is_use_servername
@@ -1215,8 +1237,8 @@ get() {
             [[ $? != 0 ]] && err "无法读取此文件: $is_config_file"
             is_json_data_more=$(jq '.inbounds[0]|.streamSettings|.network,.security,.tcpSettings.header.type,.kcpSettings.seed,.kcpSettings.header.type,.quicSettings.header.type,.wsSettings.path,.httpSettings.path,.grpcSettings.serviceName' <<<$is_json_str)
             is_json_data_host=$(jq '.inbounds[0]|.streamSettings|.grpc_host,.wsSettings.headers.Host,.httpSettings.host[0]' <<<$is_json_str)
-            is_json_data_reality=$(jq '.inbounds[0]|.streamSettings|.realitySettings.serverNames[0],.realitySettings.publicKey,.realitySettings.privateKey' <<<$is_json_str)
-            is_up_var_set=(null is_protocol port uuid trojan_password ss_method ss_password door_addr door_port is_dynamic_port is_socks_user is_socks_pass net is_reality tcp_type kcp_seed kcp_type quic_type ws_path h2_path grpc_path grpc_host ws_host h2_host is_servername is_public_key is_private_key)
+            is_json_data_reality=$(jq '.inbounds[0]|.streamSettings|.realitySettings.serverNames[0],.realitySettings.publicKey,.realitySettings.privateKey,.hy2Settings.password' <<<$is_json_str)
+            is_up_var_set=(null is_protocol port uuid trojan_password ss_method ss_password door_addr door_port is_dynamic_port is_socks_user is_socks_pass net is_reality tcp_type kcp_seed kcp_type quic_type ws_path h2_path grpc_path grpc_host ws_host h2_host is_servername is_public_key is_private_key hy2_password)
             [[ $is_debug ]] && msg "\n------------- debug: $is_config_file -------------"
             i=0
             for v in $(sed 's/""/null/g;s/"//g' <<<"$is_json_data_base $is_json_data_more $is_json_data_host $is_json_data_reality"); do
@@ -1311,6 +1333,20 @@ get() {
             [[ ! $is_socks_user ]] && is_socks_user=233boy
             [[ ! $is_socks_pass ]] && is_socks_pass=$uuid
             json_str='settings:{auth:"password",accounts:[{user:'\"$is_socks_user\"',pass:'\"$is_socks_pass\"'}],udp:true,ip:"0.0.0.0"}'
+            ;;
+        hysteria2*)
+            is_protocol=hysteria2
+            net=hy2
+            is_hy2=1
+            [[ ! $hy2_password ]] && hy2_password=$uuid
+            # gen mode skips get_ip(); fetch it here so cert lookup still works
+            [[ ! $ip ]] && export "$(_wget -4 -qO- https://one.one.one.one/cdn-cgi/trace | grep ip=)" &>/dev/null
+            is_hy2_cert=$(find /var/lib/caddy "$HOME/.local/share/caddy" -name "$ip.crt" 2>/dev/null | head -n1)
+            is_hy2_key=$(find /var/lib/caddy "$HOME/.local/share/caddy" -name "$ip.key" 2>/dev/null | head -n1)
+            [[ ! $is_hy2_cert || ! $is_hy2_key ]] && err "未找到 $ip 的 TLS 证书, 请确认安装时已为服务器 IP 申请证书"
+            is_client_id_json='settings:{servers:[{address:'\"$is_addr\"',port:'$port'}]}'
+            is_stream='streamSettings:{network:"hy2",security:"tls",tlsSettings:{serverName:'\"$is_addr\"'},hy2Settings:{password:'\"$hy2_password\"'}}'
+            json_str='settings:{},streamSettings:{network:"hy2",security:"tls",tlsSettings:{certificates:[{certificateFile:'\"$is_hy2_cert\"',keyFile:'\"$is_hy2_key\"'}]},hy2Settings:{password:'\"$hy2_password\"'}}'
             ;;
         *)
             err "无法识别协议: $is_config_file"
@@ -1541,6 +1577,13 @@ info() {
         is_info_show=(0 1 2 3 15 8 16 17 18)
         is_info_str=($is_protocol $is_addr $port $uuid xtls-rprx-vision reality $is_servername "ios" $is_public_key)
         is_url="$is_protocol://$uuid@$is_addr:$port?encryption=none&security=reality&flow=xtls-rprx-vision&type=tcp&sni=$is_servername&pbk=$is_public_key&fp=ios#233boy-$net-$is_addr"
+        ;;
+    hy2)
+        is_hy2=1
+        is_can_change=(0 1 4)
+        is_info_show=(0 1 2 10 8)
+        is_info_str=($is_protocol $is_addr $port $hy2_password tls)
+        is_url="hy2://$hy2_password@$is_addr:$port?sni=$is_addr#233boy-hy2-$is_addr"
         ;;
     door)
         is_can_change=(0 1 8 9)
