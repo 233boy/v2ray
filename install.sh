@@ -73,6 +73,15 @@ is_sh_dir=$is_core_dir/sh
 is_sh_repo=$author/$is_core
 is_pkg="wget unzip"
 is_config_json=$is_core_dir/config.json
+# caddy (always installed; used to obtain a TLS cert for this host's IP)
+is_caddy_bin=/usr/local/bin/caddy
+is_caddy_dir=/etc/caddy
+is_caddy_repo=caddyserver/caddy
+is_caddyfile=$is_caddy_dir/Caddyfile
+is_caddy_conf=$is_caddy_dir/$author
+is_http_port=80
+is_https_port=443
+caddy_arch=$is_jq_arch
 tmp_var_lists=(
     tmpcore
     tmpsh
@@ -428,8 +437,41 @@ main() {
     mkdir -p $is_conf_dir
 
     load core.sh
-    # create a tcp config
-    add tcp
+    is_core_ver=$($is_core_bin version | head -n1 | cut -d " " -f1-2)
+
+    # always install caddy and obtain a TLS certificate for this host's IP
+    msg warn "安装 Caddy 并为服务器 IP ($ip) 申请 TLS 证书..."
+    is_install_tmpdir=$tmpdir
+    load download.sh
+    download caddy
+    tmpdir=$is_install_tmpdir
+    load systemd.sh
+    systemctl unmask caddy &>/dev/null
+    install_service caddy
+
+    is_caddy_ver=$($is_caddy_bin version | head -n1 | cut -d' ' -f1)
+    [[ $(cut -d. -f2 <<<${is_caddy_ver#v}) -lt 10 ]] && \
+        err "Caddy 版本过低, 不支持 ACME profile shortlived (需要 >= 2.10.0)"
+
+    load caddy.sh
+    caddy_config new
+    caddy_config ip
+    manage restart caddy &>/dev/null
+
+    # cert issuance is asynchronous; wait up to 60s and report
+    is_ip_cert=
+    for i in $(seq 1 30); do
+        # Caddy may store certs in /var/lib/caddy (XDG_DATA_HOME set) or,
+        # with the generated service, under root's HOME.
+        is_ip_cert=$(find /var/lib/caddy "$HOME/.local/share/caddy" -name "$ip.crt" 2>/dev/null | head -n1)
+        [[ $is_ip_cert ]] && break
+        sleep 2
+    done
+    [[ $is_ip_cert ]] && msg ok "TLS 证书已签发: $is_ip_cert" \
+                       || warn "证书尚未签发, 请检查 80/443 端口; Caddy 会自动重试"
+
+    # default protocol is hy2; it reuses the IP certificate obtained above
+    add hy2
     # remove tmp dir and exit.
     exit_and_del_tmpdir ok
 }
