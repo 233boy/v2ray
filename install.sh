@@ -437,8 +437,7 @@ main() {
     mkdir -p $is_conf_dir
 
     load core.sh
-    # create a tcp config
-    add tcp
+    is_core_ver=$($is_core_bin version | head -n1 | cut -d " " -f1-2)
 
     # always install caddy and obtain a TLS certificate for this host's IP
     msg warn "安装 Caddy 并为服务器 IP ($ip) 申请 TLS 证书..."
@@ -455,7 +454,6 @@ main() {
         err "Caddy 版本过低, 不支持 ACME profile shortlived (需要 >= 2.10.0)"
 
     load caddy.sh
-    host=$ip
     caddy_config new
     caddy_config ip
     manage restart caddy &>/dev/null
@@ -471,6 +469,9 @@ main() {
     done
     [[ $is_ip_cert ]] && msg ok "TLS 证书已签发: $is_ip_cert" \
                        || warn "证书尚未签发, 请检查 80/443 端口; Caddy 会自动重试"
+
+    # default protocol is hy2; it reuses the IP certificate obtained above
+    add hy2
     # remove tmp dir and exit.
     exit_and_del_tmpdir ok
 }

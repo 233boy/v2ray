@@ -934,16 +934,10 @@ add() {
 
     case ${is_new_protocol,,} in
     hysteria2)
-        is_use_port=${2:-443}
-        if [[ $2 == auto ]]; then
-            port=
-        elif [[ $2 ]]; then
-            port=$2
-        elif [[ ! $port ]]; then
-            port=443
-        fi
+        is_use_port=$2
+        [[ $2 == auto ]] && port=
         is_use_pass=$3
-        is_add_opts="[port] [password]"
+        is_add_opts="[port | auto] [password]"
         ;;
     *-tls)
         is_use_tls=1
@@ -1052,7 +1046,7 @@ add() {
             [[ ! $(is_test port ${is_use_port}) ]] && {
                 err "($is_use_port) 不是一个有效的端口. $is_err_tips"
             }
-            [[ ! $is_hy2 && $(is_test port_used $is_use_port) ]] && {
+            [[ $(is_test port_used $is_use_port) ]] && {
                 err "无法使用 ($is_use_port) 端口. $is_err_tips"
             }
             port=$is_use_port

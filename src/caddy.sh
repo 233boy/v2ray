@@ -1,5 +1,15 @@
 caddy_config() {
-    is_caddy_site_file=$is_caddy_conf/${host}.conf
+    # The IP-certificate site is keyed by this machine's IP, not by $host.
+    # $host only belongs to domain-based reverse-proxy protocols.
+    is_caddy_target=${host:-${ip:-}}
+    [[ $1 == ip ]] && is_caddy_target=${ip:-}
+    if [[ $1 != new && ! $is_caddy_target ]]; then
+        err "caddy_config: 未指定目标 (host/ip 均为空)"
+        return 1
+    fi
+    is_caddy_site_file=$is_caddy_conf/${is_caddy_target}.conf
+    is_caddy_addr=$is_caddy_target
+    [[ $(grep : <<<$is_caddy_addr) ]] && is_caddy_addr="[$is_caddy_addr]"
     case $1 in
     new)
         mkdir -p $is_caddy_dir $is_caddy_dir/sites $is_caddy_conf
@@ -20,21 +30,21 @@ EOF
         ;;
     *ws*)
         cat >${is_caddy_site_file} <<<"
-${host}:${is_https_port} {
+${is_caddy_addr}:${is_https_port} {
     reverse_proxy ${path} 127.0.0.1:${port}
     import ${is_caddy_site_file}.add
 }"
         ;;
     *h2*)
         cat >${is_caddy_site_file} <<<"
-${host}:${is_https_port} {
+${is_caddy_addr}:${is_https_port} {
     reverse_proxy ${path} h2c://127.0.0.1:${port}
     import ${is_caddy_site_file}.add
 }"
         ;;
     *grpc*)
         cat >${is_caddy_site_file} <<<"
-${host}:${is_https_port} {
+${is_caddy_addr}:${is_https_port} {
     reverse_proxy /${path}/* h2c://127.0.0.1:${port}
     import ${is_caddy_site_file}.add
 }"
@@ -50,8 +60,6 @@ reverse_proxy https://$proxy_site {
         # site block only used to trigger ACME for this host's IP.
         # IP certificates are only issued under Let's Encrypt's "shortlived"
         # profile (Caddy >= 2.10.0).
-        is_caddy_addr=$host
-        [[ $(grep : <<<$host) ]] && is_caddy_addr="[$host]"
         cat >${is_caddy_site_file} <<<"
 ${is_caddy_addr}:${is_https_port} {
     tls {
